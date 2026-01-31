@@ -57,7 +57,6 @@
             color: white; font-weight: 600; font-size: 12px; cursor: pointer;
         }
 
-        /* Left Panel - Layers */
         .left-panel {
             position: fixed; top: 64px; left: 12px; width: 240px;
             background: rgba(10, 10, 10, 0.92); backdrop-filter: blur(20px);
@@ -78,13 +77,11 @@
         .layer-info { display: flex; align-items: center; gap: 8px; }
         .layer-icon { 
             width: 24px; height: 24px; border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
         }
         .layer-icon.terrain { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
         .layer-icon.building { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
         .layer-icon.map { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
-        .layer-icon.ocean { background: rgba(0, 188, 212, 0.2); color: #00bcd4; }
         .layer-icon.fire { background: rgba(244, 67, 54, 0.2); color: #f44336; }
         .layer-icon.water { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
         .layer-icon.trail { background: rgba(139, 195, 74, 0.2); color: #8bc34a; }
@@ -92,18 +89,15 @@
         .layer-name { color: white; font-size: 11px; }
         .layer-toggle {
             width: 32px; height: 18px; border-radius: 9px;
-            background: rgba(255,255,255,0.1); position: relative;
-            cursor: pointer; transition: all 0.2s;
+            background: rgba(255,255,255,0.1); position: relative; cursor: pointer; transition: all 0.2s;
         }
         .layer-toggle.on { background: #00d4ff; }
         .layer-toggle::after {
             content: ''; position: absolute; width: 14px; height: 14px;
-            background: white; border-radius: 50%; top: 2px; left: 2px;
-            transition: all 0.2s;
+            background: white; border-radius: 50%; top: 2px; left: 2px; transition: all 0.2s;
         }
         .layer-toggle.on::after { left: 16px; }
 
-        /* Bottom Bar */
         .bottom-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
@@ -115,8 +109,7 @@
         .my-location {
             display: flex; align-items: center; gap: 8px;
             background: rgba(255, 255, 255, 0.05);
-            padding: 8px 12px; border-radius: 8px;
-            min-width: 160px; cursor: pointer;
+            padding: 8px 12px; border-radius: 8px; min-width: 160px; cursor: pointer;
         }
         .my-location .material-icons { color: #4ade80; font-size: 18px; }
         .my-location-text { display: flex; flex-direction: column; }
@@ -134,6 +127,7 @@
         .tool-btn.active { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
         .tool-btn.fire-mode { background: rgba(244, 67, 54, 0.2); color: #f44336; }
         .tool-btn.water-mode { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .tool-btn.hose-mode { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
         .tool-btn .material-icons { font-size: 18px; }
         .tool-divider { width: 1px; height: 24px; background: rgba(255, 255, 255, 0.1); margin: 0 4px; }
 
@@ -141,8 +135,7 @@
             display: flex; background: rgba(255, 255, 255, 0.05); border-radius: 6px; overflow: hidden;
         }
         .view-btn {
-            padding: 8px 12px; border: none;
-            background: transparent; color: rgba(255,255,255,0.5);
+            padding: 8px 12px; border: none; background: transparent; color: rgba(255,255,255,0.5);
             cursor: pointer; transition: all 0.2s; font-size: 11px;
             display: flex; align-items: center; gap: 4px;
         }
@@ -150,7 +143,6 @@
         .view-btn.active { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
         .view-btn .material-icons { font-size: 14px; }
 
-        /* Info Panels */
         .info-panel {
             position: fixed; top: 64px; right: 12px; width: 260px;
             background: rgba(10, 10, 10, 0.92); backdrop-filter: blur(20px);
@@ -173,29 +165,27 @@
         .info-row:last-child { border-bottom: none; }
         .info-label { color: rgba(255,255,255,0.5); font-size: 10px; }
         .info-value { color: white; font-size: 11px; font-family: monospace; }
-        .panel-actions { display: flex; gap: 6px; margin-top: 12px; }
+        .panel-actions { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
         .action-btn {
-            flex: 1; padding: 8px; border: none; border-radius: 6px;
+            flex: 1; min-width: 70px; padding: 8px; border: none; border-radius: 6px;
             font-size: 10px; cursor: pointer; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 4px;
         }
         .action-btn.primary { background: #2196f3; color: white; }
         .action-btn.danger { background: #f44336; color: white; }
         .action-btn.secondary { background: rgba(255,255,255,0.1); color: white; }
+        .action-btn.warning { background: #ff9800; color: white; }
 
-        /* Water Source List in Panel */
-        .water-list { max-height: 200px; overflow-y: auto; margin-top: 8px; }
+        .water-list { max-height: 150px; overflow-y: auto; margin-top: 8px; }
         .water-item {
             display: flex; align-items: center; gap: 8px;
             padding: 8px; border-radius: 6px; margin-bottom: 4px;
-            background: rgba(255,255,255,0.03); cursor: pointer;
-            transition: all 0.2s;
+            background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.2s;
         }
         .water-item:hover { background: rgba(33, 150, 243, 0.1); }
         .water-item-icon {
             width: 24px; height: 24px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
         }
         .water-item-icon.hydrant { background: rgba(244, 67, 54, 0.2); color: #f44336; }
         .water-item-icon.tank { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
@@ -204,7 +194,6 @@
         .water-item-name { color: white; font-size: 11px; }
         .water-item-dist { color: rgba(255,255,255,0.5); font-size: 10px; }
 
-        /* Mode Indicator */
         .mode-indicator {
             position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
             background: rgba(244, 67, 54, 0.9); backdrop-filter: blur(10px);
@@ -213,32 +202,32 @@
         }
         .mode-indicator.show { display: flex; }
         .mode-indicator.water-mode { background: rgba(33, 150, 243, 0.9); }
+        .mode-indicator.hose-mode { background: rgba(255, 152, 0, 0.9); }
         .mode-indicator .material-icons { color: white; font-size: 16px; }
         .mode-indicator span { color: white; font-size: 12px; font-weight: 500; }
 
-        /* Measurement Panel */
-        .measure-panel {
+        /* Hose Route Panel */
+        .hose-panel {
             position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
             background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
             padding: 14px 20px; border-radius: 12px;
-            border: 1px solid rgba(0, 212, 255, 0.3); z-index: 900;
-            min-width: 260px; display: none;
+            border: 1px solid rgba(255, 152, 0, 0.3); z-index: 900;
+            min-width: 280px; display: none;
         }
-        .measure-panel.active { display: block; }
-        .measure-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .measure-title { color: #00d4ff; font-size: 11px; font-weight: 600; }
-        .measure-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; }
-        .measure-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
-        .measure-label { color: rgba(255, 255, 255, 0.5); font-size: 11px; }
-        .measure-value { color: white; font-size: 13px; font-weight: 600; font-family: monospace; }
-        .measure-value.highlight { color: #00d4ff; font-size: 16px; }
-        .measure-hint { color: rgba(255,255,255,0.4); font-size: 10px; text-align: center; margin-top: 10px; }
-        .measure-actions { display: flex; gap: 6px; margin-top: 10px; }
-        .measure-btn { flex: 1; padding: 6px; border: none; border-radius: 4px; font-size: 10px; cursor: pointer; }
-        .measure-btn.primary { background: #00d4ff; color: #000; }
-        .measure-btn.secondary { background: rgba(255,255,255,0.1); color: white; }
+        .hose-panel.active { display: block; }
+        .hose-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .hose-title { color: #ff9800; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .hose-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; }
+        .hose-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+        .hose-label { color: rgba(255, 255, 255, 0.5); font-size: 11px; }
+        .hose-value { color: white; font-size: 13px; font-weight: 600; font-family: monospace; }
+        .hose-value.highlight { color: #ff9800; font-size: 16px; }
+        .hose-hint { color: rgba(255,255,255,0.4); font-size: 10px; text-align: center; margin-top: 10px; }
+        .hose-actions { display: flex; gap: 6px; margin-top: 10px; }
+        .hose-btn { flex: 1; padding: 6px; border: none; border-radius: 4px; font-size: 10px; cursor: pointer; }
+        .hose-btn.primary { background: #ff9800; color: #000; }
+        .hose-btn.secondary { background: rgba(255,255,255,0.1); color: white; }
 
-        /* Loading indicator */
         .loading {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(10,10,10,0.9); padding: 16px 24px; border-radius: 8px;
@@ -268,7 +257,6 @@
     <div id="cesiumContainer"></div>
     <div class="loading" id="loading">読み込み中...</div>
 
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="logo">
             <div class="logo-icon"><span class="material-icons">public</span></div>
@@ -294,16 +282,14 @@
         </div>
     </div>
 
-    <!-- Mode Indicator -->
     <div class="mode-indicator" id="modeIndicator">
-        <span class="material-icons">local_fire_department</span>
-        <span id="modeText">火点追加モード - 地図をタップ</span>
+        <span class="material-icons" id="modeIcon">local_fire_department</span>
+        <span id="modeText">火点追加モード</span>
     </div>
 
-    <!-- Left Panel - Layers -->
     <div class="left-panel" id="layerPanel">
         <div class="panel-section">
-            <div class="section-title">Truth Layer（物理的正解）</div>
+            <div class="section-title">Truth Layer</div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'terrain')">
                 <div class="layer-info">
                     <div class="layer-icon terrain"><span class="material-icons">terrain</span></div>
@@ -312,9 +298,8 @@
                 <div class="layer-toggle on" id="toggle-terrain"></div>
             </div>
         </div>
-        
         <div class="panel-section">
-            <div class="section-title">Reference Layer（参照）</div>
+            <div class="section-title">Reference Layer</div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'buildings')">
                 <div class="layer-info">
                     <div class="layer-icon building"><span class="material-icons">location_city</span></div>
@@ -329,30 +314,29 @@
                 </div>
                 <div class="layer-toggle" id="toggle-gsimap"></div>
             </div>
-            <div class="layer-item" onclick="toggleLayerItem(this, 'satellite')">
-                <div class="layer-info">
-                    <div class="layer-icon terrain"><span class="material-icons">satellite_alt</span></div>
-                    <span class="layer-name">衛星画像</span>
-                </div>
-                <div class="layer-toggle on" id="toggle-satellite"></div>
-            </div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'trails')">
                 <div class="layer-info">
                     <div class="layer-icon trail"><span class="material-icons">hiking</span></div>
-                    <span class="layer-name">登山道・歩道 (OSM)</span>
+                    <span class="layer-name">登山道・歩道</span>
                 </div>
                 <div class="layer-toggle" id="toggle-trails"></div>
             </div>
         </div>
-
         <div class="panel-section">
-            <div class="section-title">Operation Layer（操作）</div>
+            <div class="section-title">Operation Layer</div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'firepoints')">
                 <div class="layer-info">
                     <div class="layer-icon fire"><span class="material-icons">local_fire_department</span></div>
                     <span class="layer-name">火点</span>
                 </div>
                 <div class="layer-toggle on" id="toggle-firepoints"></div>
+            </div>
+            <div class="layer-item" onclick="toggleLayerItem(this, 'firearea')">
+                <div class="layer-info">
+                    <div class="layer-icon fire"><span class="material-icons">pentagon</span></div>
+                    <span class="layer-name">火点範囲</span>
+                </div>
+                <div class="layer-toggle on" id="toggle-firearea"></div>
             </div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'water')">
                 <div class="layer-info">
@@ -364,14 +348,14 @@
             <div class="layer-item" onclick="toggleLayerItem(this, 'hose')">
                 <div class="layer-info">
                     <div class="layer-icon hose"><span class="material-icons">route</span></div>
-                    <span class="layer-name">ホース経路候補</span>
+                    <span class="layer-name">ホース経路</span>
                 </div>
-                <div class="layer-toggle" id="toggle-hose"></div>
+                <div class="layer-toggle on" id="toggle-hose"></div>
             </div>
         </div>
     </div>
 
-    <!-- Fire Point Info Panel -->
+    <!-- Fire Panel -->
     <div class="info-panel fire" id="firePanel">
         <div class="panel-header">
             <span class="panel-title fire"><span class="material-icons">local_fire_department</span>火点情報</span>
@@ -381,23 +365,17 @@
             <div class="info-row"><span class="info-label">緯度</span><span class="info-value" id="fireLat">-</span></div>
             <div class="info-row"><span class="info-label">経度</span><span class="info-value" id="fireLon">-</span></div>
             <div class="info-row"><span class="info-label">標高</span><span class="info-value" id="fireElev">-</span></div>
-            <div class="info-row"><span class="info-label">追加時刻</span><span class="info-value" id="fireTime">-</span></div>
-            
-            <div class="section-title" style="margin-top:12px;">周辺水利（距離順）</div>
-            <div class="water-list" id="nearbyWaterList">
-                <div style="color:rgba(255,255,255,0.4);font-size:10px;text-align:center;padding:16px;">
-                    水利を読み込み中...
-                </div>
-            </div>
-            
+            <div class="section-title" style="margin-top:12px;">周辺水利</div>
+            <div class="water-list" id="nearbyWaterList"></div>
             <div class="panel-actions">
                 <button class="action-btn secondary" onclick="flyToSelectedFire()"><span class="material-icons">flight</span>移動</button>
+                <button class="action-btn warning" onclick="updateFireArea()"><span class="material-icons">pentagon</span>範囲更新</button>
                 <button class="action-btn danger" onclick="deleteSelectedFire()"><span class="material-icons">delete</span>削除</button>
             </div>
         </div>
     </div>
 
-    <!-- Water Source Info Panel -->
+    <!-- Water Panel -->
     <div class="info-panel water" id="waterPanel">
         <div class="panel-header">
             <span class="panel-title water"><span class="material-icons">water_drop</span>水利情報</span>
@@ -407,15 +385,33 @@
             <div class="info-row"><span class="info-label">種別</span><span class="info-value" id="waterType">-</span></div>
             <div class="info-row"><span class="info-label">緯度</span><span class="info-value" id="waterLat">-</span></div>
             <div class="info-row"><span class="info-label">経度</span><span class="info-value" id="waterLon">-</span></div>
-            <div class="info-row"><span class="info-label">火点からの距離</span><span class="info-value" id="waterDist">-</span></div>
+            <div class="info-row"><span class="info-label">火点距離</span><span class="info-value" id="waterDist">-</span></div>
             <div class="panel-actions">
                 <button class="action-btn secondary" onclick="flyToSelectedWater()"><span class="material-icons">flight</span>移動</button>
-                <button class="action-btn primary" onclick="showHoseRoute()"><span class="material-icons">route</span>経路表示</button>
+                <button class="action-btn primary" onclick="startHoseFromWater()"><span class="material-icons">route</span>経路</button>
+                <button class="action-btn danger" onclick="deleteSelectedWater()"><span class="material-icons">delete</span>削除</button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Bar -->
+    <!-- Hose Route Panel -->
+    <div class="hose-panel" id="hosePanel">
+        <div class="hose-header">
+            <span class="hose-title"><span class="material-icons">route</span>ホース経路</span>
+            <button class="hose-close" onclick="closeHosePanel()">×</button>
+        </div>
+        <div class="hose-row"><span class="hose-label">水平距離</span><span class="hose-value highlight" id="hoseDistance">- m</span></div>
+        <div class="hose-row"><span class="hose-label">高低差</span><span class="hose-value" id="hoseElevation">- m</span></div>
+        <div class="hose-row"><span class="hose-label">始点標高</span><span class="hose-value" id="hoseStart">- m</span></div>
+        <div class="hose-row"><span class="hose-label">終点標高</span><span class="hose-value" id="hoseEnd">- m</span></div>
+        <div class="hose-row"><span class="hose-label">ホース本数(20m)</span><span class="hose-value" id="hoseCount">- 本</span></div>
+        <div class="hose-hint" id="hoseHint">2点目をタップしてください</div>
+        <div class="hose-actions">
+            <button class="hose-btn secondary" onclick="resetHoseRoute()">リセット</button>
+            <button class="hose-btn primary" onclick="confirmHoseRoute()">確定</button>
+        </div>
+    </div>
+
     <div class="bottom-bar">
         <div class="my-location" onclick="flyToMyLocation()">
             <span class="material-icons">my_location</span>
@@ -429,7 +425,7 @@
             <div class="tool-divider"></div>
             <button class="tool-btn" title="火点追加" onclick="setTool('fire')" id="fireToolBtn"><span class="material-icons">local_fire_department</span></button>
             <button class="tool-btn" title="水利追加" onclick="setTool('water')" id="waterToolBtn"><span class="material-icons">water_drop</span></button>
-            <button class="tool-btn" title="距離計測" onclick="setTool('distance')"><span class="material-icons">straighten</span></button>
+            <button class="tool-btn" title="ホース経路" onclick="setTool('hose')" id="hoseToolBtn"><span class="material-icons">route</span></button>
             <div class="tool-divider"></div>
             <button class="tool-btn" title="共有" onclick="shareView()"><span class="material-icons">share</span></button>
         </div>
@@ -439,27 +435,7 @@
         </div>
     </div>
 
-    <!-- Measurement Panel -->
-    <div class="measure-panel" id="measurePanel">
-        <div class="measure-header">
-            <span class="measure-title" id="measureTitle">距離計測</span>
-            <button class="measure-close" onclick="closeMeasure()">×</button>
-        </div>
-        <div class="measure-row"><span class="measure-label">水平距離</span><span class="measure-value highlight" id="measureDistance">- m</span></div>
-        <div class="measure-row"><span class="measure-label">高度差</span><span class="measure-value" id="measureElevation">- m</span></div>
-        <div class="measure-row"><span class="measure-label">始点標高</span><span class="measure-value" id="measureStart">- m</span></div>
-        <div class="measure-row"><span class="measure-label">終点標高</span><span class="measure-value" id="measureEnd">- m</span></div>
-        <div class="measure-hint" id="measureHint">地図上の2点をタップ</div>
-        <div class="measure-actions">
-            <button class="measure-btn secondary" onclick="resetMeasure()">リセット</button>
-            <button class="measure-btn primary" onclick="closeMeasure()">完了</button>
-        </div>
-    </div>
-
     <script>
-        // ========================================
-        // CESIUM INITIALIZATION
-        // ========================================
         Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwM2NhOTIxMi03NzRmLTQzMDgtYTMzZS1kOWEyMjBmNjhhMmEiLCJpZCI6Mzg1NDQ0LCJpYXQiOjE3Njk4Mzg4NTl9.ElD_8Qq0Mp1QuoaQvnODwTCVtEfaQtuDrsS9tnwlryA';
 
         const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -471,27 +447,23 @@
         });
 
         viewer.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(132.4553, 34.3853, 8000),
+            destination: Cesium.Cartesian3.fromDegrees(132.4553, 34.3853, 5000),
             orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
             duration: 0
         });
 
-        // ========================================
-        // LAYER STATE
-        // ========================================
+        // ========== LAYER STATE ==========
         const layers = {
             terrain: true, buildings: true, gsimap: false, satellite: true,
-            trails: false, firepoints: true, water: true, hose: false
+            trails: false, firepoints: true, firearea: true, water: true, hose: true
         };
 
         let plateauTileset = null;
         let gsiLayer = null;
         let trailEntities = [];
-        let hoseEntities = [];
+        let fireAreaEntity = null;
 
-        // ========================================
-        // PLATEAU BUILDINGS
-        // ========================================
+        // ========== PLATEAU ==========
         async function loadPlateauBuildings() {
             try {
                 plateauTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2602291);
@@ -500,9 +472,7 @@
         }
         loadPlateauBuildings();
 
-        // ========================================
-        // GSI MAP LAYER
-        // ========================================
+        // ========== GSI MAP ==========
         function initGsiLayer() {
             gsiLayer = viewer.imageryLayers.addImageryProvider(
                 new Cesium.UrlTemplateImageryProvider({
@@ -515,9 +485,7 @@
         }
         initGsiLayer();
 
-        // ========================================
-        // LAYER TOGGLE FUNCTIONS
-        // ========================================
+        // ========== LAYER TOGGLE ==========
         function toggleQuickLayer(el, layer) {
             el.classList.toggle('active');
             layers[layer] = el.classList.contains('active');
@@ -534,10 +502,7 @@
 
         function syncLayerToggle(layer) {
             const toggle = document.getElementById(`toggle-${layer}`);
-            if (toggle) {
-                if (layers[layer]) toggle.classList.add('on');
-                else toggle.classList.remove('on');
-            }
+            if (toggle) toggle.classList.toggle('on', layers[layer]);
         }
 
         function applyLayerState(layer) {
@@ -553,15 +518,15 @@
                 case 'gsimap':
                     if (gsiLayer) gsiLayer.show = layers.gsimap;
                     break;
-                case 'satellite':
-                    viewer.imageryLayers.get(0).show = layers.satellite;
-                    break;
                 case 'trails':
                     trailEntities.forEach(e => e.show = layers.trails);
                     if (layers.trails && trailEntities.length === 0) loadTrailsNearView();
                     break;
                 case 'firepoints':
                     firePointEntities.forEach(e => e.show = layers.firepoints);
+                    break;
+                case 'firearea':
+                    if (fireAreaEntity) fireAreaEntity.show = layers.firearea;
                     break;
                 case 'water':
                     waterEntities.forEach(e => e.show = layers.water);
@@ -576,76 +541,37 @@
             document.getElementById('layerPanel').classList.toggle('show');
         }
 
-        // ========================================
-        // OSM TRAILS (Overpass API)
-        // ========================================
+        // ========== OSM TRAILS ==========
         async function loadTrailsNearView() {
             const cam = viewer.camera.positionCartographic;
-            const lat = Cesium.Math.toDegrees(cam.latitude);
-            const lon = Cesium.Math.toDegrees(cam.longitude);
-            await loadTrails(lat, lon, 2000);
+            await loadTrails(Cesium.Math.toDegrees(cam.latitude), Cesium.Math.toDegrees(cam.longitude), 2000);
         }
 
-        async function loadTrails(centerLat, centerLon, radiusM) {
+        async function loadTrails(lat, lon, radius) {
             showLoading(true);
-            const query = `
-                [out:json][timeout:25];
-                (
-                    way["highway"="path"](around:${radiusM},${centerLat},${centerLon});
-                    way["highway"="footway"](around:${radiusM},${centerLat},${centerLon});
-                    way["highway"="track"](around:${radiusM},${centerLat},${centerLon});
-                );
-                out body; >; out skel qt;
-            `;
-            
+            const query = `[out:json][timeout:25];(way["highway"~"path|footway|track"](around:${radius},${lat},${lon}););out body;>;out skel qt;`;
             try {
-                const res = await fetch('https://overpass-api.de/api/interpreter', {
-                    method: 'POST',
-                    body: 'data=' + encodeURIComponent(query)
-                });
+                const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
                 const data = await res.json();
-                
-                // Clear existing
                 trailEntities.forEach(e => viewer.entities.remove(e));
                 trailEntities = [];
-                
-                // Build node lookup
                 const nodes = {};
-                data.elements.filter(e => e.type === 'node').forEach(n => {
-                    nodes[n.id] = [n.lon, n.lat];
-                });
-                
-                // Draw ways
+                data.elements.filter(e => e.type === 'node').forEach(n => nodes[n.id] = [n.lon, n.lat]);
                 data.elements.filter(e => e.type === 'way').forEach(way => {
-                    const positions = way.nodes
-                        .filter(nid => nodes[nid])
-                        .map(nid => Cesium.Cartesian3.fromDegrees(nodes[nid][0], nodes[nid][1]));
-                    
+                    const positions = way.nodes.filter(nid => nodes[nid]).map(nid => Cesium.Cartesian3.fromDegrees(nodes[nid][0], nodes[nid][1]));
                     if (positions.length >= 2) {
                         const entity = viewer.entities.add({
-                            polyline: {
-                                positions: positions,
-                                width: 3,
-                                material: Cesium.Color.fromCssColorString('#8bc34a').withAlpha(0.8),
-                                clampToGround: true
-                            },
-                            properties: { osmId: way.id, highway: way.tags?.highway }
+                            polyline: { positions, width: 3, material: Cesium.Color.LIGHTGREEN.withAlpha(0.8), clampToGround: true }
                         });
                         entity.show = layers.trails;
                         trailEntities.push(entity);
                     }
                 });
-                
-                console.log(`Loaded ${trailEntities.length} trails`);
-            } catch (e) {
-                console.error('Trail load error:', e);
-            }
+            } catch (e) { console.error('Trail error:', e); }
             showLoading(false);
         }
 
-        // ========================================
-        // FIRE POINTS
-        // ========================================
+        // ========== FIRE POINTS ==========
         let firePoints = [];
         let firePointEntities = [];
         let selectedFirePoint = null;
@@ -653,38 +579,23 @@
 
         function addFirePoint(lon, lat, height) {
             const id = `fire-${++firePointIdCounter}`;
-            const timestamp = new Date().toLocaleString('ja-JP');
-            
-            const feature = {
-                type: 'Feature', id: id,
-                geometry: { type: 'Point', coordinates: [lon, lat, height] },
-                properties: { timestamp, elevation: height }
-            };
+            const feature = { type: 'Feature', id, geometry: { type: 'Point', coordinates: [lon, lat, height] }, properties: { timestamp: new Date().toLocaleString('ja-JP') } };
             firePoints.push(feature);
-
             const entity = viewer.entities.add({
-                id: id,
-                position: Cesium.Cartesian3.fromDegrees(lon, lat, height),
-                billboard: {
-                    image: createFireIcon(), width: 32, height: 32,
-                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                }
+                id, position: Cesium.Cartesian3.fromDegrees(lon, lat, height),
+                billboard: { image: createFireIcon(), width: 32, height: 32, verticalOrigin: Cesium.VerticalOrigin.BOTTOM, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND }
             });
             firePointEntities.push(entity);
+            updateFireArea();
             return feature;
         }
 
         function createFireIcon() {
-            const c = document.createElement('canvas');
-            c.width = 32; c.height = 32;
+            const c = document.createElement('canvas'); c.width = 32; c.height = 32;
             const ctx = c.getContext('2d');
-            ctx.beginPath(); ctx.arc(16, 16, 14, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(244, 67, 54, 0.3)'; ctx.fill();
-            ctx.beginPath(); ctx.arc(16, 16, 10, 0, Math.PI * 2);
-            ctx.fillStyle = '#f44336'; ctx.fill();
-            ctx.beginPath(); ctx.arc(16, 16, 5, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffeb3b'; ctx.fill();
+            ctx.beginPath(); ctx.arc(16, 16, 14, 0, Math.PI * 2); ctx.fillStyle = 'rgba(244,67,54,0.3)'; ctx.fill();
+            ctx.beginPath(); ctx.arc(16, 16, 10, 0, Math.PI * 2); ctx.fillStyle = '#f44336'; ctx.fill();
+            ctx.beginPath(); ctx.arc(16, 16, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffeb3b'; ctx.fill();
             return c.toDataURL();
         }
 
@@ -692,44 +603,50 @@
             const feature = firePoints.find(f => f.id === id);
             if (!feature) return;
             selectedFirePoint = feature;
-            const coords = feature.geometry.coordinates;
-            
-            document.getElementById('fireLat').textContent = coords[1].toFixed(6) + '°';
-            document.getElementById('fireLon').textContent = coords[0].toFixed(6) + '°';
-            document.getElementById('fireElev').textContent = (coords[2] || 0).toFixed(1) + ' m';
-            document.getElementById('fireTime').textContent = feature.properties.timestamp;
-            
+            const c = feature.geometry.coordinates;
+            document.getElementById('fireLat').textContent = c[1].toFixed(6) + '°';
+            document.getElementById('fireLon').textContent = c[0].toFixed(6) + '°';
+            document.getElementById('fireElev').textContent = (c[2] || 0).toFixed(1) + ' m';
             document.getElementById('firePanel').classList.add('show');
             document.getElementById('waterPanel').classList.remove('show');
-            
-            // Load nearby water sources and trails
-            updateNearbyWaterList(coords[0], coords[1]);
-            loadTrails(coords[1], coords[0], 1000);
+            updateNearbyWaterList(c[0], c[1]);
         }
 
         function updateNearbyWaterList(fireLon, fireLat) {
             const list = document.getElementById('nearbyWaterList');
-            
-            if (waterSources.length === 0) {
-                list.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:10px;text-align:center;padding:16px;">水利データなし</div>';
-                return;
-            }
-            
-            // Calculate distances and sort
-            const withDist = waterSources.map(w => ({
-                ...w,
-                distance: haversineDistance(fireLat, fireLon, w.lat, w.lon)
-            })).sort((a, b) => a.distance - b.distance).slice(0, 5);
-            
-            list.innerHTML = withDist.map(w => `
-                <div class="water-item" onclick="selectWater('${w.id}')">
-                    <div class="water-item-icon ${w.type}">${getWaterIcon(w.type)}</div>
-                    <div class="water-item-info">
-                        <div class="water-item-name">${w.name}</div>
-                        <div class="water-item-dist">${formatDistance(w.distance)}</div>
-                    </div>
-                </div>
-            `).join('');
+            if (waterSources.length === 0) { list.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:10px;text-align:center;padding:8px;">水利なし</div>'; return; }
+            const withDist = waterSources.map(w => ({ ...w, distance: haversineDistance(fireLat, fireLon, w.lat, w.lon) })).sort((a, b) => a.distance - b.distance).slice(0, 5);
+            list.innerHTML = withDist.map(w => `<div class="water-item" onclick="selectWater('${w.id}')"><div class="water-item-icon ${w.type}">${w.type === 'hydrant' ? 'H' : w.type === 'tank' ? 'T' : 'N'}</div><div class="water-item-info"><div class="water-item-name">${w.name}</div><div class="water-item-dist">${formatDistance(w.distance)}</div></div></div>`).join('');
+        }
+
+        function updateFireArea() {
+            if (fireAreaEntity) { viewer.entities.remove(fireAreaEntity); fireAreaEntity = null; }
+            if (firePoints.length < 3) return;
+            const coords = firePoints.map(f => f.geometry.coordinates);
+            const hull = convexHull(coords);
+            if (hull.length < 3) return;
+            const positions = hull.map(c => Cesium.Cartesian3.fromDegrees(c[0], c[1]));
+            fireAreaEntity = viewer.entities.add({
+                polygon: {
+                    hierarchy: positions,
+                    material: Cesium.Color.RED.withAlpha(0.2),
+                    outline: true, outlineColor: Cesium.Color.RED, outlineWidth: 2,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                }
+            });
+            fireAreaEntity.show = layers.firearea;
+        }
+
+        function convexHull(points) {
+            if (points.length < 3) return points;
+            const sorted = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+            const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+            const lower = [];
+            for (const p of sorted) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); }
+            const upper = [];
+            for (let i = sorted.length - 1; i >= 0; i--) { const p = sorted[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); }
+            upper.pop(); lower.pop();
+            return lower.concat(upper);
         }
 
         function closePanel(type) {
@@ -741,11 +658,7 @@
         function flyToSelectedFire() {
             if (!selectedFirePoint) return;
             const c = selectedFirePoint.geometry.coordinates;
-            viewer.camera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(c[0], c[1], 500),
-                orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
-                duration: 1.5
-            });
+            viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(c[0], c[1], 500), duration: 1.5 });
         }
 
         function deleteSelectedFire() {
@@ -753,47 +666,33 @@
             const id = selectedFirePoint.id;
             firePoints = firePoints.filter(f => f.id !== id);
             const entity = firePointEntities.find(e => e.id === id);
-            if (entity) {
-                viewer.entities.remove(entity);
-                firePointEntities = firePointEntities.filter(e => e.id !== id);
-            }
+            if (entity) { viewer.entities.remove(entity); firePointEntities = firePointEntities.filter(e => e.id !== id); }
             closePanel('fire');
+            updateFireArea();
         }
 
-        // ========================================
-        // WATER SOURCES
-        // ========================================
+        // ========== WATER SOURCES ==========
         let waterSources = [];
         let waterEntities = [];
         let selectedWater = null;
         let waterIdCounter = 0;
 
-        // Demo water sources (実際は自治体GISから取得)
         function initDemoWaterSources() {
-            const demoData = [
-                { type: 'hydrant', name: '消火栓 #1', lat: 34.3858, lon: 132.4548 },
-                { type: 'hydrant', name: '消火栓 #2', lat: 34.3848, lon: 132.4558 },
-                { type: 'tank', name: '防火水槽 40t', lat: 34.3863, lon: 132.4563 },
-                { type: 'tank', name: '防火水槽 100t', lat: 34.3843, lon: 132.4538 },
-                { type: 'natural', name: '河川取水点', lat: 34.3838, lon: 132.4573 },
-            ];
-            
-            demoData.forEach(w => addWaterSource(w.type, w.name, w.lon, w.lat));
+            [{ type: 'hydrant', name: '消火栓 #1', lat: 34.3858, lon: 132.4548 },
+             { type: 'hydrant', name: '消火栓 #2', lat: 34.3848, lon: 132.4558 },
+             { type: 'tank', name: '防火水槽 40t', lat: 34.3863, lon: 132.4563 },
+             { type: 'tank', name: '防火水槽 100t', lat: 34.3843, lon: 132.4538 },
+             { type: 'natural', name: '河川取水点', lat: 34.3838, lon: 132.4573 }
+            ].forEach(w => addWaterSource(w.type, w.name, w.lon, w.lat));
         }
 
         function addWaterSource(type, name, lon, lat) {
             const id = `water-${++waterIdCounter}`;
             const source = { id, type, name, lon, lat };
             waterSources.push(source);
-            
             const entity = viewer.entities.add({
-                id: id,
-                position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
-                billboard: {
-                    image: createWaterIcon(type), width: 24, height: 24,
-                    verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                }
+                id, position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+                billboard: { image: createWaterIcon(type), width: 24, height: 24, verticalOrigin: Cesium.VerticalOrigin.CENTER, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND }
             });
             entity.show = layers.water;
             waterEntities.push(entity);
@@ -801,174 +700,163 @@
         }
 
         function createWaterIcon(type) {
-            const c = document.createElement('canvas');
-            c.width = 24; c.height = 24;
+            const c = document.createElement('canvas'); c.width = 24; c.height = 24;
             const ctx = c.getContext('2d');
-            
-            const colors = {
-                hydrant: '#f44336',
-                tank: '#2196f3',
-                natural: '#00bcd4'
-            };
-            
-            ctx.beginPath(); ctx.arc(12, 12, 10, 0, Math.PI * 2);
-            ctx.fillStyle = colors[type] || '#2196f3'; ctx.fill();
-            ctx.fillStyle = 'white'; ctx.font = 'bold 12px sans-serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const colors = { hydrant: '#f44336', tank: '#2196f3', natural: '#00bcd4' };
+            ctx.beginPath(); ctx.arc(12, 12, 10, 0, Math.PI * 2); ctx.fillStyle = colors[type]; ctx.fill();
+            ctx.fillStyle = 'white'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(type === 'hydrant' ? 'H' : type === 'tank' ? 'T' : 'N', 12, 12);
             return c.toDataURL();
-        }
-
-        function getWaterIcon(type) {
-            return type === 'hydrant' ? '🚒' : type === 'tank' ? '💧' : '🌊';
         }
 
         function selectWater(id) {
             const source = waterSources.find(w => w.id === id);
             if (!source) return;
             selectedWater = source;
-            
-            document.getElementById('waterType').textContent = 
-                source.type === 'hydrant' ? '消火栓' : 
-                source.type === 'tank' ? '防火水槽' : '自然水利';
+            document.getElementById('waterType').textContent = source.type === 'hydrant' ? '消火栓' : source.type === 'tank' ? '防火水槽' : '自然水利';
             document.getElementById('waterLat').textContent = source.lat.toFixed(6) + '°';
             document.getElementById('waterLon').textContent = source.lon.toFixed(6) + '°';
-            
             if (selectedFirePoint) {
                 const fc = selectedFirePoint.geometry.coordinates;
-                const dist = haversineDistance(fc[1], fc[0], source.lat, source.lon);
-                document.getElementById('waterDist').textContent = formatDistance(dist);
+                document.getElementById('waterDist').textContent = formatDistance(haversineDistance(fc[1], fc[0], source.lat, source.lon));
             } else {
                 document.getElementById('waterDist').textContent = '-';
             }
-            
             document.getElementById('waterPanel').classList.add('show');
         }
 
         function flyToSelectedWater() {
             if (!selectedWater) return;
-            viewer.camera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(selectedWater.lon, selectedWater.lat, 300),
-                orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
-                duration: 1.5
-            });
+            viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(selectedWater.lon, selectedWater.lat, 300), duration: 1.5 });
         }
 
-        // ========================================
-        // HOSE ROUTE VISUALIZATION
-        // ========================================
-        function showHoseRoute() {
-            if (!selectedFirePoint || !selectedWater) return;
-            
-            // Clear existing hose routes
-            hoseEntities.forEach(e => viewer.entities.remove(e));
-            hoseEntities = [];
-            
-            const fc = selectedFirePoint.geometry.coordinates;
-            const wc = [selectedWater.lon, selectedWater.lat];
-            
-            // 簡易的な直線経路（実際はOSM道に沿わせる）
-            // TODO: 登山道データを使って実際の経路を計算
-            const entity = viewer.entities.add({
+        function deleteSelectedWater() {
+            if (!selectedWater) return;
+            const id = selectedWater.id;
+            waterSources = waterSources.filter(w => w.id !== id);
+            const entity = waterEntities.find(e => e.id === id);
+            if (entity) { viewer.entities.remove(entity); waterEntities = waterEntities.filter(e => e.id !== id); }
+            closePanel('water');
+        }
+
+        function startHoseFromWater() {
+            if (!selectedWater) return;
+            setTool('hose');
+            hoseStartPoint = { lon: selectedWater.lon, lat: selectedWater.lat, height: 0 };
+            // Get height
+            Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [Cesium.Cartographic.fromDegrees(selectedWater.lon, selectedWater.lat)])
+                .then(updated => { hoseStartPoint.height = updated[0].height || 0; });
+            document.getElementById('hoseHint').textContent = '終点（火点など）をタップ';
+            document.getElementById('hoseStart').textContent = '取得中...';
+        }
+
+        initDemoWaterSources();
+
+        // ========== HOSE ROUTE ==========
+        let hoseEntities = [];
+        let hoseStartPoint = null;
+        let hoseEndPoint = null;
+        let currentHoseEntity = null;
+        let hoseIdCounter = 0;
+
+        function drawHoseRoute(start, end) {
+            if (currentHoseEntity) { viewer.entities.remove(currentHoseEntity); }
+            currentHoseEntity = viewer.entities.add({
                 polyline: {
                     positions: [
-                        Cesium.Cartesian3.fromDegrees(wc[0], wc[1]),
-                        Cesium.Cartesian3.fromDegrees(fc[0], fc[1])
+                        Cesium.Cartesian3.fromDegrees(start.lon, start.lat),
+                        Cesium.Cartesian3.fromDegrees(end.lon, end.lat)
                     ],
                     width: 6,
-                    material: new Cesium.PolylineDashMaterialProperty({
-                        color: Cesium.Color.ORANGE,
-                        dashLength: 16
-                    }),
+                    material: new Cesium.PolylineDashMaterialProperty({ color: Cesium.Color.ORANGE, dashLength: 16 }),
                     clampToGround: true
                 }
             });
-            hoseEntities.push(entity);
             
-            layers.hose = true;
-            syncLayerToggle('hose');
+            const dist = haversineDistance(start.lat, start.lon, end.lat, end.lon);
+            const elevDiff = end.height - start.height;
+            const hoseCount = Math.ceil(dist / 20);
             
-            console.log('Hose route displayed (simplified)');
+            document.getElementById('hoseDistance').textContent = formatDistance(dist);
+            document.getElementById('hoseElevation').textContent = (elevDiff >= 0 ? '+' : '') + elevDiff.toFixed(1) + ' m';
+            document.getElementById('hoseStart').textContent = start.height.toFixed(1) + ' m';
+            document.getElementById('hoseEnd').textContent = end.height.toFixed(1) + ' m';
+            document.getElementById('hoseCount').textContent = hoseCount + ' 本';
+            document.getElementById('hoseHint').style.display = 'none';
         }
 
-        // Initialize demo data
-        initDemoWaterSources();
+        function resetHoseRoute() {
+            if (currentHoseEntity) { viewer.entities.remove(currentHoseEntity); currentHoseEntity = null; }
+            hoseStartPoint = null;
+            hoseEndPoint = null;
+            document.getElementById('hoseDistance').textContent = '- m';
+            document.getElementById('hoseElevation').textContent = '- m';
+            document.getElementById('hoseStart').textContent = '- m';
+            document.getElementById('hoseEnd').textContent = '- m';
+            document.getElementById('hoseCount').textContent = '- 本';
+            document.getElementById('hoseHint').textContent = '始点をタップしてください';
+            document.getElementById('hoseHint').style.display = 'block';
+        }
 
-        // ========================================
-        // TOOL SYSTEM
-        // ========================================
+        function confirmHoseRoute() {
+            if (currentHoseEntity) {
+                const id = `hose-${++hoseIdCounter}`;
+                currentHoseEntity.id = id;
+                hoseEntities.push(currentHoseEntity);
+                currentHoseEntity = null;
+            }
+            closeHosePanel();
+        }
+
+        function closeHosePanel() {
+            document.getElementById('hosePanel').classList.remove('active');
+            document.querySelectorAll('.tools-group .tool-btn').forEach(b => b.classList.remove('active', 'hose-mode'));
+            document.getElementById('modeIndicator').classList.remove('show');
+            currentTool = null;
+            hoseStartPoint = null;
+            hoseEndPoint = null;
+        }
+
+        // ========== TOOL SYSTEM ==========
         let currentTool = null;
-        let measurePoints = [];
-        let measureEntities = [];
 
         function setTool(tool) {
-            resetMeasure();
-            document.querySelectorAll('.tools-group .tool-btn').forEach(b => {
-                b.classList.remove('active', 'fire-mode', 'water-mode');
-            });
-            document.getElementById('modeIndicator').classList.remove('show', 'water-mode');
+            document.querySelectorAll('.tools-group .tool-btn').forEach(b => b.classList.remove('active', 'fire-mode', 'water-mode', 'hose-mode'));
+            document.getElementById('modeIndicator').classList.remove('show', 'water-mode', 'hose-mode');
+            document.getElementById('hosePanel').classList.remove('active');
             
             if (currentTool === tool) { currentTool = null; return; }
             currentTool = tool;
             
             const indicator = document.getElementById('modeIndicator');
-            const modeText = document.getElementById('modeText');
-            const icon = indicator.querySelector('.material-icons');
+            const icon = document.getElementById('modeIcon');
+            const text = document.getElementById('modeText');
             
             if (tool === 'fire') {
                 document.getElementById('fireToolBtn').classList.add('active', 'fire-mode');
-                icon.textContent = 'local_fire_department';
-                modeText.textContent = '火点追加モード - 地図をタップ';
-                indicator.classList.remove('water-mode');
+                icon.textContent = 'local_fire_department'; text.textContent = '火点追加モード';
                 indicator.classList.add('show');
             } else if (tool === 'water') {
                 document.getElementById('waterToolBtn').classList.add('active', 'water-mode');
-                icon.textContent = 'water_drop';
-                modeText.textContent = '水利追加モード - 地図をタップ';
+                icon.textContent = 'water_drop'; text.textContent = '水利追加モード';
                 indicator.classList.add('show', 'water-mode');
-            } else if (tool === 'distance') {
-                event.target.closest('.tool-btn').classList.add('active');
-                document.getElementById('measurePanel').classList.add('active');
+            } else if (tool === 'hose') {
+                document.getElementById('hoseToolBtn').classList.add('active', 'hose-mode');
+                icon.textContent = 'route'; text.textContent = 'ホース経路モード';
+                indicator.classList.add('show', 'hose-mode');
+                document.getElementById('hosePanel').classList.add('active');
+                resetHoseRoute();
             }
         }
 
-        function closeMeasure() {
-            document.getElementById('measurePanel').classList.remove('active');
-            document.querySelectorAll('.tools-group .tool-btn').forEach(b => b.classList.remove('active'));
-            resetMeasure();
-            currentTool = null;
-        }
-
-        function resetMeasure() {
-            measurePoints = [];
-            measureEntities.forEach(e => viewer.entities.remove(e));
-            measureEntities = [];
-            document.getElementById('measureDistance').textContent = '- m';
-            document.getElementById('measureElevation').textContent = '- m';
-            document.getElementById('measureStart').textContent = '- m';
-            document.getElementById('measureEnd').textContent = '- m';
-            document.getElementById('measureHint').style.display = 'block';
-        }
-
-        // ========================================
-        // CLICK HANDLER
-        // ========================================
+        // ========== CLICK HANDLER ==========
         const clickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         
         clickHandler.setInputAction(async function(click) {
             const picked = viewer.scene.pick(click.position);
             
-            // Check if clicked on fire point
-            if (picked?.id?.id?.startsWith('fire-')) {
-                selectFirePoint(picked.id.id);
-                return;
-            }
-            
-            // Check if clicked on water source
-            if (picked?.id?.id?.startsWith('water-')) {
-                selectWater(picked.id.id);
-                return;
-            }
+            if (picked?.id?.id?.startsWith('fire-')) { selectFirePoint(picked.id.id); return; }
+            if (picked?.id?.id?.startsWith('water-')) { selectWater(picked.id.id); return; }
 
             const ray = viewer.camera.getPickRay(click.position);
             const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
@@ -980,55 +868,29 @@
             
             let height = 0;
             try {
-                const updated = await Cesium.sampleTerrainMostDetailed(
-                    viewer.terrainProvider, [Cesium.Cartographic.fromDegrees(lon, lat)]
-                );
+                const updated = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [Cesium.Cartographic.fromDegrees(lon, lat)]);
                 height = updated[0].height || 0;
             } catch (e) { height = carto.height || 0; }
 
             if (currentTool === 'fire') {
                 const feature = addFirePoint(lon, lat, height);
                 selectFirePoint(feature.id);
-                return;
-            }
-
-            if (currentTool === 'water') {
+            } else if (currentTool === 'water') {
                 const source = addWaterSource('hydrant', `消火栓 #${waterIdCounter + 1}`, lon, lat);
                 selectWater(source.id);
-                return;
-            }
-
-            if (currentTool === 'distance') {
-                measurePoints.push({ lon, lat, height, cartesian });
-                const marker = viewer.entities.add({
-                    position: cartesian,
-                    point: { pixelSize: 8, color: Cesium.Color.YELLOW, outlineColor: Cesium.Color.BLACK, outlineWidth: 2, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND },
-                    label: { text: `P${measurePoints.length}`, font: '11px sans-serif', fillColor: Cesium.Color.WHITE, outlineColor: Cesium.Color.BLACK, outlineWidth: 2, style: Cesium.LabelStyle.FILL_AND_OUTLINE, verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -12) }
-                });
-                measureEntities.push(marker);
-
-                if (measurePoints.length >= 2) {
-                    const p1 = measurePoints[measurePoints.length - 2];
-                    const p2 = measurePoints[measurePoints.length - 1];
-                    const line = viewer.entities.add({
-                        polyline: { positions: [p1.cartesian, p2.cartesian], width: 3, material: new Cesium.PolylineGlowMaterialProperty({ glowPower: 0.2, color: Cesium.Color.CYAN }), clampToGround: true }
-                    });
-                    measureEntities.push(line);
-
-                    const dist = haversineDistance(p1.lat, p1.lon, p2.lat, p2.lon);
-                    const elev = p2.height - p1.height;
-                    document.getElementById('measureDistance').textContent = formatDistance(dist);
-                    document.getElementById('measureElevation').textContent = (elev >= 0 ? '+' : '') + elev.toFixed(1) + ' m';
-                    document.getElementById('measureStart').textContent = p1.height.toFixed(1) + ' m';
-                    document.getElementById('measureEnd').textContent = p2.height.toFixed(1) + ' m';
-                    document.getElementById('measureHint').style.display = 'none';
+            } else if (currentTool === 'hose') {
+                if (!hoseStartPoint) {
+                    hoseStartPoint = { lon, lat, height };
+                    document.getElementById('hoseStart').textContent = height.toFixed(1) + ' m';
+                    document.getElementById('hoseHint').textContent = '終点をタップ';
+                } else {
+                    hoseEndPoint = { lon, lat, height };
+                    drawHoseRoute(hoseStartPoint, hoseEndPoint);
                 }
             }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-        // ========================================
-        // UTILITIES
-        // ========================================
+        // ========== UTILITIES ==========
         function haversineDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1037,13 +899,8 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function formatDistance(m) {
-            return m >= 1000 ? (m/1000).toFixed(2) + ' km' : m.toFixed(0) + ' m';
-        }
-
-        function showLoading(show) {
-            document.getElementById('loading').classList.toggle('show', show);
-        }
+        function formatDistance(m) { return m >= 1000 ? (m/1000).toFixed(2) + ' km' : m.toFixed(0) + ' m'; }
+        function showLoading(show) { document.getElementById('loading').classList.toggle('show', show); }
 
         function setViewMode(mode) {
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
@@ -1053,22 +910,12 @@
 
         let myLat = null, myLon = null;
         function flyToMyLocation() {
-            if (myLat && myLon) {
-                viewer.camera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(myLon, myLat, 1000),
-                    orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
-                    duration: 2
-                });
-            }
+            if (myLat && myLon) viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(myLon, myLat, 1000), duration: 2 });
         }
 
         if ('geolocation' in navigator) {
             navigator.geolocation.watchPosition(
-                pos => {
-                    myLat = pos.coords.latitude;
-                    myLon = pos.coords.longitude;
-                    document.getElementById('myCoords').textContent = `${myLat.toFixed(4)}°N ${myLon.toFixed(4)}°E`;
-                },
+                pos => { myLat = pos.coords.latitude; myLon = pos.coords.longitude; document.getElementById('myCoords').textContent = `${myLat.toFixed(4)}°N ${myLon.toFixed(4)}°E`; },
                 () => { document.getElementById('myCoords').textContent = '取得失敗'; },
                 { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
             );
@@ -1082,14 +929,10 @@
 
         const params = new URLSearchParams(location.search);
         if (params.has('lat') && params.has('lon')) {
-            viewer.camera.flyTo({
-                destination: Cesium.Cartesian3.fromDegrees(parseFloat(params.get('lon')), parseFloat(params.get('lat')), parseFloat(params.get('h')) || 3000),
-                duration: 2
-            });
+            viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(parseFloat(params.get('lon')), parseFloat(params.get('lat')), parseFloat(params.get('h')) || 3000), duration: 2 });
         }
 
-        // Export for debugging
-        window.exportData = () => ({ firePoints, waterSources });
+        window.exportData = () => ({ firePoints, waterSources, hoseRoutes: hoseEntities.length });
     </script>
 </body>
 </html>
