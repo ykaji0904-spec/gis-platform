@@ -88,7 +88,7 @@
         .tool-item-icon .material-icons { font-size: 16px; }
         .tool-item-content { flex: 1; min-width: 0; }
         .tool-item-name { color: white; font-size: 11px; font-weight: 500; }
-        .tool-item-desc { color: rgba(255,255,255,0.4); font-size: 9px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tool-item-desc { color: rgba(255,255,255,0.4); font-size: 9px; margin-top: 2px; }
 
         /* Layer Panel */
         .layer-panel {
@@ -122,58 +122,6 @@
         .layer-toggle::after { content: ''; position: absolute; width: 12px; height: 12px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: all 0.2s; }
         .layer-toggle.on::after { left: 14px; }
 
-        /* Info Panels - Compact */
-        .info-panel {
-            position: fixed; top: 56px; right: 8px; width: 200px;
-            background: rgba(10, 10, 10, 0.92); backdrop-filter: blur(20px);
-            border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 900; display: none;
-        }
-        .info-panel.show { display: block; }
-        .info-panel.fire { border-color: rgba(244, 67, 54, 0.25); }
-        .info-panel.water { border-color: rgba(33, 150, 243, 0.25); }
-        .info-panel.hose-info { border-color: rgba(255, 152, 0, 0.25); }
-        .panel-header {
-            padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .panel-title { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        .panel-title.fire { color: #f44336; }
-        .panel-title.water { color: #2196f3; }
-        .panel-title.hose { color: #ff9800; }
-        .panel-close { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 2px; }
-        .panel-close .material-icons { font-size: 16px; }
-        .panel-content { padding: 8px 10px; }
-        .info-row { display: flex; justify-content: space-between; padding: 3px 0; }
-        .info-label { color: rgba(255,255,255,0.45); font-size: 9px; }
-        .info-value { color: white; font-size: 10px; font-family: monospace; }
-        .panel-actions { display: flex; gap: 4px; margin-top: 8px; }
-        .action-btn {
-            flex: 1; padding: 6px; border: none; border-radius: 4px;
-            font-size: 9px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 3px;
-        }
-        .action-btn .material-icons { font-size: 12px; }
-        .action-btn.primary { background: #2196f3; color: white; }
-        .action-btn.danger { background: #f44336; color: white; }
-        .action-btn.secondary { background: rgba(255,255,255,0.08); color: white; }
-        .action-btn.warning { background: #ff9800; color: white; }
-
-        .water-list { max-height: 80px; overflow-y: auto; margin-top: 6px; }
-        .water-item {
-            display: flex; align-items: center; gap: 6px;
-            padding: 5px; border-radius: 4px; margin-bottom: 2px;
-            background: rgba(255,255,255,0.02); cursor: pointer;
-        }
-        .water-item:hover { background: rgba(33, 150, 243, 0.08); }
-        .water-item-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; }
-        .water-item-icon.hydrant { background: rgba(244, 67, 54, 0.15); color: #f44336; }
-        .water-item-icon.tank { background: rgba(33, 150, 243, 0.15); color: #2196f3; }
-        .water-item-icon.natural { background: rgba(0, 188, 212, 0.15); color: #00bcd4; }
-        .water-item-info { flex: 1; }
-        .water-item-name { color: white; font-size: 9px; }
-        .water-item-dist { color: rgba(255,255,255,0.4); font-size: 8px; }
-
         .mode-indicator {
             position: fixed; top: 56px; left: 50%; transform: translateX(-50%);
             background: rgba(244, 67, 54, 0.9);
@@ -187,55 +135,65 @@
         .mode-indicator .material-icons { color: white; font-size: 14px; }
         .mode-indicator span { color: white; font-size: 11px; font-weight: 500; }
 
-        /* Hose Panel - Compact */
-        .hose-panel {
+        /* Bottom Panels - All panels now at bottom */
+        .bottom-panel {
             position: fixed; bottom: 56px; left: 8px; right: 8px;
             background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
             padding: 10px 12px; border-radius: 10px;
-            border: 1px solid rgba(255, 152, 0, 0.25); z-index: 900;
+            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 900;
             display: none;
         }
-        .hose-panel.active { display: block; }
-        .hose-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .hose-title { color: #ff9800; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        .hose-title .material-icons { font-size: 14px; }
-        .hose-close { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; }
-        .hose-stats { display: flex; gap: 6px; flex-wrap: wrap; }
-        .hose-stat { background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; min-width: 70px; }
-        .hose-stat.wide { flex: 1; min-width: 140px; }
-        .hose-stat-label { color: rgba(255,255,255,0.4); font-size: 8px; margin-bottom: 2px; }
-        .hose-stat-value { color: white; font-size: 12px; font-weight: 600; font-family: monospace; }
-        .hose-stat-value.highlight { color: #ff9800; }
-        .hose-hint { color: rgba(255,255,255,0.35); font-size: 9px; text-align: center; margin: 8px 0; }
-        .hose-actions { display: flex; gap: 6px; }
-        .hose-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: 500; }
-        .hose-btn .material-icons { font-size: 14px; }
-        .hose-btn.primary { background: #ff9800; color: #000; }
-        .hose-btn.secondary { background: rgba(255,255,255,0.08); color: white; }
-        .hose-btn.danger { background: rgba(244,67,54,0.7); color: white; }
+        .bottom-panel.active { display: block; }
+        .bottom-panel.fire { border-color: rgba(244, 67, 54, 0.25); }
+        .bottom-panel.water { border-color: rgba(33, 150, 243, 0.25); }
+        .bottom-panel.hose { border-color: rgba(255, 152, 0, 0.25); }
+        .bottom-panel.measure { border-color: rgba(0, 212, 255, 0.25); }
+        .bottom-panel.hose-info { border-color: rgba(255, 152, 0, 0.25); }
 
-        /* Measure Panel - Compact */
-        .measure-panel {
-            position: fixed; bottom: 56px; left: 8px; right: 8px;
-            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
-            padding: 10px 12px; border-radius: 10px;
-            border: 1px solid rgba(0, 212, 255, 0.25); z-index: 900;
-            display: none;
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
         }
-        .measure-panel.active { display: block; }
-        .measure-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .measure-title { color: #00d4ff; font-size: 11px; font-weight: 600; }
-        .measure-close { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; }
-        .measure-stats { display: flex; gap: 6px; flex-wrap: wrap; }
-        .measure-stat { background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; min-width: 70px; }
-        .measure-stat-label { color: rgba(255,255,255,0.4); font-size: 8px; margin-bottom: 2px; }
-        .measure-stat-value { color: white; font-size: 12px; font-weight: 600; font-family: monospace; }
-        .measure-stat-value.highlight { color: #00d4ff; }
-        .measure-hint { color: rgba(255,255,255,0.35); font-size: 9px; text-align: center; margin: 8px 0; }
-        .measure-actions { display: flex; gap: 6px; }
-        .measure-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 10px; cursor: pointer; font-weight: 500; }
-        .measure-btn.primary { background: #00d4ff; color: #000; }
-        .measure-btn.secondary { background: rgba(255,255,255,0.08); color: white; }
+        .panel-title { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .panel-title.fire { color: #f44336; }
+        .panel-title.water { color: #2196f3; }
+        .panel-title.hose { color: #ff9800; }
+        .panel-title.measure { color: #00d4ff; }
+        .panel-title .material-icons { font-size: 14px; }
+        .panel-close { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; }
+        .panel-close .material-icons { font-size: 16px; }
+
+        .panel-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+        .panel-stat { background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; min-width: 70px; }
+        .panel-stat.wide { flex: 1; min-width: 140px; }
+        .panel-stat-label { color: rgba(255,255,255,0.4); font-size: 8px; margin-bottom: 2px; }
+        .panel-stat-value { color: white; font-size: 12px; font-weight: 600; font-family: monospace; }
+        .panel-stat-value.highlight { color: #ff9800; }
+        .panel-stat-value.fire-highlight { color: #f44336; }
+        .panel-stat-value.water-highlight { color: #2196f3; }
+        .panel-stat-value.measure-highlight { color: #00d4ff; }
+
+        .panel-hint { color: rgba(255,255,255,0.35); font-size: 9px; text-align: center; margin: 8px 0; }
+        .panel-actions { display: flex; gap: 6px; margin-top: 8px; }
+        .panel-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: 500; }
+        .panel-btn .material-icons { font-size: 14px; }
+        .panel-btn.primary { background: #ff9800; color: #000; }
+        .panel-btn.primary-blue { background: #2196f3; color: white; }
+        .panel-btn.primary-cyan { background: #00d4ff; color: #000; }
+        .panel-btn.secondary { background: rgba(255,255,255,0.08); color: white; }
+        .panel-btn.danger { background: rgba(244,67,54,0.7); color: white; }
+
+        .water-list { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+        .water-chip {
+            display: flex; align-items: center; gap: 4px;
+            padding: 4px 8px; border-radius: 12px;
+            background: rgba(255,255,255,0.05); cursor: pointer; font-size: 9px;
+        }
+        .water-chip:hover { background: rgba(33, 150, 243, 0.15); }
+        .water-chip.hydrant { border: 1px solid rgba(244, 67, 54, 0.3); }
+        .water-chip.tank { border: 1px solid rgba(33, 150, 243, 0.3); }
+        .water-chip.natural { border: 1px solid rgba(0, 188, 212, 0.3); }
+        .water-chip-icon { font-size: 10px; font-weight: 600; }
+        .water-chip-dist { color: rgba(255,255,255,0.6); }
 
         /* Bottom Bar */
         .bottom-bar {
@@ -268,6 +226,13 @@
         }
         .loading.show { display: block; }
 
+        .trail-info {
+            position: fixed; top: 56px; right: 8px;
+            background: rgba(139, 195, 74, 0.9); padding: 6px 10px; border-radius: 12px;
+            color: white; font-size: 10px; display: none; z-index: 900;
+        }
+        .trail-info.show { display: block; }
+
         .cesium-viewer-toolbar, .cesium-viewer-animationContainer, .cesium-viewer-timelineContainer, .cesium-viewer-fullscreenContainer, .cesium-viewer-bottom { display: none !important; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
@@ -281,6 +246,7 @@
 <body>
     <div id="cesiumContainer"></div>
     <div class="loading" id="loading">読み込み中...</div>
+    <div class="trail-info" id="trailInfo">登山道: 0本</div>
 
     <div class="top-bar">
         <div class="logo" onclick="toggleToolMenu()">
@@ -332,7 +298,7 @@
                 <div class="tool-item-icon hose"><span class="material-icons">route</span></div>
                 <div class="tool-item-content">
                     <div class="tool-item-name">ホース延長</div>
-                    <div class="tool-item-desc">連続タップで経路描画・本数計算</div>
+                    <div class="tool-item-desc">連続タップで経路・本数計算</div>
                 </div>
             </div>
             <div class="tool-item" id="toolMeasure" onclick="setTool('measure')">
@@ -369,7 +335,7 @@
             <div class="layer-item" onclick="toggleLayerItem(this, 'terrain')"><div class="layer-info"><div class="layer-icon terrain"><span class="material-icons">terrain</span></div><span class="layer-name">地形</span></div><div class="layer-toggle on" id="toggle-terrain"></div></div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'buildings')"><div class="layer-info"><div class="layer-icon building"><span class="material-icons">location_city</span></div><span class="layer-name">3D建物</span></div><div class="layer-toggle on" id="toggle-buildings"></div></div>
             <div class="layer-item" onclick="toggleLayerItem(this, 'gsimap')"><div class="layer-info"><div class="layer-icon map"><span class="material-icons">map</span></div><span class="layer-name">国土地理院</span></div><div class="layer-toggle" id="toggle-gsimap"></div></div>
-            <div class="layer-item" onclick="toggleLayerItem(this, 'trails')"><div class="layer-info"><div class="layer-icon trail"><span class="material-icons">hiking</span></div><span class="layer-name">登山道</span></div><div class="layer-toggle" id="toggle-trails"></div></div>
+            <div class="layer-item" onclick="toggleLayerItem(this, 'trails')"><div class="layer-info"><div class="layer-icon trail"><span class="material-icons">hiking</span></div><span class="layer-name">登山道(OSM)</span></div><div class="layer-toggle" id="toggle-trails"></div></div>
         </div>
         <div class="panel-section">
             <div class="section-title">Operation</div>
@@ -380,98 +346,98 @@
         </div>
     </div>
 
-    <!-- Fire Panel -->
-    <div class="info-panel fire" id="firePanel">
+    <!-- Fire Panel (Bottom) -->
+    <div class="bottom-panel fire" id="firePanel">
         <div class="panel-header">
             <span class="panel-title fire"><span class="material-icons">local_fire_department</span>火点</span>
             <button class="panel-close" onclick="closePanel('fire')"><span class="material-icons">close</span></button>
         </div>
-        <div class="panel-content">
-            <div class="info-row"><span class="info-label">緯度</span><span class="info-value" id="fireLat">-</span></div>
-            <div class="info-row"><span class="info-label">経度</span><span class="info-value" id="fireLon">-</span></div>
-            <div class="info-row"><span class="info-label">標高</span><span class="info-value" id="fireElev">-</span></div>
-            <div class="section-title" style="margin-top:6px;">周辺水利</div>
-            <div class="water-list" id="nearbyWaterList"></div>
-            <div class="panel-actions">
-                <button class="action-btn secondary" onclick="flyToSelectedFire()"><span class="material-icons">flight</span>移動</button>
-                <button class="action-btn danger" onclick="deleteSelectedFire()"><span class="material-icons">delete</span>削除</button>
-            </div>
+        <div class="panel-stats">
+            <div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value" id="fireLat">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value" id="fireLon">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">標高</div><div class="panel-stat-value fire-highlight" id="fireElev">-</div></div>
+        </div>
+        <div class="section-title" style="margin-top:8px;">周辺水利</div>
+        <div class="water-list" id="nearbyWaterList"></div>
+        <div class="panel-actions">
+            <button class="panel-btn secondary" onclick="flyToSelectedFire()"><span class="material-icons">flight</span>移動</button>
+            <button class="panel-btn danger" onclick="deleteSelectedFire()"><span class="material-icons">delete</span>削除</button>
         </div>
     </div>
 
-    <!-- Water Panel -->
-    <div class="info-panel water" id="waterPanel">
+    <!-- Water Panel (Bottom) -->
+    <div class="bottom-panel water" id="waterPanel">
         <div class="panel-header">
             <span class="panel-title water"><span class="material-icons">water_drop</span>水利</span>
             <button class="panel-close" onclick="closePanel('water')"><span class="material-icons">close</span></button>
         </div>
-        <div class="panel-content">
-            <div class="info-row"><span class="info-label">種別</span><span class="info-value" id="waterType">-</span></div>
-            <div class="info-row"><span class="info-label">座標</span><span class="info-value" id="waterCoords">-</span></div>
-            <div class="info-row"><span class="info-label">火点距離</span><span class="info-value" id="waterDist">-</span></div>
-            <div class="panel-actions">
-                <button class="action-btn secondary" onclick="flyToSelectedWater()"><span class="material-icons">flight</span>移動</button>
-                <button class="action-btn danger" onclick="deleteSelectedWater()"><span class="material-icons">delete</span>削除</button>
-            </div>
+        <div class="panel-stats">
+            <div class="panel-stat"><div class="panel-stat-label">種別</div><div class="panel-stat-value water-highlight" id="waterType">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value" id="waterLat">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value" id="waterLon">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">火点距離</div><div class="panel-stat-value" id="waterDist">-</div></div>
+        </div>
+        <div class="panel-actions">
+            <button class="panel-btn secondary" onclick="flyToSelectedWater()"><span class="material-icons">flight</span>移動</button>
+            <button class="panel-btn danger" onclick="deleteSelectedWater()"><span class="material-icons">delete</span>削除</button>
         </div>
     </div>
 
-    <!-- Hose Info Panel (確定済みホース用) -->
-    <div class="info-panel hose-info" id="hoseInfoPanel">
+    <!-- Hose Info Panel (確定済み) -->
+    <div class="bottom-panel hose-info" id="hoseInfoPanel">
         <div class="panel-header">
             <span class="panel-title hose"><span class="material-icons">route</span>ホース経路</span>
             <button class="panel-close" onclick="closePanel('hoseInfo')"><span class="material-icons">close</span></button>
         </div>
-        <div class="panel-content">
-            <div class="info-row"><span class="info-label">総延長</span><span class="info-value" id="hoseInfoDist">-</span></div>
-            <div class="info-row"><span class="info-label">ホース本数</span><span class="info-value" id="hoseInfoCount">-</span></div>
-            <div class="info-row"><span class="info-label">始点標高</span><span class="info-value" id="hoseInfoStart">-</span></div>
-            <div class="info-row"><span class="info-label">終点標高</span><span class="info-value" id="hoseInfoEnd">-</span></div>
-            <div class="info-row"><span class="info-label">高低差</span><span class="info-value" id="hoseInfoElev">-</span></div>
-            <div class="info-row"><span class="info-label">累計高低差</span><span class="info-value" id="hoseInfoCumElev">-</span></div>
-            <div class="panel-actions">
-                <button class="action-btn danger" onclick="deleteSelectedHose()"><span class="material-icons">delete</span>削除</button>
-            </div>
+        <div class="panel-stats">
+            <div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseInfoDist">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">本数</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">始点</div><div class="panel-stat-value" id="hoseInfoStart">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">終点</div><div class="panel-stat-value" id="hoseInfoEnd">-</div></div>
+            <div class="panel-stat wide"><div class="panel-stat-label">高低差（直線/累計）</div><div class="panel-stat-value" id="hoseInfoElev">-</div></div>
+        </div>
+        <div class="panel-actions">
+            <button class="panel-btn danger" onclick="deleteSelectedHose()"><span class="material-icons">delete</span>削除</button>
         </div>
     </div>
 
     <!-- Hose Drawing Panel -->
-    <div class="hose-panel" id="hosePanel">
-        <div class="hose-header">
-            <span class="hose-title"><span class="material-icons">route</span>ホース延長</span>
-            <button class="hose-close" onclick="closeHosePanel()"><span class="material-icons">close</span></button>
+    <div class="bottom-panel hose" id="hosePanel">
+        <div class="panel-header">
+            <span class="panel-title hose"><span class="material-icons">route</span>ホース延長</span>
+            <button class="panel-close" onclick="closeHosePanel()"><span class="material-icons">close</span></button>
         </div>
-        <div class="hose-stats">
-            <div class="hose-stat"><div class="hose-stat-label">総延長</div><div class="hose-stat-value highlight" id="hoseTotalDist">0 m</div></div>
-            <div class="hose-stat"><div class="hose-stat-label">本数(20m)</div><div class="hose-stat-value" id="hoseTotalCount">0本</div></div>
-            <div class="hose-stat"><div class="hose-stat-label">始点</div><div class="hose-stat-value" id="hoseStartElev">-</div></div>
-            <div class="hose-stat"><div class="hose-stat-label">終点</div><div class="hose-stat-value" id="hoseEndElev">-</div></div>
-            <div class="hose-stat wide"><div class="hose-stat-label">高低差（直線/累計）</div><div class="hose-stat-value" id="hoseElevInfo">- / -</div></div>
+        <div class="panel-stats">
+            <div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseTotalDist">0m</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">本数</div><div class="panel-stat-value" id="hoseTotalCount">0本</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">始点</div><div class="panel-stat-value" id="hoseStartElev">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">終点</div><div class="panel-stat-value" id="hoseEndElev">-</div></div>
+            <div class="panel-stat wide"><div class="panel-stat-label">高低差（直線/累計）</div><div class="panel-stat-value" id="hoseElevInfo">-/-</div></div>
         </div>
-        <div class="hose-hint" id="hoseHint">連続タップでポイント追加</div>
-        <div class="hose-actions">
-            <button class="hose-btn secondary" onclick="undoHosePoint()"><span class="material-icons">undo</span>戻す</button>
-            <button class="hose-btn danger" onclick="resetHoseLine()"><span class="material-icons">delete</span></button>
-            <button class="hose-btn primary" onclick="confirmHoseLine()"><span class="material-icons">check</span>確定</button>
+        <div class="panel-hint" id="hoseHint">連続タップでポイント追加</div>
+        <div class="panel-actions">
+            <button class="panel-btn secondary" onclick="undoHosePoint()"><span class="material-icons">undo</span>戻す</button>
+            <button class="panel-btn danger" onclick="resetHoseLine()"><span class="material-icons">delete</span></button>
+            <button class="panel-btn primary" onclick="confirmHoseLine()"><span class="material-icons">check</span>確定</button>
         </div>
     </div>
 
     <!-- Measure Panel -->
-    <div class="measure-panel" id="measurePanel">
-        <div class="measure-header">
-            <span class="measure-title">2点計測</span>
-            <button class="measure-close" onclick="closeMeasurePanel()"><span class="material-icons">close</span></button>
+    <div class="bottom-panel measure" id="measurePanel">
+        <div class="panel-header">
+            <span class="panel-title measure">2点計測</span>
+            <button class="panel-close" onclick="closeMeasurePanel()"><span class="material-icons">close</span></button>
         </div>
-        <div class="measure-stats">
-            <div class="measure-stat"><div class="measure-stat-label">距離</div><div class="measure-stat-value highlight" id="measureDistance">-</div></div>
-            <div class="measure-stat"><div class="measure-stat-label">高低差</div><div class="measure-stat-value" id="measureElevation">-</div></div>
-            <div class="measure-stat"><div class="measure-stat-label">始点</div><div class="measure-stat-value" id="measureStart">-</div></div>
-            <div class="measure-stat"><div class="measure-stat-label">終点</div><div class="measure-stat-value" id="measureEnd">-</div></div>
+        <div class="panel-stats">
+            <div class="panel-stat"><div class="panel-stat-label">距離</div><div class="panel-stat-value measure-highlight" id="measureDistance">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="measureElevation">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">始点</div><div class="panel-stat-value" id="measureStart">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">終点</div><div class="panel-stat-value" id="measureEnd">-</div></div>
         </div>
-        <div class="measure-hint" id="measureHint">2点タップで計測</div>
-        <div class="measure-actions">
-            <button class="measure-btn secondary" onclick="resetMeasure()">リセット</button>
-            <button class="measure-btn primary" onclick="closeMeasurePanel()">完了</button>
+        <div class="panel-hint" id="measureHint">2点タップで計測</div>
+        <div class="panel-actions">
+            <button class="panel-btn secondary" onclick="resetMeasure()">リセット</button>
+            <button class="panel-btn primary-cyan" onclick="closeMeasurePanel()">完了</button>
         </div>
     </div>
 
@@ -501,6 +467,7 @@
 
         const layers = { terrain: true, buildings: true, gsimap: false, satellite: true, trails: false, firepoints: true, firearea: true, water: true, hose: true };
         let plateauTileset = null, gsiLayer = null, trailEntities = [], fireAreaEntity = null;
+        let loadedTrailAreas = new Set(); // 既に読み込んだエリアを記録
 
         async function loadPlateauBuildings() { try { plateauTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2602291); viewer.scene.primitives.add(plateauTileset); } catch (e) {} }
         loadPlateauBuildings();
@@ -518,7 +485,11 @@
                 case 'terrain': viewer.scene.terrainProvider = layers.terrain ? Cesium.Terrain.fromWorldTerrain() : new Cesium.EllipsoidTerrainProvider(); break;
                 case 'buildings': if (plateauTileset) plateauTileset.show = layers.buildings; break;
                 case 'gsimap': if (gsiLayer) gsiLayer.show = layers.gsimap; break;
-                case 'trails': trailEntities.forEach(e => e.show = layers.trails); if (layers.trails && trailEntities.length === 0) loadTrailsNearView(); break;
+                case 'trails': 
+                    trailEntities.forEach(e => e.show = layers.trails); 
+                    if (layers.trails) loadTrailsNearView();
+                    document.getElementById('trailInfo').classList.toggle('show', layers.trails && trailEntities.length > 0);
+                    break;
                 case 'firepoints': firePointEntities.forEach(e => e.show = layers.firepoints); break;
                 case 'firearea': if (fireAreaEntity) fireAreaEntity.show = layers.firearea; break;
                 case 'water': waterEntities.forEach(e => e.show = layers.water); break;
@@ -526,21 +497,84 @@
             }
         }
 
-        async function loadTrailsNearView() { const c = viewer.camera.positionCartographic; await loadTrails(Cesium.Math.toDegrees(c.latitude), Cesium.Math.toDegrees(c.longitude), 2000); }
+        // 登山道を10km範囲で読み込み（既存データ保持）
+        async function loadTrailsNearView() { 
+            const c = viewer.camera.positionCartographic; 
+            const lat = Cesium.Math.toDegrees(c.latitude);
+            const lon = Cesium.Math.toDegrees(c.longitude);
+            const areaKey = `${Math.round(lat * 10)}_${Math.round(lon * 10)}`; // 約11km単位でキャッシュ
+            
+            if (loadedTrailAreas.has(areaKey)) return; // 既に読み込み済み
+            loadedTrailAreas.add(areaKey);
+            
+            await loadTrails(lat, lon, 10000); // 10km範囲
+        }
+        
         async function loadTrails(lat, lon, r) {
             showLoading(true);
+            document.getElementById('loading').textContent = `登山道読み込み中... (${(r/1000).toFixed(0)}km範囲)`;
+            
             try {
-                const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(`[out:json][timeout:25];(way["highway"~"path|footway|track"](around:${r},${lat},${lon}););out body;>;out skel qt;`) });
-                const data = await res.json(); trailEntities.forEach(e => viewer.entities.remove(e)); trailEntities = [];
-                const nodes = {}; data.elements.filter(e => e.type === 'node').forEach(n => nodes[n.id] = [n.lon, n.lat]);
-                data.elements.filter(e => e.type === 'way').forEach(way => {
-                    const pos = way.nodes.filter(nid => nodes[nid]).map(nid => Cesium.Cartesian3.fromDegrees(nodes[nid][0], nodes[nid][1]));
-                    if (pos.length >= 2) { const e = viewer.entities.add({ polyline: { positions: pos, width: 3, material: Cesium.Color.LIGHTGREEN.withAlpha(0.8), clampToGround: true } }); e.show = layers.trails; trailEntities.push(e); }
+                // OSM: path, footway, track, steps を取得
+                const query = `[out:json][timeout:60];
+                    (
+                        way["highway"="path"](around:${r},${lat},${lon});
+                        way["highway"="footway"](around:${r},${lat},${lon});
+                        way["highway"="track"](around:${r},${lat},${lon});
+                        way["highway"="steps"](around:${r},${lat},${lon});
+                    );
+                    out body; >; out skel qt;`;
+                
+                const res = await fetch('https://overpass-api.de/api/interpreter', { 
+                    method: 'POST', 
+                    body: 'data=' + encodeURIComponent(query) 
                 });
-            } catch (e) {}
+                const data = await res.json();
+                
+                const nodes = {}; 
+                data.elements.filter(e => e.type === 'node').forEach(n => nodes[n.id] = [n.lon, n.lat]);
+                
+                let newCount = 0;
+                data.elements.filter(e => e.type === 'way').forEach(way => {
+                    // 既に同じwayが追加されていないかチェック
+                    if (trailEntities.some(e => e.osmId === way.id)) return;
+                    
+                    const pos = way.nodes.filter(nid => nodes[nid]).map(nid => Cesium.Cartesian3.fromDegrees(nodes[nid][0], nodes[nid][1]));
+                    if (pos.length >= 2) { 
+                        const e = viewer.entities.add({ 
+                            polyline: { 
+                                positions: pos, 
+                                width: 3, 
+                                material: Cesium.Color.LIGHTGREEN.withAlpha(0.8), 
+                                clampToGround: true 
+                            } 
+                        }); 
+                        e.show = layers.trails; 
+                        e.osmId = way.id;
+                        trailEntities.push(e);
+                        newCount++;
+                    }
+                });
+                
+                console.log(`登山道: 新規${newCount}本追加, 合計${trailEntities.length}本`);
+                updateTrailInfo();
+                
+            } catch (e) { 
+                console.error('Trail load error:', e);
+                // エラー時はキャッシュから除外して再読み込み可能に
+                const areaKey = `${Math.round(lat * 10)}_${Math.round(lon * 10)}`;
+                loadedTrailAreas.delete(areaKey);
+            }
             showLoading(false);
         }
+        
+        function updateTrailInfo() {
+            const info = document.getElementById('trailInfo');
+            info.textContent = `登山道: ${trailEntities.length}本 (OSM)`;
+            info.classList.toggle('show', layers.trails && trailEntities.length > 0);
+        }
 
+        // Fire Points
         let firePoints = [], firePointEntities = [], selectedFirePoint = null, firePointIdCounter = 0;
         function addFirePoint(lon, lat, height) {
             const id = `fire-${++firePointIdCounter}`;
@@ -549,22 +583,25 @@
             firePointEntities.push(e); updateFireArea(); return id;
         }
         function createFireIcon() { const c = document.createElement('canvas'); c.width = 28; c.height = 28; const ctx = c.getContext('2d'); ctx.beginPath(); ctx.arc(14, 14, 12, 0, Math.PI * 2); ctx.fillStyle = 'rgba(244,67,54,0.3)'; ctx.fill(); ctx.beginPath(); ctx.arc(14, 14, 8, 0, Math.PI * 2); ctx.fillStyle = '#f44336'; ctx.fill(); ctx.beginPath(); ctx.arc(14, 14, 4, 0, Math.PI * 2); ctx.fillStyle = '#ffeb3b'; ctx.fill(); return c.toDataURL(); }
+        
         function selectFirePoint(id) {
-            const f = firePoints.find(p => p.id === id); if (!f) return; selectedFirePoint = f;
+            const f = firePoints.find(p => p.id === id); if (!f) return; 
+            selectedFirePoint = f;
+            closeAllPanels();
             document.getElementById('fireLat').textContent = f.lat.toFixed(5) + '°';
             document.getElementById('fireLon').textContent = f.lon.toFixed(5) + '°';
             document.getElementById('fireElev').textContent = f.height.toFixed(1) + 'm';
-            document.getElementById('firePanel').classList.add('show');
-            document.getElementById('waterPanel').classList.remove('show');
-            document.getElementById('hoseInfoPanel').classList.remove('show');
+            document.getElementById('firePanel').classList.add('active');
             updateNearbyWaterList(f.lon, f.lat);
         }
+        
         function updateNearbyWaterList(lon, lat) {
             const list = document.getElementById('nearbyWaterList');
-            if (waterSources.length === 0) { list.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:8px;text-align:center;padding:4px;">水利なし</div>'; return; }
-            const sorted = waterSources.map(w => ({ ...w, d: haversineDistance(lat, lon, w.lat, w.lon) })).sort((a, b) => a.d - b.d).slice(0, 4);
-            list.innerHTML = sorted.map(w => `<div class="water-item" onclick="selectWater('${w.id}')"><div class="water-item-icon ${w.type}">${w.type[0].toUpperCase()}</div><div class="water-item-info"><div class="water-item-name">${w.name}</div><div class="water-item-dist">${formatDistance(w.d)}</div></div></div>`).join('');
+            if (waterSources.length === 0) { list.innerHTML = '<span style="color:rgba(255,255,255,0.3);font-size:8px;">水利なし</span>'; return; }
+            const sorted = waterSources.map(w => ({ ...w, d: haversineDistance(lat, lon, w.lat, w.lon) })).sort((a, b) => a.d - b.d).slice(0, 5);
+            list.innerHTML = sorted.map(w => `<div class="water-chip ${w.type}" onclick="selectWater('${w.id}')"><span class="water-chip-icon">${w.type[0].toUpperCase()}</span><span class="water-chip-dist">${formatDistance(w.d)}</span></div>`).join('');
         }
+        
         function updateFireArea() {
             if (fireAreaEntity) { viewer.entities.remove(fireAreaEntity); fireAreaEntity = null; }
             if (firePoints.length < 3) return;
@@ -573,15 +610,31 @@
             fireAreaEntity.show = layers.firearea;
         }
         function convexHull(pts) { if (pts.length < 3) return pts; const s = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); const l = []; for (const p of s) { while (l.length >= 2 && cr(l[l.length - 2], l[l.length - 1], p) <= 0) l.pop(); l.push(p); } const u = []; for (let i = s.length - 1; i >= 0; i--) { const p = s[i]; while (u.length >= 2 && cr(u[u.length - 2], u[u.length - 1], p) <= 0) u.pop(); u.push(p); } u.pop(); l.pop(); return l.concat(u); }
-        function closePanel(type) { document.getElementById(type + 'Panel').classList.remove('show'); if (type === 'fire') selectedFirePoint = null; if (type === 'water') selectedWater = null; if (type === 'hoseInfo') selectedHoseLine = null; }
+        
+        function closeAllPanels() {
+            ['firePanel', 'waterPanel', 'hoseInfoPanel'].forEach(id => document.getElementById(id).classList.remove('active'));
+            selectedFirePoint = null; selectedWater = null; selectedHoseLine = null;
+        }
+        function closePanel(type) { document.getElementById(type + 'Panel').classList.remove('active'); if (type === 'fire') selectedFirePoint = null; if (type === 'water') selectedWater = null; if (type === 'hoseInfo') selectedHoseLine = null; }
         function flyToSelectedFire() { if (selectedFirePoint) viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(selectedFirePoint.lon, selectedFirePoint.lat, 400), duration: 1 }); }
         function deleteSelectedFire() { if (!selectedFirePoint) return; const id = selectedFirePoint.id; firePoints = firePoints.filter(f => f.id !== id); const e = firePointEntities.find(e => e.id === id); if (e) { viewer.entities.remove(e); firePointEntities = firePointEntities.filter(x => x.id !== id); } closePanel('fire'); updateFireArea(); }
 
+        // Water Sources
         let waterSources = [], waterEntities = [], selectedWater = null, waterIdCounter = 0;
         function initDemoWater() { [{ type: 'hydrant', name: '消火栓#1', lat: 34.3858, lon: 132.4548 }, { type: 'hydrant', name: '消火栓#2', lat: 34.3848, lon: 132.4558 }, { type: 'tank', name: '防火水槽40t', lat: 34.3863, lon: 132.4563 }, { type: 'tank', name: '防火水槽100t', lat: 34.3843, lon: 132.4538 }, { type: 'natural', name: '河川取水点', lat: 34.3838, lon: 132.4573 }].forEach(w => addWaterSource(w.type, w.name, w.lon, w.lat)); }
         function addWaterSource(type, name, lon, lat) { const id = `water-${++waterIdCounter}`; waterSources.push({ id, type, name, lon, lat }); const e = viewer.entities.add({ id, position: Cesium.Cartesian3.fromDegrees(lon, lat, 0), billboard: { image: createWaterIcon(type), width: 20, height: 20, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND } }); e.show = layers.water; waterEntities.push(e); return id; }
         function createWaterIcon(type) { const c = document.createElement('canvas'); c.width = 20; c.height = 20; const ctx = c.getContext('2d'); ctx.beginPath(); ctx.arc(10, 10, 8, 0, Math.PI * 2); ctx.fillStyle = { hydrant: '#f44336', tank: '#2196f3', natural: '#00bcd4' }[type]; ctx.fill(); ctx.fillStyle = 'white'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(type[0].toUpperCase(), 10, 10); return c.toDataURL(); }
-        function selectWater(id) { const w = waterSources.find(x => x.id === id); if (!w) return; selectedWater = w; document.getElementById('waterType').textContent = { hydrant: '消火栓', tank: '防火水槽', natural: '自然水利' }[w.type]; document.getElementById('waterCoords').textContent = `${w.lat.toFixed(4)}, ${w.lon.toFixed(4)}`; document.getElementById('waterDist').textContent = selectedFirePoint ? formatDistance(haversineDistance(selectedFirePoint.lat, selectedFirePoint.lon, w.lat, w.lon)) : '-'; document.getElementById('waterPanel').classList.add('show'); document.getElementById('firePanel').classList.remove('show'); document.getElementById('hoseInfoPanel').classList.remove('show'); }
+        
+        function selectWater(id) { 
+            const w = waterSources.find(x => x.id === id); if (!w) return; 
+            selectedWater = w; 
+            closeAllPanels();
+            document.getElementById('waterType').textContent = { hydrant: '消火栓', tank: '防火水槽', natural: '自然水利' }[w.type]; 
+            document.getElementById('waterLat').textContent = w.lat.toFixed(5) + '°';
+            document.getElementById('waterLon').textContent = w.lon.toFixed(5) + '°';
+            document.getElementById('waterDist').textContent = selectedFirePoint ? formatDistance(haversineDistance(selectedFirePoint.lat, selectedFirePoint.lon, w.lat, w.lon)) : '-'; 
+            document.getElementById('waterPanel').classList.add('active');
+        }
         function flyToSelectedWater() { if (selectedWater) viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(selectedWater.lon, selectedWater.lat, 300), duration: 1 }); }
         function deleteSelectedWater() { if (!selectedWater) return; const id = selectedWater.id; waterSources = waterSources.filter(w => w.id !== id); const e = waterEntities.find(x => x.id === id); if (e) { viewer.entities.remove(e); waterEntities = waterEntities.filter(x => x.id !== id); } closePanel('water'); }
         initDemoWater();
@@ -598,7 +651,7 @@
             document.getElementById('hoseTotalCount').textContent = Math.ceil(totalDist / 20) + '本';
             document.getElementById('hoseStartElev').textContent = hoseLinePoints.length > 0 ? startH.toFixed(1) + 'm' : '-';
             document.getElementById('hoseEndElev').textContent = hoseLinePoints.length > 0 ? endH.toFixed(1) + 'm' : '-';
-            document.getElementById('hoseElevInfo').textContent = hoseLinePoints.length > 1 ? `${directElev >= 0 ? '+' : ''}${directElev.toFixed(1)}m / ${cumElev.toFixed(1)}m` : '- / -';
+            document.getElementById('hoseElevInfo').textContent = hoseLinePoints.length > 1 ? `${directElev >= 0 ? '+' : ''}${directElev.toFixed(1)}m/${cumElev.toFixed(1)}m` : '-/-';
             if (hoseLinePoints.length > 0) document.getElementById('hoseHint').textContent = `${hoseLinePoints.length}点`;
         }
         function addHosePoint(lon, lat, height, cartesian) {
@@ -623,16 +676,15 @@
             updateHoseDisplay(); document.getElementById('hoseHint').textContent = '確定！続けて描画可';
         }
         function selectHoseLine(id) {
-            const h = hoseLineEntities.find(x => x.id === id); if (!h) return; selectedHoseLine = h;
+            const h = hoseLineEntities.find(x => x.id === id); if (!h) return; 
+            selectedHoseLine = h;
+            closeAllPanels();
             document.getElementById('hoseInfoDist').textContent = formatDistance(h.totalDist);
             document.getElementById('hoseInfoCount').textContent = h.count + '本';
             document.getElementById('hoseInfoStart').textContent = h.startH.toFixed(1) + 'm';
             document.getElementById('hoseInfoEnd').textContent = h.endH.toFixed(1) + 'm';
-            document.getElementById('hoseInfoElev').textContent = (h.directElev >= 0 ? '+' : '') + h.directElev.toFixed(1) + 'm';
-            document.getElementById('hoseInfoCumElev').textContent = h.cumElev.toFixed(1) + 'm';
-            document.getElementById('hoseInfoPanel').classList.add('show');
-            document.getElementById('firePanel').classList.remove('show');
-            document.getElementById('waterPanel').classList.remove('show');
+            document.getElementById('hoseInfoElev').textContent = `${h.directElev >= 0 ? '+' : ''}${h.directElev.toFixed(1)}m/${h.cumElev.toFixed(1)}m`;
+            document.getElementById('hoseInfoPanel').classList.add('active');
         }
         function deleteSelectedHose() { if (!selectedHoseLine) return; viewer.entities.remove(selectedHoseLine.entity); hoseLineEntities = hoseLineEntities.filter(h => h.id !== selectedHoseLine.id); closePanel('hoseInfo'); }
         function closeHosePanel() { document.getElementById('hosePanel').classList.remove('active'); resetHoseLine(); document.querySelectorAll('.tool-item').forEach(t => t.classList.remove('active')); document.getElementById('modeIndicator').classList.remove('show'); currentTool = null; }
@@ -665,6 +717,8 @@
             document.getElementById('hosePanel').classList.remove('active');
             document.getElementById('measurePanel').classList.remove('active');
             document.getElementById('toolMenu').classList.remove('show');
+            closeAllPanels();
+            
             if (currentTool === tool) { currentTool = null; return; }
             currentTool = tool;
             const ind = document.getElementById('modeIndicator'), icon = document.getElementById('modeIcon'), text = document.getElementById('modeText');
@@ -695,7 +749,7 @@
 
         function haversineDistance(lat1, lon1, lat2, lon2) { const R = 6371000, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
         function formatDistance(m) { return m >= 1000 ? (m/1000).toFixed(2) + 'km' : m.toFixed(0) + 'm'; }
-        function showLoading(show) { document.getElementById('loading').classList.toggle('show', show); }
+        function showLoading(show) { document.getElementById('loading').classList.toggle('show', show); if (!show) document.getElementById('loading').textContent = '読み込み中...'; }
         function setViewMode(mode) { document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); event.target.closest('.view-btn').classList.add('active'); viewer.scene.mode = mode === '2d' ? Cesium.SceneMode.SCENE2D : Cesium.SceneMode.SCENE3D; }
         let myLat = null, myLon = null;
         function flyToMyLocation() { if (myLat && myLon) viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(myLon, myLat, 800), duration: 1.5 }); }
