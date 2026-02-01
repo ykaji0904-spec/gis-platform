@@ -1,4 +1,4 @@
-# GIS Platform - HardSkill OS
+# GIS Platform 
 
 Public Web:
 https://gis-platform.pages.dev/
