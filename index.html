@@ -777,57 +777,49 @@
             return c.toDataURL();
         }
 
-        // パネル更新（新仕様）
+        // パネル更新（中継位置考慮版）
         function updateHoseInfoPanel(data) {
             document.getElementById('hoseInfoDist').textContent = formatDistance(data.totalLengthM);
             document.getElementById('hoseInfoCount').textContent = data.totalHoses20m + '本';
             document.getElementById('hoseInfoLoss').textContent = data.totalLossMPa.toFixed(2) + ' MPa';
             
             const endPEl = document.getElementById('hoseInfoEndP');
-            // 末端圧がマイナスの場合の表示
-            if (data.endPressureMPa < 0) {
-                endPEl.textContent = '不足 (' + data.endPressureMPa.toFixed(2) + ')';
-                endPEl.className = 'panel-stat-value warning';
+            // 末端圧表示（中継込みの計算結果）
+            endPEl.textContent = data.endPressureMPa.toFixed(2) + ' MPa';
+            if (data.endPressureMPa >= hoseParams.nozzleRequiredMPa) {
+                endPEl.className = 'panel-stat-value ok';
+            } else if (data.endPressureMPa >= hoseParams.minInletPressureMPa) {
+                endPEl.className = 'panel-stat-value highlight';
             } else {
-                endPEl.textContent = data.endPressureMPa.toFixed(2) + ' MPa';
-                // 筒先要求圧0.3MPa以上で合格、0.2以上でギリギリ
-                if (data.endPressureMPa >= hoseParams.nozzleRequiredMPa) {
-                    endPEl.className = 'panel-stat-value ok';
-                } else if (data.endPressureMPa >= hoseParams.minInletPressureMPa) {
-                    endPEl.className = 'panel-stat-value highlight'; // 黄色
-                } else {
-                    endPEl.className = 'panel-stat-value warning';
-                }
+                endPEl.className = 'panel-stat-value warning';
             }
             
             document.getElementById('hoseInfoRelay').textContent = data.candidates + '台必要';
             document.getElementById('hoseInfoElev').textContent = (data.totalClimbM || 0).toFixed(1) + 'm↑';
             
-            // 警告表示
+            // 警告表示（末端圧が0.3未満の場合）
             const warning = document.getElementById('simWarning');
             if (data.endPressureMPa < hoseParams.nozzleRequiredMPa) {
-                if (data.candidates > 0) {
-                    document.getElementById('simWarningText').textContent = 
-                        `末端圧${data.endPressureMPa.toFixed(2)}MPa。中継${data.candidates}台で筒先0.3MPa確保可能。`;
-                } else {
-                    document.getElementById('simWarningText').textContent = 
-                        `末端圧${data.endPressureMPa.toFixed(2)}MPa < 要求0.3MPa`;
-                }
+                document.getElementById('simWarningText').textContent = 
+                    `末端圧${data.endPressureMPa.toFixed(2)}MPa < 要求0.3MPa。中継位置を調整してください。`;
                 warning.classList.add('show');
             } else {
                 warning.classList.remove('show');
             }
             
-            // 区間詳細リスト更新（残圧ベースの色分け）
+            // 区間詳細リスト更新（中継位置を考慮した残圧表示）
             if (data.sections) {
+                const relaySet = new Set(data.relayIndices || []);
                 const listEl = document.getElementById('segmentList');
                 listEl.innerHTML = data.sections.map((s, idx) => {
-                    const remainingP = hoseParams.pumpOutputMPa - s.cumulativeLossMPa;
+                    const remainingP = s.remainingPressure;
                     const colorClass = remainingP >= 0.4 ? 'green' : remainingP >= 0.2 ? 'yellow' : 'red';
                     const elevStr = s.elevDiffM > 0 ? `↑${s.elevDiffM.toFixed(1)}m` : s.elevDiffM < 0 ? `↓${Math.abs(s.elevDiffM).toFixed(1)}m` : '±0';
+                    // 中継位置の直後は「★」マーク
+                    const relayMark = relaySet.has(idx) ? '★' : '';
                     return `<div class="segment-item">
                         <div class="segment-color ${colorClass}"></div>
-                        <div class="segment-info">区間${idx + 1}: ${s.lengthM.toFixed(0)}m/${s.nHose}本 (${elevStr})</div>
+                        <div class="segment-info">${relayMark}区間${idx + 1}: ${s.lengthM.toFixed(0)}m/${s.nHose}本 (${elevStr})</div>
                         <div class="segment-loss">残圧 ${remainingP.toFixed(2)} MPa</div>
                     </div>`;
                 }).join('');
@@ -852,8 +844,8 @@
                 const s = sections[i];
                 const p1 = pathLLH[i], p2 = pathLLH[i + 1];
                 
-                // この区間終点での残圧 = 0.6 - 累積損失
-                const remainingP = hoseParams.pumpOutputMPa - s.cumulativeLossMPa;
+                // この区間終点での残圧（中継考慮済み）
+                const remainingP = s.remainingPressure;
                 
                 let color;
                 if (remainingP >= 0.4) {
@@ -880,23 +872,56 @@
             hoseSimState.colorSegmentsByLine.set(lineId, segs);
         }
 
-        // シミュレーション実行（新仕様）
+        // シミュレーション実行（中継位置を考慮した新仕様）
         function runSimulationForLine(lineId, pathLLH) {
             // パラメータ更新（UIから）
             hoseParams.kFrictionMPaPer100m = parseFloat(document.getElementById('paramK').value) || 0.04;
             hoseParams.extraLossPerHoseMPa = parseFloat(document.getElementById('paramExtra').value) || 0.02;
 
+            // 基本シミュレーション（損失計算）
             const sim = simulateHoseExtension(pathLLH, hoseParams);
+            
+            // 中継候補位置を計算
             const cands = computeRelayCandidates(pathLLH, hoseParams, []);
+            const relayIndices = cands.map(c => c.index).sort((a, b) => a - b);
+            
+            // 中継位置を考慮した区間ごとの残圧を再計算
+            // 各中継位置で残圧は0.6にリセットされる
+            const sectionsWithRelay = [];
+            let currentPressure = hoseParams.pumpOutputMPa; // 0.6から開始
+            let nextRelayIdx = 0;
+            
+            for (let i = 0; i < sim.sections.length; i++) {
+                const s = sim.sections[i];
+                
+                // この区間の終点インデックス
+                const sectionEndIdx = s.i;
+                
+                // 中継位置を通過したかチェック
+                while (nextRelayIdx < relayIndices.length && relayIndices[nextRelayIdx] < sectionEndIdx) {
+                    // 中継位置で圧力リセット
+                    currentPressure = hoseParams.pumpOutputMPa;
+                    nextRelayIdx++;
+                }
+                
+                // この区間の損失を引く
+                currentPressure -= s.sectionLossMPa;
+                
+                sectionsWithRelay.push({
+                    ...s,
+                    remainingPressure: currentPressure,
+                    hasRelayBefore: nextRelayIdx > 0 && relayIndices[nextRelayIdx - 1] === sectionEndIdx - 1
+                });
+            }
 
             renderStartEndMarkers(lineId, pathLLH);
             renderRelayCandidates(lineId, pathLLH, cands);
-            renderColorizedSegments(lineId, pathLLH, sim.sections);
+            renderColorizedSegments(lineId, pathLLH, sectionsWithRelay);
 
-            // 末端圧計算（シンプル版）
-            // 末端圧 = 吐出圧(0.6) - 総損失
-            // ただし中継が必要な場合は、中継なしでの末端圧を表示
-            const endP = hoseParams.pumpOutputMPa - sim.totalLossMPa;
+            // 末端圧 = 最後の区間の残圧
+            const endP = sectionsWithRelay.length > 0 
+                ? sectionsWithRelay[sectionsWithRelay.length - 1].remainingPressure 
+                : hoseParams.pumpOutputMPa;
             
             // 高低差（上りのみカウント）
             let totalClimb = 0;
@@ -912,7 +937,8 @@
                 endPressureMPa: endP,
                 candidates: cands.length,
                 totalClimbM: totalClimb,
-                sections: sim.sections
+                sections: sectionsWithRelay,
+                relayIndices: relayIndices
             });
         }
 
