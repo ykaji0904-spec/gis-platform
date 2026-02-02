@@ -136,6 +136,28 @@
         .sim-warning-text { color: #f44336; font-size: 10px; display: flex; align-items: center; gap: 4px; }
         .sim-warning-text .material-icons { font-size: 14px; }
 
+        /* Segment details */
+        .segment-list { max-height: 120px; overflow-y: auto; margin-top: 8px; }
+        .segment-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; background: rgba(255,255,255,0.02); border-radius: 4px; margin-bottom: 2px; font-size: 9px; }
+        .segment-color { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .segment-color.green { background: #4ade80; }
+        .segment-color.yellow { background: #fbbf24; }
+        .segment-color.red { background: #ef4444; }
+        .segment-info { flex: 1; color: rgba(255,255,255,0.7); }
+        .segment-loss { color: white; font-weight: 500; min-width: 60px; text-align: right; }
+
+        /* Legend */
+        .sim-legend { display: flex; gap: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 8px; color: rgba(255,255,255,0.5); }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .legend-dot.green { background: #4ade80; }
+        .legend-dot.yellow { background: #fbbf24; }
+        .legend-dot.red { background: #ef4444; }
+        .legend-dot.start { background: #ef4444; border: 2px solid white; }
+        .legend-dot.end { background: #3b82f6; border: 2px solid white; }
+        .legend-dot.cand { background: #ef4444; }
+        .legend-dot.conf { background: #ff9800; }
+
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 10px; z-index: 1000; display: flex; align-items: center; justify-content: space-between; }
         .my-location { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.05); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
         .my-location .material-icons { font-size: 16px; color: #4ade80; }
@@ -268,6 +290,17 @@
         </div>
         <div class="sim-warning" id="simWarning">
             <div class="sim-warning-text"><span class="material-icons">warning</span><span id="simWarningText">末端圧が0.1MPa未満です。中継可搬を追加してください。</span></div>
+        </div>
+        <div class="section-title" style="margin-top:8px;">区間詳細</div>
+        <div class="segment-list" id="segmentList"></div>
+        <div class="sim-legend">
+            <div class="legend-item"><div class="legend-dot start"></div>開始</div>
+            <div class="legend-item"><div class="legend-dot end"></div>終了</div>
+            <div class="legend-item"><div class="legend-dot cand"></div>候補</div>
+            <div class="legend-item"><div class="legend-dot conf"></div>確定</div>
+            <div class="legend-item"><div class="legend-dot green"></div>&lt;0.03</div>
+            <div class="legend-item"><div class="legend-dot yellow"></div>&lt;0.06</div>
+            <div class="legend-item"><div class="legend-dot red"></div>&gt;0.06</div>
         </div>
         <div class="sim-params">
             <div class="sim-params-title">パラメータ（林野65mm）</div>
@@ -708,6 +741,59 @@
             } else {
                 warning.classList.remove('show');
             }
+            
+            // 区間詳細リスト更新
+            if (data.sections) {
+                const listEl = document.getElementById('segmentList');
+                listEl.innerHTML = data.sections.map((s, idx) => {
+                    const colorClass = s.sectionLossMPa <= 0.03 ? 'green' : s.sectionLossMPa <= 0.06 ? 'yellow' : 'red';
+                    const elevSign = s.elevDiffM >= 0 ? '+' : '';
+                    return `<div class="segment-item">
+                        <div class="segment-color ${colorClass}"></div>
+                        <div class="segment-info">区間${idx + 1}: ${s.lengthM.toFixed(0)}m (${elevSign}${s.elevDiffM.toFixed(1)}m)</div>
+                        <div class="segment-loss">${s.sectionLossMPa.toFixed(3)} MPa</div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // 区間色分けポリライン描画
+        function renderColorizedSegments(lineId, pathLLH, sections) {
+            // 既存の色分けセグメントを削除
+            const prevSegs = hoseSimState.colorSegmentsByLine?.get(lineId) || [];
+            prevSegs.forEach(e => viewer.entities.remove(e));
+            
+            if (!hoseSimState.colorSegmentsByLine) {
+                hoseSimState.colorSegmentsByLine = new Map();
+            }
+            
+            const segs = [];
+            for (let i = 0; i < sections.length; i++) {
+                const s = sections[i];
+                const p1 = pathLLH[i], p2 = pathLLH[i + 1];
+                let color;
+                if (s.sectionLossMPa <= 0.03) {
+                    color = Cesium.Color.fromCssColorString('#4ade80'); // 緑
+                } else if (s.sectionLossMPa <= 0.06) {
+                    color = Cesium.Color.fromCssColorString('#fbbf24'); // 黄
+                } else {
+                    color = Cesium.Color.fromCssColorString('#ef4444'); // 赤
+                }
+                
+                const seg = viewer.entities.add({
+                    polyline: {
+                        positions: [
+                            Cesium.Cartesian3.fromDegrees(p1.lon, p1.lat, p1.height || 0),
+                            Cesium.Cartesian3.fromDegrees(p2.lon, p2.lat, p2.height || 0)
+                        ],
+                        width: 6,
+                        material: color,
+                        clampToGround: true
+                    }
+                });
+                segs.push(seg);
+            }
+            hoseSimState.colorSegmentsByLine.set(lineId, segs);
         }
 
         // シミュレーション実行
@@ -723,6 +809,7 @@
 
             renderStartEndMarkers(lineId, pathLLH);
             renderRelayCandidates(lineId, pathLLH, cands);
+            renderColorizedSegments(lineId, pathLLH, sim.sections);
 
             const endP = hoseParams.minInletPressureMPa + confirmedIdx.length * hoseParams.relayPumpGainMPa - sim.totalLossMPa;
             const totalElevDiff = pathLLH.length > 1 ? Math.abs(pathLLH[pathLLH.length-1].height - pathLLH[0].height) : 0;
@@ -734,7 +821,8 @@
                 endPressureMPa: endP,
                 candidates: cands.length,
                 confirmed: confirmedIdx.length,
-                totalElevDiff: totalElevDiff
+                totalElevDiff: totalElevDiff,
+                sections: sim.sections
             });
         }
 
@@ -757,9 +845,10 @@
                 cumElev += Math.abs(hoseLinePoints[i].height - hoseLinePoints[i-1].height);
             }
             
+            // ベースライン（非表示、選択用のみ）
             const lineEntity = viewer.entities.add({
                 id: id,
-                polyline: { positions: hoseLinePoints.map(p => p.cartesian), width: 4, material: new Cesium.PolylineDashMaterialProperty({ color: Cesium.Color.DARKORANGE, dashLength: 10 }), clampToGround: true }
+                polyline: { positions: hoseLinePoints.map(p => p.cartesian), width: 8, material: Cesium.Color.TRANSPARENT, clampToGround: true }
             });
             
             const hoseData = { id, entity: lineEntity, totalDist, count: Math.ceil(totalDist / 20), cumElev, pathLLH };
@@ -816,6 +905,13 @@
             confs.forEach(e => viewer.entities.remove(e));
             hoseSimState.relayConfirmedEntitiesByLine.delete(lineId);
             hoseSimState.relayConfirmedIdxByLine.delete(lineId);
+            
+            // 色分けセグメント削除
+            if (hoseSimState.colorSegmentsByLine) {
+                const colorSegs = hoseSimState.colorSegmentsByLine.get(lineId) || [];
+                colorSegs.forEach(e => viewer.entities.remove(e));
+                hoseSimState.colorSegmentsByLine.delete(lineId);
+            }
             
             // ライン本体削除
             viewer.entities.remove(selectedHoseLine.entity);
