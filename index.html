@@ -284,14 +284,14 @@
             <div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseInfoDist">-</div></div>
             <div class="panel-stat"><div class="panel-stat-label">ホース本数</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div>
             <div class="panel-stat"><div class="panel-stat-label">総損失</div><div class="panel-stat-value" id="hoseInfoLoss">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">末端圧</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">末端圧(≥0.3)</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div>
             <div class="panel-stat"><div class="panel-stat-label">候補/確定</div><div class="panel-stat-value" id="hoseInfoRelay">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="hoseInfoElev">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">累計上り</div><div class="panel-stat-value" id="hoseInfoElev">-</div></div>
         </div>
         <div class="sim-warning" id="simWarning">
-            <div class="sim-warning-text"><span class="material-icons">warning</span><span id="simWarningText">末端圧が0.1MPa未満です。中継可搬を追加してください。</span></div>
+            <div class="sim-warning-text"><span class="material-icons">warning</span><span id="simWarningText">末端圧が0.3MPa未満です。中継を追加してください。</span></div>
         </div>
-        <div class="section-title" style="margin-top:8px;">区間詳細</div>
+        <div class="section-title" style="margin-top:8px;">区間詳細（下りは0扱い・安全側）</div>
         <div class="segment-list" id="segmentList"></div>
         <div class="sim-legend">
             <div class="legend-item"><div class="legend-dot start"></div>開始</div>
@@ -303,21 +303,32 @@
             <div class="legend-item"><div class="legend-dot red"></div>&gt;0.06</div>
         </div>
         <div class="sim-params">
-            <div class="sim-params-title">パラメータ（林野65mm）</div>
+            <div class="sim-params-title">計算条件（林野65mm・固定）</div>
             <div class="sim-param-row">
-                <span class="sim-param-label">摩擦損失係数 k</span>
+                <span class="sim-param-label">吐出圧</span>
+                <span class="sim-param-input" style="background:transparent;border:none;color:#4ade80;">0.6</span>
+                <span class="sim-param-unit">MPa（固定）</span>
+            </div>
+            <div class="sim-param-row">
+                <span class="sim-param-label">中継入口最低</span>
+                <span class="sim-param-input" style="background:transparent;border:none;color:#fbbf24;">0.2</span>
+                <span class="sim-param-unit">MPa（固定）</span>
+            </div>
+            <div class="sim-param-row">
+                <span class="sim-param-label">筒先要求</span>
+                <span class="sim-param-input" style="background:transparent;border:none;color:#ef4444;">0.3</span>
+                <span class="sim-param-unit">MPa（固定）</span>
+            </div>
+            <div class="sim-params-title" style="margin-top:8px;">調整可能</div>
+            <div class="sim-param-row">
+                <span class="sim-param-label">摩擦損失係数</span>
                 <input type="number" class="sim-param-input" id="paramK" value="0.04" step="0.01" onchange="onParamChange()">
                 <span class="sim-param-unit">MPa/100m</span>
             </div>
             <div class="sim-param-row">
                 <span class="sim-param-label">付加損失</span>
                 <input type="number" class="sim-param-input" id="paramExtra" value="0.02" step="0.01" onchange="onParamChange()">
-                <span class="sim-param-unit">MPa/区間</span>
-            </div>
-            <div class="sim-param-row">
-                <span class="sim-param-label">中継昇圧余力</span>
-                <input type="number" class="sim-param-input" id="paramGain" value="0.8" step="0.1" onchange="onParamChange()">
-                <span class="sim-param-unit">MPa</span>
+                <span class="sim-param-unit">MPa/本</span>
             </div>
         </div>
         <div class="panel-hint">赤丸(候補)をタップ → 橙(確定)に昇格</div>
@@ -385,14 +396,19 @@
         let plateauTileset = null, trailEntities = [], fireAreaEntity = null;
         let loadedTrailTiles = new Set(), trailLoadActive = false;
 
-        // ========== 林野用シミュレーションパラメータ ==========
+        // ========== 林野用シミュレーションパラメータ（新仕様） ==========
         const hoseParams = {
-            hoseDiameterMm: 65,
-            kFrictionMPaPer100m: 0.04,      // 林野＝標準×2
-            extraLossPerSectionMPa: 0.02,
-            relayPumpGainMPa: 0.8,          // B級可搬
-            minInletPressureMPa: 0.2,       // 中継入口最低
-            endBackPressureMPa: 0.1         // 末端背圧
+            // 固定条件
+            pumpOutputMPa: 0.6,           // 可搬吐出圧（固定）
+            minInletPressureMPa: 0.2,     // 中継入口最低圧
+            nozzleRequiredMPa: 0.3,       // 筒先要求圧
+            // 損失予算
+            relayBudgetMPa: 0.4,          // 中継区間の許容損失（0.6 - 0.2）
+            tailBudgetMPa: 0.3,           // 末端区間の許容損失（0.6 - 0.3）
+            // 損失係数
+            kFrictionMPaPer100m: 0.04,    // 摩擦損失係数
+            extraLossPerHoseMPa: 0.02,    // 付加損失（1本20mあたり）
+            hoseLengthM: 20               // 1本の長さ
         };
 
         // シミュレーション状態（ライン毎）
@@ -579,69 +595,98 @@
         function undoHosePoint() { if (!hoseLinePoints.length) return; hoseLinePoints.pop(); if (hoseLineMarkers.length) viewer.entities.remove(hoseLineMarkers.pop()); if (hoseLineSegments.length) viewer.entities.remove(hoseLineSegments.pop()); updateHoseDisplay(); }
         function resetHoseLine() { hoseLinePoints = []; hoseLineMarkers.forEach(e => viewer.entities.remove(e)); hoseLineMarkers = []; hoseLineSegments.forEach(e => viewer.entities.remove(e)); hoseLineSegments = []; updateHoseDisplay(); document.getElementById('hoseHint').textContent = '連続タップでポイント追加'; }
 
-        // ========== シミュレーション計算 ==========
+        // ========== シミュレーション計算（新仕様） ==========
+        // 区間損失計算
+        // - 摩擦損失: k × (L / 100)
+        // - 高低差損失: 0.01 × max(0, Δh) ※上りのみ（安全側）
+        // - 付加損失: 0.02 × ceil(L / 20) ※ホース本数ベース
+        function calcSectionLoss(L, dh, params) {
+            const friction = params.kFrictionMPaPer100m * (L / 100.0);
+            const head = 0.01 * Math.max(0, dh);  // 下りは0扱い（安全側）
+            const nHose = Math.ceil(L / params.hoseLengthM);
+            const extra = params.extraLossPerHoseMPa * nHose;
+            return { friction, head, extra, nHose, total: friction + head + extra };
+        }
+
         function simulateHoseExtension(points, params) {
             const sections = [];
             let cumulative = 0;
+            let totalHoses = 0;
             for (let i = 1; i < points.length; i++) {
                 const p1 = points[i-1], p2 = points[i];
                 const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
                 const dh = (p2.height || 0) - (p1.height || 0);
-                const friction = params.kFrictionMPaPer100m * (L / 100.0);
-                const head = 0.01 * dh;  // 10m = 0.1MPa
-                const extra = params.extraLossPerSectionMPa;
-                const loss = friction + head + extra;
-                cumulative += loss;
-                sections.push({ i, lengthM: L, elevDiffM: dh, frictionLossMPa: friction, headLossMPa: head, extraLossMPa: extra, sectionLossMPa: loss, cumulativeLossMPa: cumulative });
+                const loss = calcSectionLoss(L, dh, params);
+                cumulative += loss.total;
+                totalHoses += loss.nHose;
+                sections.push({
+                    i,
+                    lengthM: L,
+                    elevDiffM: dh,
+                    nHose: loss.nHose,
+                    frictionLossMPa: loss.friction,
+                    headLossMPa: loss.head,
+                    extraLossMPa: loss.extra,
+                    sectionLossMPa: loss.total,
+                    cumulativeLossMPa: cumulative
+                });
             }
             return {
                 sections,
                 totalLengthM: sections.reduce((s, x) => s + x.lengthM, 0),
-                totalHoses20m: sections.length ? Math.ceil(sections.reduce((s, x) => s + x.lengthM, 0) / 20) : 0,
+                totalHoses20m: totalHoses,
                 totalLossMPa: cumulative
             };
         }
 
-        // 中継可搬の設置候補生成（前進貪欲法）
+        // 中継可搬の設置候補生成（損失予算方式）
+        // 「0.6で出して0.4消費する直前」に可搬を置く
         function computeRelayCandidates(points, params, confirmedRelaysIdx = []) {
             const cand = [];
             const anchors = [0, ...confirmedRelaysIdx.sort((a, b) => a - b)];
-            let pGainSum = 0;
+            
             for (let a = 0; a < anchors.length; a++) {
                 const startIdx = anchors[a];
-                let inletP = params.minInletPressureMPa + pGainSum;
                 let accLoss = 0;
+                
                 for (let i = startIdx + 1; i < points.length; i++) {
-                    const L = geodesicDistance(points[i-1].lon, points[i-1].lat, points[i].lon, points[i].lat);
-                    const dh = (points[i].height || 0) - (points[i-1].height || 0);
-                    const loss = params.kFrictionMPaPer100m * (L / 100.0) + 0.01 * dh + params.extraLossPerSectionMPa;
-                    accLoss += loss;
-                    if (inletP - accLoss < 0.2) {
+                    const p1 = points[i-1], p2 = points[i];
+                    const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
+                    const dh = (p2.height || 0) - (p1.height || 0);
+                    const loss = calcSectionLoss(L, dh, params);
+                    accLoss += loss.total;
+                    
+                    // 損失予算0.4を超える直前が候補位置
+                    if (accLoss > params.relayBudgetMPa) {
                         const candIdx = Math.max(startIdx + 1, i - 1);
                         if (!cand.some(c => c.index === candIdx) && !confirmedRelaysIdx.includes(candIdx)) {
-                            cand.push({ index: candIdx });
+                            cand.push({ index: candIdx, reason: `損失${accLoss.toFixed(3)}MPa到達` });
                         }
-                        pGainSum += params.relayPumpGainMPa;
                         anchors.splice(a + 1, 0, candIdx);
                         break;
                     }
                 }
             }
-            // 末端判定
+            
+            // 末端成立判定（最後の可搬→筒先で0.3以下か）
             const finalStart = anchors[anchors.length - 1];
-            let inletP = params.minInletPressureMPa + (anchors.length - 1) * params.relayPumpGainMPa;
             let tailLoss = 0;
             for (let i = finalStart + 1; i < points.length; i++) {
-                const L = geodesicDistance(points[i-1].lon, points[i-1].lat, points[i].lon, points[i].lat);
-                const dh = (points[i].height || 0) - (points[i-1].height || 0);
-                tailLoss += params.kFrictionMPaPer100m * (L / 100.0) + 0.01 * dh + params.extraLossPerSectionMPa;
+                const p1 = points[i-1], p2 = points[i];
+                const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
+                const dh = (p2.height || 0) - (p1.height || 0);
+                const loss = calcSectionLoss(L, dh, params);
+                tailLoss += loss.total;
             }
-            if (inletP - tailLoss < params.endBackPressureMPa && points.length >= 2) {
+            
+            // 末端損失が0.3を超える場合、追加候補が必要
+            if (tailLoss > params.tailBudgetMPa && points.length >= 2) {
                 const idx = Math.max(finalStart + 1, points.length - 2);
                 if (!cand.some(c => c.index === idx) && !confirmedRelaysIdx.includes(idx)) {
-                    cand.push({ index: idx });
+                    cand.push({ index: idx, reason: `末端損失${tailLoss.toFixed(3)}MPa超過` });
                 }
             }
+            
             return cand;
         }
 
@@ -724,33 +769,39 @@
             hoseSimState.relayConfirmedEntitiesByLine.set(lineId, cur);
         }
 
-        // パネル更新
+        // パネル更新（新仕様）
         function updateHoseInfoPanel(data) {
             document.getElementById('hoseInfoDist').textContent = formatDistance(data.totalLengthM);
             document.getElementById('hoseInfoCount').textContent = data.totalHoses20m + '本';
             document.getElementById('hoseInfoLoss').textContent = data.totalLossMPa.toFixed(2) + ' MPa';
+            
             const endPEl = document.getElementById('hoseInfoEndP');
             endPEl.textContent = data.endPressureMPa.toFixed(2) + ' MPa';
-            endPEl.className = 'panel-stat-value ' + (data.endPressureMPa < hoseParams.endBackPressureMPa ? 'warning' : 'ok');
-            document.getElementById('hoseInfoRelay').textContent = `${data.candidates} / ${data.confirmed}`;
-            document.getElementById('hoseInfoElev').textContent = data.totalElevDiff.toFixed(1) + 'm';
+            // 筒先要求圧0.3MPa以上で合格
+            endPEl.className = 'panel-stat-value ' + (data.endPressureMPa >= hoseParams.nozzleRequiredMPa ? 'ok' : 'warning');
             
+            document.getElementById('hoseInfoRelay').textContent = `${data.candidates} / ${data.confirmed}`;
+            document.getElementById('hoseInfoElev').textContent = (data.totalClimbM || 0).toFixed(1) + 'm↑';
+            
+            // 警告表示
             const warning = document.getElementById('simWarning');
-            if (data.endPressureMPa < hoseParams.endBackPressureMPa) {
+            if (data.endPressureMPa < hoseParams.nozzleRequiredMPa) {
+                document.getElementById('simWarningText').textContent = 
+                    `末端圧${data.endPressureMPa.toFixed(2)}MPa < 要求0.3MPa。中継を追加してください。`;
                 warning.classList.add('show');
             } else {
                 warning.classList.remove('show');
             }
             
-            // 区間詳細リスト更新
+            // 区間詳細リスト更新（ホース本数も表示）
             if (data.sections) {
                 const listEl = document.getElementById('segmentList');
                 listEl.innerHTML = data.sections.map((s, idx) => {
                     const colorClass = s.sectionLossMPa <= 0.03 ? 'green' : s.sectionLossMPa <= 0.06 ? 'yellow' : 'red';
-                    const elevSign = s.elevDiffM >= 0 ? '+' : '';
+                    const elevStr = s.elevDiffM > 0 ? `↑${s.elevDiffM.toFixed(1)}m` : s.elevDiffM < 0 ? `↓${Math.abs(s.elevDiffM).toFixed(1)}m` : '±0';
                     return `<div class="segment-item">
                         <div class="segment-color ${colorClass}"></div>
-                        <div class="segment-info">区間${idx + 1}: ${s.lengthM.toFixed(0)}m (${elevSign}${s.elevDiffM.toFixed(1)}m)</div>
+                        <div class="segment-info">区間${idx + 1}: ${s.lengthM.toFixed(0)}m/${s.nHose}本 (${elevStr})</div>
                         <div class="segment-loss">${s.sectionLossMPa.toFixed(3)} MPa</div>
                     </div>`;
                 }).join('');
@@ -796,12 +847,11 @@
             hoseSimState.colorSegmentsByLine.set(lineId, segs);
         }
 
-        // シミュレーション実行
+        // シミュレーション実行（新仕様）
         function runSimulationForLine(lineId, pathLLH) {
-            // パラメータ更新
+            // パラメータ更新（UIから）
             hoseParams.kFrictionMPaPer100m = parseFloat(document.getElementById('paramK').value) || 0.04;
-            hoseParams.extraLossPerSectionMPa = parseFloat(document.getElementById('paramExtra').value) || 0.02;
-            hoseParams.relayPumpGainMPa = parseFloat(document.getElementById('paramGain').value) || 0.8;
+            hoseParams.extraLossPerHoseMPa = parseFloat(document.getElementById('paramExtra').value) || 0.02;
 
             const sim = simulateHoseExtension(pathLLH, hoseParams);
             const confirmedIdx = hoseSimState.relayConfirmedIdxByLine.get(lineId) || [];
@@ -811,8 +861,27 @@
             renderRelayCandidates(lineId, pathLLH, cands);
             renderColorizedSegments(lineId, pathLLH, sim.sections);
 
-            const endP = hoseParams.minInletPressureMPa + confirmedIdx.length * hoseParams.relayPumpGainMPa - sim.totalLossMPa;
-            const totalElevDiff = pathLLH.length > 1 ? Math.abs(pathLLH[pathLLH.length-1].height - pathLLH[0].height) : 0;
+            // 末端圧計算（新仕様）
+            // 最後の可搬（または根本）から筒先までの損失を計算
+            const relayCount = confirmedIdx.length;
+            const lastRelayIdx = relayCount > 0 ? Math.max(...confirmedIdx) : 0;
+            let tailLoss = 0;
+            for (let i = lastRelayIdx + 1; i < pathLLH.length; i++) {
+                const p1 = pathLLH[i-1], p2 = pathLLH[i];
+                const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
+                const dh = (p2.height || 0) - (p1.height || 0);
+                const loss = calcSectionLoss(L, dh, hoseParams);
+                tailLoss += loss.total;
+            }
+            // 末端圧 = 吐出圧 - 末端区間損失
+            const endP = hoseParams.pumpOutputMPa - tailLoss;
+            
+            // 高低差（上りのみカウント）
+            let totalClimb = 0;
+            for (let i = 1; i < pathLLH.length; i++) {
+                const dh = (pathLLH[i].height || 0) - (pathLLH[i-1].height || 0);
+                if (dh > 0) totalClimb += dh;
+            }
 
             updateHoseInfoPanel({
                 totalLengthM: sim.totalLengthM,
@@ -820,8 +889,9 @@
                 totalLossMPa: sim.totalLossMPa,
                 endPressureMPa: endP,
                 candidates: cands.length,
-                confirmed: confirmedIdx.length,
-                totalElevDiff: totalElevDiff,
+                confirmed: relayCount,
+                totalClimbM: totalClimb,
+                tailLossMPa: tailLoss,
                 sections: sim.sections
             });
         }
