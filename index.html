@@ -489,8 +489,7 @@
             if (hazardLayers[layer]) hazardLayers[layer].show = layers[layer];
         }
 
-        // Trails
-        viewer.camera.moveEnd.addEventListener(() => { if (layers.trails) loadTrails(); });
+        // Trails - ボタン押下時のみ読み込み（カメラ移動では再読み込みしない）
         async function loadTrails() {
             if (trailLoadActive) return;
             const c = viewer.camera.positionCartographic, lat = Cesium.Math.toDegrees(c.latitude), lon = Cesium.Math.toDegrees(c.longitude);
@@ -570,7 +569,7 @@
             waterEntities.push(e);
             return id;
         }
-        function createWaterIcon(type) { const c = document.createElement('canvas'); c.width = 20; c.height = 20; const ctx = c.getContext('2d'); ctx.beginPath(); ctx.arc(10, 10, 8, 0, Math.PI * 2); ctx.fillStyle = { hydrant: '#f44336', tank: '#2196f3', natural: '#00bcd4' }[type] || '#2196f3'; ctx.fill(); ctx.fillStyle = 'white'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(type[0].toUpperCase(), 10, 10); return c.toDataURL(); }
+        function createWaterIcon(type) { const c = document.createElement('canvas'); c.width = 20; c.height = 20; const ctx = c.getContext('2d'); ctx.beginPath(); ctx.arc(10, 10, 8, 0, Math.PI * 2); ctx.fillStyle = '#2196f3'; ctx.fill(); ctx.fillStyle = 'white'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('水', 10, 10); return c.toDataURL(); }
         function selectWater(id) {
             const w = waterSources.find(x => x.id === id);
             if (!w) return;
@@ -1262,7 +1261,7 @@
                     const entity = viewer.entities.add({
                         polyline: {
                             positions: positions,
-                            width: 6,
+                            width: 4,
                             material: color,
                             clampToGround: true
                         }
@@ -1296,7 +1295,7 @@
             // ベースライン（選択用、太い半透明オレンジ）
             const lineEntity = viewer.entities.add({
                 id: id,
-                polyline: { positions: hoseLinePoints.map(p => p.cartesian), width: 12, material: Cesium.Color.ORANGE.withAlpha(0.3), clampToGround: true }
+                polyline: { positions: hoseLinePoints.map(p => p.cartesian), width: 4, material: Cesium.Color.ORANGE.withAlpha(0.5), clampToGround: true }
             });
             
             const hoseData = { id, entity: lineEntity, totalDist, count: Math.ceil(totalDist / 20), cumElev, pathLLH };
