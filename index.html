@@ -3,600 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GIS Platform - 林野火災支援システム</title>
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <title>GIS Platform</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans JP', sans-serif; overflow: hidden; background: #0a0a0a; }
-        #cesiumContainer { width: 100vw; height: 100vh; }
-
-        /* ===== Top Bar ===== */
-        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 1000; }
-        .logo { display: flex; align-items: center; gap: 10px; }
-        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .logo-icon .material-icons { color: white; font-size: 22px; }
-        .logo-text { color: white; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
-        .map-type-switch { display: flex; background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 3px; }
-        .map-type-btn { padding: 8px 16px; border: none; background: transparent; color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-        .map-type-btn.active { background: rgba(0, 212, 255, 0.25); color: #00d4ff; }
-        .map-type-btn .material-icons { font-size: 18px; }
-        .menu-btn { width: 44px; height: 44px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .menu-btn:hover { background: rgba(255,255,255,0.15); }
-        .menu-btn .material-icons { color: white; font-size: 26px; }
-
-        /* ===== Side Panel ===== */
-        .side-panel-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s; }
-        .side-panel-overlay.show { opacity: 1; visibility: visible; }
-        .side-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 85vw; background: rgba(20, 20, 20, 0.98); z-index: 2001; transform: translateX(100%); transition: transform 0.3s ease; overflow-y: auto; }
-        .side-panel.show { transform: translateX(0); }
-        .side-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; background: rgba(20, 20, 20, 0.98); }
-        .side-panel-title { color: white; font-size: 16px; font-weight: 600; }
-        .side-panel-close { background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 8px; border-radius: 8px; }
-        .side-panel-close:hover { background: rgba(255,255,255,0.1); }
-
-        .panel-section { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .panel-section-title { color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600; letter-spacing: 0.5px; }
-        .layer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .layer-card { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.04); border: 2px solid transparent; transition: all 0.2s; }
-        .layer-card:hover { background: rgba(255,255,255,0.08); }
-        .layer-card.active { background: rgba(0, 212, 255, 0.12); border-color: #00d4ff; }
-        .layer-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
-        .layer-card-icon .material-icons { font-size: 22px; }
-        .layer-card-icon.fire { background: rgba(244, 67, 54, 0.2); color: #f44336; }
-        .layer-card-icon.water { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
-        .layer-card-icon.hose { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
-        .layer-card-icon.measure { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
-        .layer-card-icon.building { background: rgba(139, 195, 74, 0.2); color: #8bc34a; }
-        .layer-card-icon.trail { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
-        .layer-card-icon.flood { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
-        .layer-card-icon.tsunami { background: rgba(0, 188, 212, 0.2); color: #00bcd4; }
-        .layer-card-icon.landslide { background: rgba(255, 87, 34, 0.2); color: #ff5722; }
-        .layer-card-name { color: white; font-size: 11px; text-align: center; font-weight: 500; }
-
-        .info-links { display: flex; flex-direction: column; gap: 4px; }
-        .info-link { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s; }
-        .info-link:hover { background: rgba(255,255,255,0.06); }
-        .info-link .material-icons { font-size: 20px; color: rgba(255,255,255,0.5); }
-        .info-link-text { font-size: 13px; }
-
-        /* ===== Mode Indicator ===== */
-        .mode-indicator { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(244, 67, 54, 0.95); padding: 8px 16px; border-radius: 20px; display: none; align-items: center; gap: 8px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .mode-indicator.show { display: flex; }
-        .mode-indicator.water-mode { background: rgba(33, 150, 243, 0.95); }
-        .mode-indicator.hose-mode { background: rgba(255, 152, 0, 0.95); }
-        .mode-indicator.measure-mode { background: rgba(0, 212, 255, 0.95); }
-        .mode-indicator .material-icons { color: white; font-size: 18px; }
-        .mode-indicator span { color: white; font-size: 13px; font-weight: 600; }
-
-        /* ===== Coordinate Popup ===== */
-        .coord-popup { position: fixed; background: rgba(20, 20, 20, 0.95); padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); z-index: 1500; display: none; min-width: 200px; }
-        .coord-popup.show { display: block; }
-        .coord-popup-title { color: rgba(255,255,255,0.6); font-size: 10px; text-transform: uppercase; margin-bottom: 6px; }
-        .coord-popup-value { color: white; font-size: 13px; font-family: monospace; margin-bottom: 8px; user-select: all; }
-        .coord-popup-btn { width: 100%; padding: 8px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; border-radius: 6px; color: white; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .coord-popup-btn .material-icons { font-size: 14px; }
-
-        /* ===== Bottom Panels ===== */
-        .bottom-panel { position: fixed; bottom: 60px; left: 10px; right: 10px; background: rgba(15, 15, 15, 0.95); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12); z-index: 900; display: none; backdrop-filter: blur(10px); }
-        .bottom-panel.active { display: block; }
-        .bottom-panel.fire { border-color: rgba(244, 67, 54, 0.3); }
-        .bottom-panel.water { border-color: rgba(33, 150, 243, 0.3); }
-        .bottom-panel.hose, .bottom-panel.hose-info { border-color: rgba(255, 152, 0, 0.3); }
-        .bottom-panel.measure { border-color: rgba(0, 212, 255, 0.3); }
-        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .panel-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .panel-title.fire { color: #f44336; }
-        .panel-title.water { color: #2196f3; }
-        .panel-title.hose { color: #ff9800; }
-        .panel-title.measure { color: #00d4ff; }
-        .panel-title .material-icons { font-size: 18px; }
-        .panel-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 6px; border-radius: 6px; }
-        .panel-close:hover { background: rgba(255,255,255,0.1); }
-        .panel-stats { display: flex; gap: 16px; flex-wrap: wrap; }
-        .panel-stat { flex: 1; min-width: 70px; }
-        .panel-stat-label { color: rgba(255,255,255,0.5); font-size: 10px; text-transform: uppercase; margin-bottom: 3px; }
-        .panel-stat-value { color: white; font-size: 15px; font-weight: 600; }
-        .panel-stat-value.highlight { color: #00d4ff; }
-        .panel-stat-value.fire-highlight { color: #f44336; }
-        .panel-stat-value.water-highlight { color: #2196f3; }
-        .panel-stat-value.measure-highlight { color: #00d4ff; }
-        .panel-stat-value.ok { color: #4ade80; }
-        .panel-stat-value.warning { color: #ef4444; }
-        .panel-stat-value.copyable { cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
-        .panel-hint { color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 10px; }
-        .panel-actions { display: flex; gap: 8px; margin-top: 12px; }
-        .panel-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; }
-        .panel-btn .material-icons { font-size: 16px; }
-        .panel-btn.primary { background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: white; }
-        .panel-btn.secondary { background: rgba(255,255,255,0.1); color: white; }
-        .panel-btn.danger { background: rgba(244, 67, 54, 0.2); color: #f44336; }
-
-        .section-title { color: rgba(255,255,255,0.4); font-size: 10px; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
-        .sim-param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .sim-param-item label { font-size: 10px; color: rgba(255,255,255,0.5); display: block; margin-bottom: 4px; }
-        .sim-param-input-wrap { display: flex; align-items: center; gap: 6px; }
-        .sim-param-input-wrap input { width: 60px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 8px; color: white; font-size: 12px; text-align: right; }
-        .sim-param-input-wrap span { font-size: 11px; color: rgba(255,255,255,0.5); }
-        .recalc-btn { margin-top: 12px; width: 100%; padding: 10px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .recalc-btn .material-icons { font-size: 16px; }
-        .segment-table-wrap { max-height: 140px; overflow-y: auto; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }
-        .segment-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        .segment-table th { background: rgba(255,255,255,0.06); padding: 8px 6px; text-align: center; color: rgba(255,255,255,0.6); font-weight: 500; position: sticky; top: 0; }
-        .segment-table td { padding: 6px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
-        .segment-table tr.green td { background: rgba(74, 222, 128, 0.1); }
-        .segment-table tr.yellow td { background: rgba(251, 191, 36, 0.1); }
-        .segment-table tr.red td { background: rgba(239, 68, 68, 0.1); }
-        .segment-table .elev-up { color: #ef4444; }
-        .segment-table .elev-down { color: #4ade80; }
-        .sim-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.6); }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .legend-dot.green { background: #4ade80; }
-        .legend-dot.yellow { background: #fbbf24; }
-        .legend-dot.red { background: #ef4444; }
-        .legend-dot.conf { background: #ff9800; }
-        .legend-dot.end { background: #3b82f6; }
-        .sim-params { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; margin-top: 10px; }
-        .sim-params-title { color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 600; margin-bottom: 6px; }
-
-        /* ===== Bottom Bar ===== */
-        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 52px; background: rgba(15, 15, 15, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 0 12px; z-index: 1000; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .my-location { display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.06); padding: 8px 12px; border-radius: 8px; cursor: pointer; min-width: 0; flex-shrink: 0; }
-        .my-location .material-icons { font-size: 18px; color: #4ade80; }
-        .my-location-coords { color: white; font-size: 11px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .search-box { flex: 1; max-width: 220px; min-width: 120px; }
-        .search-input { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: white; font-size: 12px; outline: none; }
-        .search-input::placeholder { color: rgba(255,255,255,0.4); }
-        .view-toggle { display: flex; background: rgba(255, 255, 255, 0.06); border-radius: 8px; flex-shrink: 0; }
-        .view-btn { padding: 8px 14px; border: none; background: transparent; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
-        .view-btn.active { background: rgba(0, 212, 255, 0.2); color: #00d4ff; border-radius: 8px; }
-        .view-btn .material-icons { font-size: 16px; }
-
-        /* ===== Scale Bar & Credits ===== */
-        .map-info { position: fixed; bottom: 60px; right: 12px; z-index: 800; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-        .credit-bar { background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 6px; font-size: 9px; color: rgba(255,255,255,0.8); }
-        .scale-bar { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 6px; }
-        .scale-line { height: 4px; background: white; border-radius: 2px; min-width: 50px; }
-        .scale-text { color: white; font-size: 10px; font-weight: 500; }
-        .coord-display { position: fixed; bottom: 60px; left: 12px; background: rgba(0,0,0,0.7); padding: 6px 10px; border-radius: 6px; font-size: 10px; color: rgba(255,255,255,0.9); font-family: monospace; z-index: 800; }
-
-        .loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15,15,15,0.95); padding: 20px 30px; border-radius: 12px; color: white; font-size: 13px; display: none; z-index: 3000; }
-        .loading.show { display: block; }
-        .toast { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); background: rgba(50,50,50,0.95); padding: 12px 20px; border-radius: 10px; color: white; font-size: 13px; z-index: 3000; display: none; }
-        .toast.show { display: block; animation: fadeInOut 2.5s ease; }
-        @keyframes fadeInOut { 0%,100% { opacity: 0; } 10%,90% { opacity: 1; } }
-        .search-results { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 280px; max-height: 200px; overflow-y: auto; background: rgba(20,20,20,0.98); border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); z-index: 1100; display: none; }
-        .search-results.show { display: block; }
-        .search-result-item { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .search-result-item:hover { background: rgba(255,255,255,0.06); }
-        .search-result-name { color: white; font-size: 12px; font-weight: 500; }
-        .search-result-address { color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 3px; }
-        .cesium-viewer-toolbar, .cesium-viewer-animationContainer, .cesium-viewer-timelineContainer, .cesium-viewer-fullscreenContainer, .cesium-viewer-bottom { display: none !important; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Noto Sans JP',sans-serif;overflow:hidden;background:#0a0a0a}
+        #cesiumContainer{width:100vw;height:100vh}
+        .top-bar{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(15,15,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:1000}
+        .logo{display:flex;align-items:center;gap:10px}
+        .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#ff6b35,#f7931e);border-radius:10px;display:flex;align-items:center;justify-content:center}
+        .logo-icon .material-icons{color:white;font-size:22px}
+        .logo-text{color:white;font-size:16px;font-weight:700}
+        .map-type-switch{display:flex;background:rgba(255,255,255,0.1);border-radius:8px;padding:3px}
+        .map-type-btn{padding:8px 16px;border:none;background:transparent;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:6px}
+        .map-type-btn.active{background:rgba(0,212,255,0.25);color:#00d4ff}
+        .map-type-btn .material-icons{font-size:18px}
+        .menu-btn{width:44px;height:44px;background:rgba(255,255,255,0.08);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .menu-btn .material-icons{color:white;font-size:26px}
+        .side-panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;opacity:0;visibility:hidden;transition:all 0.3s}
+        .side-panel-overlay.show{opacity:1;visibility:visible}
+        .side-panel{position:fixed;top:0;right:0;bottom:0;width:320px;max-width:85vw;background:rgba(20,20,20,0.98);z-index:2001;transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto}
+        .side-panel.show{transform:translateX(0)}
+        .side-panel-header{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .side-panel-title{color:white;font-size:16px;font-weight:600}
+        .side-panel-close{background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;padding:8px}
+        .panel-section{padding:16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .panel-section-title{color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+        .layer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .layer-card{display:flex;flex-direction:column;align-items:center;padding:12px 8px;border-radius:12px;cursor:pointer;background:rgba(255,255,255,0.04);border:2px solid transparent}
+        .layer-card.active{background:rgba(0,212,255,0.12);border-color:#00d4ff}
+        .layer-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+        .layer-card-icon .material-icons{font-size:22px}
+        .layer-card-icon.fire{background:rgba(244,67,54,0.2);color:#f44336}
+        .layer-card-icon.water{background:rgba(33,150,243,0.2);color:#2196f3}
+        .layer-card-icon.hose{background:rgba(255,152,0,0.2);color:#ff9800}
+        .layer-card-icon.measure{background:rgba(0,212,255,0.2);color:#00d4ff}
+        .layer-card-icon.building{background:rgba(139,195,74,0.2);color:#8bc34a}
+        .layer-card-icon.trail{background:rgba(76,175,80,0.2);color:#4caf50}
+        .layer-card-icon.flood{background:rgba(33,150,243,0.2);color:#2196f3}
+        .layer-card-icon.tsunami{background:rgba(0,188,212,0.2);color:#00bcd4}
+        .layer-card-icon.landslide{background:rgba(255,87,34,0.2);color:#ff5722}
+        .layer-card-name{color:white;font-size:11px;text-align:center;font-weight:500}
+        .info-links{display:flex;flex-direction:column;gap:4px}
+        .info-link{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.8);text-decoration:none}
+        .info-link:hover{background:rgba(255,255,255,0.06)}
+        .info-link .material-icons{font-size:20px;color:rgba(255,255,255,0.5)}
+        .mode-indicator{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(244,67,54,0.95);padding:8px 16px;border-radius:20px;display:none;align-items:center;gap:8px;z-index:1000}
+        .mode-indicator.show{display:flex}
+        .mode-indicator.water-mode{background:rgba(33,150,243,0.95)}
+        .mode-indicator.hose-mode{background:rgba(255,152,0,0.95)}
+        .mode-indicator.measure-mode{background:rgba(0,212,255,0.95)}
+        .mode-indicator .material-icons{color:white;font-size:18px}
+        .mode-indicator span{color:white;font-size:13px;font-weight:600}
+        .coord-popup{position:fixed;background:rgba(30,30,30,0.95);padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);z-index:1500;display:none}
+        .coord-popup.show{display:block}
+        .coord-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+        .coord-popup-title{color:rgba(255,255,255,0.6);font-size:9px}
+        .coord-popup-close{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:0;font-size:14px;line-height:1}
+        .coord-popup-value{color:white;font-size:11px;font-family:monospace;margin-bottom:5px}
+        .coord-popup-btn{width:100%;padding:4px;background:rgba(0,212,255,0.2);border:1px solid rgba(0,212,255,0.3);border-radius:4px;color:#00d4ff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px}
+        .coord-popup-btn .material-icons{font-size:11px}
+        .bottom-panel{position:fixed;bottom:60px;left:10px;right:10px;background:rgba(15,15,15,0.95);padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);z-index:900;display:none}
+        .bottom-panel.active{display:block}
+        .bottom-panel.fire{border-color:rgba(244,67,54,0.3)}
+        .bottom-panel.water{border-color:rgba(33,150,243,0.3)}
+        .bottom-panel.hose,.bottom-panel.hose-info{border-color:rgba(255,152,0,0.3)}
+        .bottom-panel.measure{border-color:rgba(0,212,255,0.3)}
+        .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .panel-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px}
+        .panel-title.fire{color:#f44336}
+        .panel-title.water{color:#2196f3}
+        .panel-title.hose{color:#ff9800}
+        .panel-title.measure{color:#00d4ff}
+        .panel-title .material-icons{font-size:16px}
+        .panel-close{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px}
+        .panel-stats{display:flex;gap:14px;flex-wrap:wrap}
+        .panel-stat{flex:1;min-width:65px}
+        .panel-stat-label{color:rgba(255,255,255,0.5);font-size:9px;text-transform:uppercase;margin-bottom:2px}
+        .panel-stat-value{color:white;font-size:14px;font-weight:600}
+        .panel-stat-value.highlight{color:#00d4ff}
+        .panel-stat-value.fire-highlight{color:#f44336}
+        .panel-stat-value.water-highlight{color:#2196f3}
+        .panel-stat-value.ok{color:#4ade80}
+        .panel-stat-value.warning{color:#ef4444}
+        .panel-stat-value.copyable{cursor:pointer;text-decoration:underline dotted}
+        .panel-hint{color:rgba(255,255,255,0.4);font-size:10px;margin-top:8px}
+        .panel-actions{display:flex;gap:8px;margin-top:10px}
+        .panel-btn{flex:1;padding:8px;border:none;border-radius:6px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:500}
+        .panel-btn .material-icons{font-size:14px}
+        .panel-btn.primary{background:linear-gradient(135deg,#00d4ff,#0099cc);color:white}
+        .panel-btn.secondary{background:rgba(255,255,255,0.1);color:white}
+        .panel-btn.danger{background:rgba(244,67,54,0.2);color:#f44336}
+        .section-title{color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;margin-bottom:6px;font-weight:500}
+        .segment-table-wrap{max-height:150px;overflow-y:auto;margin-top:6px;border:1px solid rgba(255,255,255,0.1);border-radius:6px}
+        .segment-table{width:100%;border-collapse:collapse;font-size:12px}
+        .segment-table th{background:#333;padding:10px 6px;text-align:center;color:rgba(255,255,255,0.9);font-weight:600;position:sticky;top:0;z-index:1}
+        .segment-table td{padding:8px 6px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.85)}
+        .segment-table tr.green td{background:rgba(74,222,128,0.1)}
+        .segment-table tr.yellow td{background:rgba(251,191,36,0.1)}
+        .segment-table tr.red td{background:rgba(239,68,68,0.1)}
+        .segment-table .elev-up{color:#ef4444}
+        .segment-table .elev-down{color:#4ade80}
+        .sim-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1)}
+        .legend-item{display:flex;align-items:center;gap:3px;font-size:9px;color:rgba(255,255,255,0.6)}
+        .legend-dot{width:8px;height:8px;border-radius:50%}
+        .legend-dot.green{background:#4ade80}
+        .legend-dot.yellow{background:#fbbf24}
+        .legend-dot.red{background:#ef4444}
+        .legend-dot.conf{background:#ff9800}
+        .legend-dot.end{background:#3b82f6}
+        .sim-params{background:rgba(255,255,255,0.03);border-radius:6px;padding:6px 8px;margin-top:6px}
+        .sim-params-title{color:rgba(255,255,255,0.5);font-size:9px;font-weight:600;margin-bottom:3px}
+        .sim-param-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 6px}
+        .sim-param-item label{font-size:9px;color:rgba(255,255,255,0.5);display:block;margin-bottom:1px}
+        .sim-param-input-wrap{display:flex;align-items:center;gap:2px}
+        .sim-param-input-wrap input{width:48px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:2px 4px;color:white;font-size:11px;text-align:right}
+        .sim-param-input-wrap span{font-size:9px;color:rgba(255,255,255,0.5)}
+        .recalc-btn{margin-top:4px;width:100%;padding:5px;background:linear-gradient(135deg,#00d4ff,#0099cc);border:none;border-radius:4px;color:white;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px}
+        .recalc-btn .material-icons{font-size:13px}
+        .bottom-bar{position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(15,15,15,0.95);border-top:1px solid rgba(255,255,255,0.1);padding:0 12px;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .my-location{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;cursor:pointer}
+        .my-location .material-icons{font-size:16px;color:#4ade80}
+        .my-location-coords{color:white;font-size:10px;font-family:monospace}
+        .search-box{flex:1;max-width:200px}
+        .search-input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:7px 12px;color:white;font-size:11px;outline:none}
+        .search-input::placeholder{color:rgba(255,255,255,0.4)}
+        .view-toggle{display:flex;background:rgba(255,255,255,0.06);border-radius:8px}
+        .view-btn{padding:7px 12px;border:none;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px}
+        .view-btn.active{background:rgba(0,212,255,0.2);color:#00d4ff;border-radius:8px}
+        .view-btn .material-icons{font-size:14px}
+        .map-info{position:fixed;bottom:60px;right:12px;z-index:800;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+        .credit-bar{background:rgba(0,0,0,0.7);padding:3px 8px;border-radius:4px;font-size:9px;color:rgba(255,255,255,0.8)}
+        .scale-bar{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.7);padding:3px 8px;border-radius:4px}
+        .scale-line{height:3px;background:white;border-radius:1px;min-width:40px}
+        .scale-text{color:white;font-size:9px;font-weight:500}
+        .coord-display{position:fixed;bottom:60px;left:12px;background:rgba(0,0,0,0.7);padding:4px 8px;border-radius:4px;font-size:9px;color:rgba(255,255,255,0.9);font-family:monospace;z-index:800}
+        .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,15,15,0.95);padding:20px 30px;border-radius:12px;color:white;font-size:13px;display:none;z-index:3000}
+        .loading.show{display:block}
+        .toast{position:fixed;top:110px;left:50%;transform:translateX(-50%);background:rgba(50,50,50,0.95);padding:12px 20px;border-radius:10px;color:white;font-size:13px;z-index:3000;display:none}
+        .toast.show{display:block;animation:fadeInOut 2.5s ease}
+        @keyframes fadeInOut{0%,100%{opacity:0}10%,90%{opacity:1}}
+        .search-results{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:260px;max-height:180px;overflow-y:auto;background:rgba(20,20,20,0.98);border-radius:10px;border:1px solid rgba(255,255,255,0.15);z-index:1100;display:none}
+        .search-results.show{display:block}
+        .search-result-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .search-result-item:hover{background:rgba(255,255,255,0.06)}
+        .search-result-name{color:white;font-size:11px;font-weight:500}
+        .search-result-address{color:rgba(255,255,255,0.5);font-size:9px;margin-top:2px}
+        .cesium-viewer-toolbar,.cesium-viewer-animationContainer,.cesium-viewer-timelineContainer,.cesium-viewer-fullscreenContainer,.cesium-viewer-bottom{display:none!important}
     </style>
 </head>
 <body>
     <div id="cesiumContainer"></div>
     <div class="loading" id="loading">読み込み中...</div>
     <div class="toast" id="toast"></div>
-
-    <!-- Coordinate Popup -->
-    <div class="coord-popup" id="coordPopup">
-        <div class="coord-popup-title">座標</div>
-        <div class="coord-popup-value" id="coordPopupValue">--</div>
-        <button class="coord-popup-btn" onclick="copyCoords()"><span class="material-icons">content_copy</span>コピー</button>
-    </div>
-
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="logo">
-            <div class="logo-icon"><span class="material-icons">local_fire_department</span></div>
-            <span class="logo-text">GIS Platform</span>
-        </div>
-        <div class="map-type-switch">
-            <button class="map-type-btn active" id="mapBtnSatellite" onclick="setBasemap('satellite')"><span class="material-icons">satellite_alt</span><span>衛星</span></button>
-            <button class="map-type-btn" id="mapBtnStd" onclick="setBasemap('std')"><span class="material-icons">map</span><span>地図</span></button>
-        </div>
-        <button class="menu-btn" onclick="openSidePanel()"><span class="material-icons">menu</span></button>
-    </div>
-
-    <!-- Mode Indicator -->
+    <div class="coord-popup" id="coordPopup"><div class="coord-popup-header"><span class="coord-popup-title">座標</span><button class="coord-popup-close" onclick="hideCoordPopup()">×</button></div><div class="coord-popup-value" id="coordPopupValue">--</div><button class="coord-popup-btn" onclick="copyCoords()"><span class="material-icons">content_copy</span>コピー</button></div>
+    <div class="top-bar"><div class="logo"><div class="logo-icon"><span class="material-icons">local_fire_department</span></div><span class="logo-text">GIS Platform</span></div><div class="map-type-switch"><button class="map-type-btn active" id="mapBtnSatellite" onclick="setBasemap('satellite')"><span class="material-icons">satellite_alt</span><span>衛星</span></button><button class="map-type-btn" id="mapBtnStd" onclick="setBasemap('std')"><span class="material-icons">map</span><span>地図</span></button></div><button class="menu-btn" onclick="openSidePanel()"><span class="material-icons">menu</span></button></div>
     <div class="mode-indicator" id="modeIndicator"><span class="material-icons" id="modeIcon">local_fire_department</span><span id="modeText">火点追加</span></div>
-
-    <!-- Side Panel -->
     <div class="side-panel-overlay" id="sidePanelOverlay" onclick="closeSidePanel()"></div>
     <div class="side-panel" id="sidePanel">
-        <div class="side-panel-header">
-            <span class="side-panel-title">メニュー</span>
-            <button class="side-panel-close" onclick="closeSidePanel()"><span class="material-icons">close</span></button>
-        </div>
-        <div class="panel-section">
-            <div class="panel-section-title">地図レイヤ</div>
-            <div class="layer-grid">
-                <div class="layer-card active" id="layerBuildings" onclick="toggleMapLayer('buildings')"><div class="layer-card-icon building"><span class="material-icons">location_city</span></div><span class="layer-card-name">3D建物</span></div>
-                <div class="layer-card" id="layerTrails" onclick="toggleMapLayer('trails')"><div class="layer-card-icon trail"><span class="material-icons">hiking</span></div><span class="layer-card-name">登山道</span></div>
-            </div>
-        </div>
-        <div class="panel-section">
-            <div class="panel-section-title">オペレーション</div>
-            <div class="layer-grid">
-                <div class="layer-card" id="opFire" onclick="setOperation('fire')"><div class="layer-card-icon fire"><span class="material-icons">local_fire_department</span></div><span class="layer-card-name">火点</span></div>
-                <div class="layer-card" id="opWater" onclick="setOperation('water')"><div class="layer-card-icon water"><span class="material-icons">water_drop</span></div><span class="layer-card-name">水利</span></div>
-                <div class="layer-card" id="opHose" onclick="setOperation('hose')"><div class="layer-card-icon hose"><span class="material-icons">route</span></div><span class="layer-card-name">ホース延長</span></div>
-                <div class="layer-card" id="opMeasure" onclick="setOperation('measure')"><div class="layer-card-icon measure"><span class="material-icons">straighten</span></div><span class="layer-card-name">2点計測</span></div>
-            </div>
-        </div>
-        <div class="panel-section">
-            <div class="panel-section-title">情報レイヤ（ハザード）</div>
-            <div class="layer-grid">
-                <div class="layer-card" id="layerFlood" onclick="toggleHazardLayer('flood')"><div class="layer-card-icon flood"><span class="material-icons">water</span></div><span class="layer-card-name">洪水</span></div>
-                <div class="layer-card" id="layerTsunami" onclick="toggleHazardLayer('tsunami')"><div class="layer-card-icon tsunami"><span class="material-icons">waves</span></div><span class="layer-card-name">津波</span></div>
-                <div class="layer-card" id="layerLandslide" onclick="toggleHazardLayer('landslide')"><div class="layer-card-icon landslide"><span class="material-icons">landslide</span></div><span class="layer-card-name">土砂</span></div>
-            </div>
-        </div>
-        <div class="panel-section">
-            <div class="panel-section-title">このサイトについて</div>
-            <div class="info-links">
-                <a class="info-link" href="#" onclick="showInfo('about')"><span class="material-icons">info</span><span class="info-link-text">GIS Platformについて</span></a>
-                <a class="info-link" href="#" onclick="showInfo('usage')"><span class="material-icons">help_outline</span><span class="info-link-text">使い方</span></a>
-                <a class="info-link" href="#" onclick="showInfo('calc')"><span class="material-icons">calculate</span><span class="info-link-text">ホース延長の計算方法</span></a>
-                <a class="info-link" href="#" onclick="showInfo('source')"><span class="material-icons">source</span><span class="info-link-text">情報元・データソース</span></a>
-            </div>
-        </div>
+        <div class="side-panel-header"><span class="side-panel-title">メニュー</span><button class="side-panel-close" onclick="closeSidePanel()"><span class="material-icons">close</span></button></div>
+        <div class="panel-section"><div class="panel-section-title">地図レイヤ</div><div class="layer-grid"><div class="layer-card active" id="layerBuildings" onclick="toggleMapLayer('buildings')"><div class="layer-card-icon building"><span class="material-icons">location_city</span></div><span class="layer-card-name">3D建物</span></div><div class="layer-card" id="layerTrails" onclick="toggleMapLayer('trails')"><div class="layer-card-icon trail"><span class="material-icons">hiking</span></div><span class="layer-card-name">登山道</span></div></div></div>
+        <div class="panel-section"><div class="panel-section-title">オペレーション</div><div class="layer-grid"><div class="layer-card" id="opFire" onclick="setOperation('fire')"><div class="layer-card-icon fire"><span class="material-icons">local_fire_department</span></div><span class="layer-card-name">火点</span></div><div class="layer-card" id="opWater" onclick="setOperation('water')"><div class="layer-card-icon water"><span class="material-icons">water_drop</span></div><span class="layer-card-name">水利</span></div><div class="layer-card" id="opHose" onclick="setOperation('hose')"><div class="layer-card-icon hose"><span class="material-icons">route</span></div><span class="layer-card-name">ホース延長</span></div><div class="layer-card" id="opMeasure" onclick="setOperation('measure')"><div class="layer-card-icon measure"><span class="material-icons">straighten</span></div><span class="layer-card-name">2点計測</span></div></div></div>
+        <div class="panel-section"><div class="panel-section-title">情報レイヤ（ハザード）</div><div class="layer-grid"><div class="layer-card" id="layerFlood" onclick="toggleHazardLayer('flood')"><div class="layer-card-icon flood"><span class="material-icons">water</span></div><span class="layer-card-name">洪水</span></div><div class="layer-card" id="layerTsunami" onclick="toggleHazardLayer('tsunami')"><div class="layer-card-icon tsunami"><span class="material-icons">waves</span></div><span class="layer-card-name">津波</span></div><div class="layer-card" id="layerLandslide" onclick="toggleHazardLayer('landslide')"><div class="layer-card-icon landslide"><span class="material-icons">landslide</span></div><span class="layer-card-name">土砂</span></div></div></div>
+        <div class="panel-section"><div class="panel-section-title">このサイトについて</div><div class="info-links"><a class="info-link" href="#" onclick="showInfo('about');return false"><span class="material-icons">info</span><span>GIS Platformについて</span></a><a class="info-link" href="#" onclick="showInfo('usage');return false"><span class="material-icons">help_outline</span><span>使い方</span></a><a class="info-link" href="#" onclick="showInfo('calc');return false"><span class="material-icons">calculate</span><span>ホース延長の計算方法</span></a><a class="info-link" href="#" onclick="showInfo('source');return false"><span class="material-icons">source</span><span>情報元・データソース</span></a></div></div>
     </div>
-
-    <!-- Fire Panel -->
-    <div class="bottom-panel fire" id="firePanel">
-        <div class="panel-header"><span class="panel-title fire"><span class="material-icons">local_fire_department</span>火点</span><button class="panel-close" onclick="closePanel('fire')"><span class="material-icons">close</span></button></div>
-        <div class="panel-stats">
-            <div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value copyable" id="fireLat" onclick="copyText(this)">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value copyable" id="fireLon" onclick="copyText(this)">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">標高</div><div class="panel-stat-value fire-highlight" id="fireElev">-</div></div>
-        </div>
-        <div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedFire()"><span class="material-icons">delete</span>削除</button></div>
-    </div>
-
-    <!-- Water Panel -->
-    <div class="bottom-panel water" id="waterPanel">
-        <div class="panel-header"><span class="panel-title water"><span class="material-icons">water_drop</span>水利</span><button class="panel-close" onclick="closePanel('water')"><span class="material-icons">close</span></button></div>
-        <div class="panel-stats">
-            <div class="panel-stat"><div class="panel-stat-label">種別</div><div class="panel-stat-value water-highlight" id="waterType">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value copyable" id="waterLat" onclick="copyText(this)">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value copyable" id="waterLon" onclick="copyText(this)">-</div></div>
-        </div>
-        <div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedWater()"><span class="material-icons">delete</span>削除</button></div>
-    </div>
-
-    <!-- Hose Info Panel -->
-    <div class="bottom-panel hose-info" id="hoseInfoPanel">
-        <div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長シミュレーション</span><button class="panel-close" onclick="closePanel('hoseInfo')"><span class="material-icons">close</span></button></div>
-        <div class="panel-stats">
-            <div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseInfoDist">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">ホース</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">可搬台数</div><div class="panel-stat-value" id="hoseInfoRelay">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">筒先圧</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div>
-        </div>
-        <div class="section-title" style="margin-top:10px;">区間詳細</div>
-        <div class="segment-table-wrap"><table class="segment-table"><thead><tr><th>区間</th><th>距離</th><th>本数</th><th>高低差</th><th>損失</th><th>残圧</th></tr></thead><tbody id="segmentTableBody"></tbody></table></div>
-        <div class="sim-legend"><div class="legend-item"><div class="legend-dot conf"></div>可搬</div><div class="legend-item"><div class="legend-dot end"></div>筒先</div><div class="legend-item"><div class="legend-dot green"></div>≥0.4</div><div class="legend-item"><div class="legend-dot yellow"></div>≥0.2</div><div class="legend-item"><div class="legend-dot red"></div>&lt;0.2</div></div>
-        <div class="sim-params">
-            <div class="sim-params-title">計算条件</div>
-            <div class="sim-param-grid">
-                <div class="sim-param-item"><label>送水圧</label><div class="sim-param-input-wrap"><input type="number" id="paramPumpOut" value="0.6" step="0.05"><span>MPa</span></div></div>
-                <div class="sim-param-item"><label>受水圧</label><div class="sim-param-input-wrap"><input type="number" id="paramInlet" value="0.2" step="0.05"><span>MPa</span></div></div>
-                <div class="sim-param-item"><label>筒先圧</label><div class="sim-param-input-wrap"><input type="number" id="paramNozzle" value="0.4" step="0.05"><span>MPa</span></div></div>
-                <div class="sim-param-item"><label>損失/本</label><div class="sim-param-input-wrap"><input type="number" id="paramLossPerHose" value="0.02" step="0.005"><span>MPa</span></div></div>
-            </div>
-            <button class="recalc-btn" onclick="onParamChange()"><span class="material-icons">refresh</span>再計算</button>
-        </div>
-        <div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedHose()"><span class="material-icons">delete</span>削除</button></div>
-    </div>
-
-    <!-- Hose Drawing Panel -->
-    <div class="bottom-panel hose" id="hosePanel">
-        <div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長(林野)</span><button class="panel-close" onclick="closeHosePanel()"><span class="material-icons">close</span></button></div>
-        <div class="panel-stats">
-            <div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseTotalDist">0m</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">本数(20m)</div><div class="panel-stat-value" id="hoseTotalCount">0本</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="hoseElevInfo">-</div></div>
-        </div>
-        <div class="panel-hint" id="hoseHint">連続タップでポイント追加</div>
-        <div class="panel-actions">
-            <button class="panel-btn secondary" onclick="undoHosePoint()"><span class="material-icons">undo</span>戻す</button>
-            <button class="panel-btn danger" onclick="resetHoseLine()"><span class="material-icons">delete</span></button>
-            <button class="panel-btn primary" onclick="confirmHoseLine()"><span class="material-icons">check</span>確定</button>
-        </div>
-    </div>
-
-    <!-- Measure Panel -->
-    <div class="bottom-panel measure" id="measurePanel">
-        <div class="panel-header"><span class="panel-title measure"><span class="material-icons">straighten</span>2点計測</span><button class="panel-close" onclick="closeMeasurePanel()"><span class="material-icons">close</span></button></div>
-        <div class="panel-stats">
-            <div class="panel-stat"><div class="panel-stat-label">地表距離</div><div class="panel-stat-value measure-highlight" id="measureDistance">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">直線距離</div><div class="panel-stat-value" id="measureStraight">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="measureElev">-</div></div>
-        </div>
-        <div class="panel-hint" id="measureHint">2点をタップして計測</div>
-        <div class="panel-actions"><button class="panel-btn secondary" onclick="resetMeasure()"><span class="material-icons">refresh</span>リセット</button></div>
-    </div>
-
-    <!-- Map Info (Scale & Credits) -->
-    <div class="map-info">
-        <div class="scale-bar"><div class="scale-line" id="scaleLine"></div><span class="scale-text" id="scaleText">--</span></div>
-        <div class="credit-bar">© OpenStreetMap, 国土地理院, Cesium</div>
-    </div>
+    <div class="bottom-panel fire" id="firePanel"><div class="panel-header"><span class="panel-title fire"><span class="material-icons">local_fire_department</span>火点</span><button class="panel-close" onclick="closePanel('fire')"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value copyable" id="fireLat" onclick="copyText(this)">-</div></div><div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value copyable" id="fireLon" onclick="copyText(this)">-</div></div><div class="panel-stat"><div class="panel-stat-label">標高</div><div class="panel-stat-value fire-highlight" id="fireElev">-</div></div></div><div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedFire()"><span class="material-icons">delete</span>削除</button></div></div>
+    <div class="bottom-panel water" id="waterPanel"><div class="panel-header"><span class="panel-title water"><span class="material-icons">water_drop</span>水利</span><button class="panel-close" onclick="closePanel('water')"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">種別</div><div class="panel-stat-value water-highlight" id="waterType">-</div></div><div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value copyable" id="waterLat" onclick="copyText(this)">-</div></div><div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value copyable" id="waterLon" onclick="copyText(this)">-</div></div></div><div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedWater()"><span class="material-icons">delete</span>削除</button></div></div>
+    <div class="bottom-panel hose-info" id="hoseInfoPanel"><div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長シミュレーション</span><button class="panel-close" onclick="closePanel('hoseInfo')"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseInfoDist">-</div></div><div class="panel-stat"><div class="panel-stat-label">ホース</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div><div class="panel-stat"><div class="panel-stat-label">可搬台数</div><div class="panel-stat-value" id="hoseInfoRelay">-</div></div><div class="panel-stat"><div class="panel-stat-label">筒先圧</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div></div><div class="section-title" style="margin-top:8px">区間詳細</div><div class="segment-table-wrap"><table class="segment-table"><thead><tr><th>区間</th><th>距離</th><th>本数</th><th>高低差</th><th>損失</th><th>残圧</th></tr></thead><tbody id="segmentTableBody"></tbody></table></div><div class="sim-legend"><div class="legend-item"><div class="legend-dot conf"></div>可搬</div><div class="legend-item"><div class="legend-dot end"></div>筒先</div><div class="legend-item"><div class="legend-dot green"></div>≥0.4</div><div class="legend-item"><div class="legend-dot yellow"></div>≥0.2</div><div class="legend-item"><div class="legend-dot red"></div>&lt;0.2</div></div><div class="sim-params"><div class="sim-params-title">計算条件</div><div class="sim-param-grid"><div class="sim-param-item"><label>送水圧</label><div class="sim-param-input-wrap"><input type="number" id="paramPumpOut" value="0.6" step="0.05"><span>MPa</span></div></div><div class="sim-param-item"><label>受水圧</label><div class="sim-param-input-wrap"><input type="number" id="paramInlet" value="0.2" step="0.05"><span>MPa</span></div></div><div class="sim-param-item"><label>筒先圧</label><div class="sim-param-input-wrap"><input type="number" id="paramNozzle" value="0.4" step="0.05"><span>MPa</span></div></div><div class="sim-param-item"><label>損失/本</label><div class="sim-param-input-wrap"><input type="number" id="paramLossPerHose" value="0.02" step="0.005"><span>MPa</span></div></div></div><button class="recalc-btn" onclick="onParamChange()"><span class="material-icons">refresh</span>再計算</button></div><div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedHose()"><span class="material-icons">delete</span>削除</button></div></div>
+    <div class="bottom-panel hose" id="hosePanel"><div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長(林野)</span><button class="panel-close" onclick="closeHosePanel()"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseTotalDist">0m</div></div><div class="panel-stat"><div class="panel-stat-label">本数(20m)</div><div class="panel-stat-value" id="hoseTotalCount">0本</div></div><div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="hoseElevInfo">-</div></div></div><div class="panel-hint" id="hoseHint">連続タップでポイント追加</div><div class="panel-actions"><button class="panel-btn secondary" onclick="undoHosePoint()"><span class="material-icons">undo</span>戻す</button><button class="panel-btn danger" onclick="resetHoseLine()"><span class="material-icons">delete</span></button><button class="panel-btn primary" onclick="confirmHoseLine()"><span class="material-icons">check</span>確定</button></div></div>
+    <div class="bottom-panel measure" id="measurePanel"><div class="panel-header"><span class="panel-title measure"><span class="material-icons">straighten</span>2点計測</span><button class="panel-close" onclick="closeMeasurePanel()"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">地表距離</div><div class="panel-stat-value highlight" id="measureDistance">-</div></div><div class="panel-stat"><div class="panel-stat-label">直線距離</div><div class="panel-stat-value" id="measureStraight">-</div></div><div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="measureElev">-</div></div></div><div class="panel-hint" id="measureHint">2点をタップして計測</div><div class="panel-actions"><button class="panel-btn secondary" onclick="resetMeasure()"><span class="material-icons">refresh</span>リセット</button></div></div>
+    <div class="map-info"><div class="scale-bar"><div class="scale-line" id="scaleLine"></div><span class="scale-text" id="scaleText">--</span></div><div class="credit-bar" id="creditBar">© Cesium Ion</div></div>
     <div class="coord-display" id="coordDisplay">--</div>
-
-    <!-- Bottom Bar -->
-    <div class="bottom-bar">
-        <div class="my-location" onclick="goToMyLocation()"><span class="material-icons">my_location</span><span class="my-location-coords" id="myLocationText">取得中...</span></div>
-        <div class="search-box"><input type="text" class="search-input" id="searchInput" placeholder="住所を検索..." onkeydown="if(event.key==='Enter')doSearch()"></div>
-        <div class="view-toggle">
-            <button class="view-btn" onclick="setViewMode('2d')"><span class="material-icons">map</span>2D</button>
-            <button class="view-btn active" onclick="setViewMode('3d')"><span class="material-icons">view_in_ar</span>3D</button>
-        </div>
-    </div>
+    <div class="bottom-bar"><div class="my-location" onclick="goToMyLocation()"><span class="material-icons">my_location</span><span class="my-location-coords" id="myLocationText">取得中...</span></div><div class="search-box"><input type="text" class="search-input" id="searchInput" placeholder="住所を検索..." onkeydown="if(event.key==='Enter')doSearch()"></div><div class="view-toggle"><button class="view-btn" onclick="setViewMode('2d')"><span class="material-icons">map</span>2D</button><button class="view-btn active" onclick="setViewMode('3d')"><span class="material-icons">view_in_ar</span>3D</button></div></div>
     <div class="search-results" id="searchResults"></div>
-
-    <script>
-        // ===== CESIUM INIT =====
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjkwN2E2MC1jYjM5LTRmNzUtOTEyZS1hYTBlNmYzNWRhMjUiLCJpZCI6MjU5MjkyLCJpYXQiOjE3MzI2MTg4MDB9.vvcLKVhx_sUMFYMYwZzArW2DfXRxXdJdgfxDqpE7ba8';
-        
-        const viewer = new Cesium.Viewer('cesiumContainer', {
-            baseLayerPicker: false, geocoder: false, homeButton: false, sceneModePicker: false,
-            navigationHelpButton: false, animation: false, timeline: false, fullscreenButton: false,
-            infoBox: false, selectionIndicator: false
-        });
-        
-        // 地形を非同期で設定
-        Cesium.createWorldTerrainAsync().then(terrain => {
-            viewer.terrainProvider = terrain;
-        }).catch(e => console.warn('Terrain failed:', e));
-        
-        viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(132.4553, 34.3853, 3000), orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 }, duration: 2 });
-
-        // ===== STATE =====
-        const layers = { buildings: true, trails: false, flood: false, tsunami: false, landslide: false };
-        let currentTool = null, osmBuildingsTileset = null;
-        let trailEntities = [], loadedTrailTiles = new Set(), trailLoadActive = false;
-        let hazardLayers = { flood: null, tsunami: null, landslide: null };
-        let stdLayer = null, satelliteLayer = null, currentBasemap = 'satellite';
-        let myLocationEntity = null, myLocationCoords = null;
-        let lastClickedCoords = null;
-
-        // ===== BASEMAP =====
-        async function initBasemaps() {
-            // Cesium Ionの衛星画像を明示的に追加
-            try {
-                const ionImagery = await Cesium.IonImageryProvider.fromAssetId(2);
-                // 既存のレイヤーをクリアして新しく追加
-                viewer.imageryLayers.removeAll();
-                satelliteLayer = viewer.imageryLayers.addImageryProvider(ionImagery);
-            } catch(e) {
-                console.warn('Ion imagery failed, using default:', e);
-                if (viewer.imageryLayers.length > 0) {
-                    satelliteLayer = viewer.imageryLayers.get(0);
-                }
-            }
-            // 国土地理院地図レイヤーを追加
-            try {
-                const gsiProvider = new Cesium.UrlTemplateImageryProvider({ 
-                    url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', 
-                    maximumLevel: 18,
-                    credit: '国土地理院'
-                });
-                stdLayer = viewer.imageryLayers.addImageryProvider(gsiProvider);
-                stdLayer.show = false;
-            } catch(e) { console.warn('GSI layer failed:', e); }
-        }
-        // Cesiumの初期化完了を待ってからベースマップ初期化
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener(() => {});
-        setTimeout(initBasemaps, 100);
-
-        function setBasemap(type) {
-            document.querySelectorAll('.map-type-btn').forEach(b => b.classList.remove('active'));
-            if (type === 'satellite') {
-                document.getElementById('mapBtnSatellite').classList.add('active');
-                if (satelliteLayer) satelliteLayer.show = true;
-                if (stdLayer) stdLayer.show = false;
-            } else {
-                document.getElementById('mapBtnStd').classList.add('active');
-                if (satelliteLayer) satelliteLayer.show = false;
-                if (stdLayer) stdLayer.show = true;
-            }
-            currentBasemap = type;
-        }
-
-        // ===== 3D BUILDINGS =====
-        async function init3DBuildings() {
-            try {
-                osmBuildingsTileset = await Cesium.createOsmBuildingsAsync();
-                viewer.scene.primitives.add(osmBuildingsTileset);
-                osmBuildingsTileset.show = layers.buildings;
-            } catch(e) { console.warn('3D buildings failed:', e); }
-        }
-        init3DBuildings();
-
-        // ===== SIDE PANEL =====
-        function openSidePanel() {
-            document.getElementById('sidePanelOverlay').classList.add('show');
-            document.getElementById('sidePanel').classList.add('show');
-            updateLayerCards();
-        }
-        function closeSidePanel() {
-            document.getElementById('sidePanelOverlay').classList.remove('show');
-            document.getElementById('sidePanel').classList.remove('show');
-        }
-        function updateLayerCards() {
-            document.getElementById('layerBuildings').classList.toggle('active', layers.buildings);
-            document.getElementById('layerTrails').classList.toggle('active', layers.trails);
-            document.getElementById('layerFlood').classList.toggle('active', layers.flood);
-            document.getElementById('layerTsunami').classList.toggle('active', layers.tsunami);
-            document.getElementById('layerLandslide').classList.toggle('active', layers.landslide);
-            document.querySelectorAll('#opFire, #opWater, #opHose, #opMeasure').forEach(el => el.classList.remove('active'));
-            if (currentTool === 'fire') document.getElementById('opFire').classList.add('active');
-            if (currentTool === 'water') document.getElementById('opWater').classList.add('active');
-            if (currentTool === 'hose') document.getElementById('opHose').classList.add('active');
-            if (currentTool === 'measure') document.getElementById('opMeasure').classList.add('active');
-        }
-
-        // ===== LAYERS =====
-        function toggleMapLayer(layer) {
-            layers[layer] = !layers[layer];
-            if (layer === 'buildings' && osmBuildingsTileset) osmBuildingsTileset.show = layers.buildings;
-            if (layer === 'trails') { trailEntities.forEach(e => e.show = layers.trails); if (layers.trails) loadTrails(); }
-            updateLayerCards();
-        }
-        function toggleHazardLayer(layer) {
-            const wasOn = layers[layer];
-            ['flood', 'tsunami', 'landslide'].forEach(h => { layers[h] = false; if (hazardLayers[h]) { viewer.imageryLayers.remove(hazardLayers[h]); hazardLayers[h] = null; } });
-            if (!wasOn) { layers[layer] = true; loadHazardLayer(layer); }
-            updateLayerCards();
-        }
-        function loadHazardLayer(layer) {
-            const urls = { flood: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png', tsunami: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png', landslide: 'https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki/{z}/{x}/{y}.png' };
-            if (urls[layer]) { hazardLayers[layer] = viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({ url: urls[layer], maximumLevel: 17 })); hazardLayers[layer].alpha = 0.6; }
-        }
-
-        // ===== OPERATIONS =====
-        function setOperation(op) {
-            if (currentTool === op) { clearTool(); updateLayerCards(); return; }
-            clearTool(); currentTool = op;
-            const ind = document.getElementById('modeIndicator'), icon = document.getElementById('modeIcon'), text = document.getElementById('modeText');
-            if (op === 'fire') { icon.textContent = 'local_fire_department'; text.textContent = '火点追加'; ind.className = 'mode-indicator show'; }
-            else if (op === 'water') { icon.textContent = 'water_drop'; text.textContent = '水利追加'; ind.className = 'mode-indicator show water-mode'; }
-            else if (op === 'hose') { icon.textContent = 'route'; text.textContent = 'ホース延長'; ind.className = 'mode-indicator show hose-mode'; document.getElementById('hosePanel').classList.add('active'); resetHoseLine(); }
-            else if (op === 'measure') { icon.textContent = 'straighten'; text.textContent = '2点計測'; ind.className = 'mode-indicator show measure-mode'; document.getElementById('measurePanel').classList.add('active'); resetMeasure(); }
-            updateLayerCards(); closeSidePanel();
-        }
-        function clearTool() { currentTool = null; document.getElementById('modeIndicator').className = 'mode-indicator'; document.getElementById('hosePanel').classList.remove('active'); document.getElementById('measurePanel').classList.remove('active'); }
-
-        // ===== TRAILS =====
-        async function loadTrails() {
-            if (trailLoadActive) return;
-            const c = viewer.camera.positionCartographic, lat = Cesium.Math.toDegrees(c.latitude), lon = Cesium.Math.toDegrees(c.longitude);
-            const key = `${Math.floor(lat/0.05)}_${Math.floor(lon/0.05)}`;
-            if (loadedTrailTiles.has(key)) return;
-            trailLoadActive = true; showLoading(true);
-            try {
-                const query = `[out:json][timeout:30];(way["highway"~"path|footway|track"](around:5000,${lat},${lon}););out body;>;out skel qt;`;
-                const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-                const data = await res.json(), nodes = {};
-                data.elements.filter(e => e.type === 'node').forEach(n => nodes[n.id] = [n.lon, n.lat]);
-                data.elements.filter(e => e.type === 'way').forEach(way => {
-                    if (trailEntities.some(e => e.osmId === way.id)) return;
-                    const pos = way.nodes.filter(nid => nodes[nid]).map(nid => Cesium.Cartesian3.fromDegrees(nodes[nid][0], nodes[nid][1]));
-                    if (pos.length >= 2) { const e = viewer.entities.add({ polyline: { positions: pos, width: 3, material: Cesium.Color.LIGHTGREEN.withAlpha(0.8), clampToGround: true } }); e.show = layers.trails; e.osmId = way.id; trailEntities.push(e); }
-                });
-                loadedTrailTiles.add(key);
-            } catch(e) { console.warn('Trail load error:', e); }
-            trailLoadActive = false; showLoading(false);
-        }
-
-        // ===== INFO PAGES =====
-        function showInfo(type) {
-            const messages = {
-                about: 'GIS Platform は林野火災の消火活動を支援するためのWebアプリケーションです。ホース延長シミュレーション、可搬ポンプ中継計算などの機能を提供します。',
-                usage: '【使い方】\n1. メニューから「火点」を選択し、地図上をタップして火点を追加\n2. 「水利」で水源の位置を登録\n3. 「ホース延長」で経路を描画し、シミュレーションを実行\n4. 「2点計測」で距離と高低差を測定',
-                calc: '【計算方法】\n・摩擦損失: 0.02 MPa/本(65mm林野用)\n・高低差損失: 上り 0.01 MPa/m\n・下り加圧効果: 1/3として計算\n・受水圧: 0.2 MPa以上確保\n・筒先圧: 0.4 MPa以上確保',
-                source: '【情報元】\n・地図: 国土地理院, OpenStreetMap\n・衛星画像: Cesium Ion\n・3D建物: OpenStreetMap Buildings\n・ハザード: 国土交通省ハザードマップ'
-            };
-            alert(messages[type] || '情報がありません');
-        }
-
-        // ===== SEARCH =====
-        async function doSearch() {
-            const q = document.getElementById('searchInput').value.trim();
-            if (!q) return; showLoading(true);
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=5`);
-                const data = await res.json();
-                const sr = document.getElementById('searchResults');
-                sr.innerHTML = data.length === 0 ? '<div class="search-result-item"><span class="search-result-name">結果なし</span></div>' : data.map(r => `<div class="search-result-item" onclick="flyToSearch(${r.lon}, ${r.lat})"><div class="search-result-name">${r.display_name.split(',')[0]}</div><div class="search-result-address">${r.display_name}</div></div>`).join('');
-                sr.classList.add('show');
-            } catch(e) { showToast('検索エラー'); }
-            showLoading(false);
-        }
-        function flyToSearch(lon, lat) { viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1500), duration: 1.5 }); document.getElementById('searchResults').classList.remove('show'); }
-        document.addEventListener('click', (e) => { if (!e.target.closest('.search-box') && !e.target.closest('.search-results')) document.getElementById('searchResults').classList.remove('show'); });
-
-        // ===== MY LOCATION =====
-        function goToMyLocation() {
-            if (!navigator.geolocation) { document.getElementById('myLocationText').textContent = '非対応'; return; }
-            navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude, lon = pos.coords.longitude;
-                myLocationCoords = { lat, lon };
-                document.getElementById('myLocationText').textContent = `${lat.toFixed(5)}°, ${lon.toFixed(5)}°`;
-                viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1000), duration: 1.5 });
-                if (myLocationEntity) viewer.entities.remove(myLocationEntity);
-                myLocationEntity = viewer.entities.add({
-                    position: Cesium.Cartesian3.fromDegrees(lon, lat),
-                    billboard: { image: createMyLocationIcon(), width: 24, height: 24, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND }
-                });
-            }, (err) => { document.getElementById('myLocationText').textContent = '取得失敗'; });
-        }
-        function createMyLocationIcon() {
-            const c = document.createElement('canvas'); c.width = 24; c.height = 24;
-            const ctx = c.getContext('2d');
-            ctx.beginPath(); ctx.arc(12, 12, 10, 0, Math.PI * 2); ctx.fillStyle = '#4ade80'; ctx.fill();
-            ctx.beginPath(); ctx.arc(12, 12, 5, 0, Math.PI * 2); ctx.fillStyle = 'white'; ctx.fill();
-            return c.toDataURL();
-        }
-        goToMyLocation();
-
-        // ===== SCALE BAR =====
-        function updateScaleBar() {
-            const width = viewer.canvas.clientWidth;
-            const left = viewer.scene.camera.getPickRay(new Cesium.Cartesian2(width * 0.3, viewer.canvas.clientHeight / 2));
-            const right = viewer.scene.camera.getPickRay(new Cesium.Cartesian2(width * 0.7, viewer.canvas.clientHeight / 2));
-            if (!left || !right) return;
-            const leftPos = viewer.scene.globe.pick(left, viewer.scene);
-            const rightPos = viewer.scene.globe.pick(right, viewer.scene);
-            if (!leftPos || !rightPos) return;
-            const distance = Cesium.Cartesian3.distance(leftPos, rightPos) / 2;
-            let scaleWidth = 80, scaleValue = distance * (80 / (width * 0.2));
-            const scales = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
-            let best = scales[0];
-            for (const s of scales) { if (scaleValue >= s) best = s; }
-            scaleWidth = Math.round(80 * (best / scaleValue));
-            document.getElementById('scaleLine').style.width = scaleWidth + 'px';
-            document.getElementById('scaleText').textContent = best >= 1000 ? (best/1000) + 'km' : best + 'm';
-        }
-        viewer.camera.moveEnd.addEventListener(updateScaleBar);
-        setTimeout(updateScaleBar, 2000);
-
-        // ===== COORD DISPLAY =====
-        viewer.camera.moveEnd.addEventListener(() => {
-            const c = viewer.camera.positionCartographic;
-            document.getElementById('coordDisplay').textContent = `${Cesium.Math.toDegrees(c.latitude).toFixed(5)}°, ${Cesium.Math.toDegrees(c.longitude).toFixed(5)}°`;
-        });
-
-        // ===== COORDINATE POPUP =====
-        function showCoordPopup(lat, lon, x, y) {
-            lastClickedCoords = { lat, lon };
-            const popup = document.getElementById('coordPopup');
-            document.getElementById('coordPopupValue').textContent = `${lat.toFixed(6)}°, ${lon.toFixed(6)}°`;
-            popup.style.left = Math.min(x, window.innerWidth - 220) + 'px';
-            popup.style.top = Math.min(y, window.innerHeight - 100) + 'px';
-            popup.classList.add('show');
-        }
-        function hideCoordPopup() { document.getElementById('coordPopup').classList.remove('show'); }
-        function copyCoords() {
-            if (lastClickedCoords) {
-                navigator.clipboard.writeText(`${lastClickedCoords.lat.toFixed(6)}, ${lastClickedCoords.lon.toFixed(6)}`);
-                showToast('座標をコピーしました');
-                hideCoordPopup();
-            }
-        }
-        function copyText(el) {
-            navigator.clipboard.writeText(el.textContent.replace('°', ''));
-            showToast('コピーしました');
-        }
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.coord-popup') && !e.target.closest('#cesiumContainer')) hideCoordPopup();
-        });
 
         // ===== FIRE POINTS =====
         let firePoints = [], firePointEntities = [], selectedFirePoint = null, firePointIdCounter = 0, fireAreaEntity = null;
@@ -621,8 +203,8 @@
             const f = firePoints.find(p => p.id === id);
             if (!f) return;
             closeAllPanels(); selectedFirePoint = f;
-            document.getElementById('fireLat').textContent = f.lat.toFixed(6) + '°';
-            document.getElementById('fireLon').textContent = f.lon.toFixed(6) + '°';
+            document.getElementById('fireLat').textContent = f.lat.toFixed(6);
+            document.getElementById('fireLon').textContent = f.lon.toFixed(6);
             document.getElementById('fireElev').textContent = f.height.toFixed(1) + 'm';
             document.getElementById('firePanel').classList.add('active');
         }
@@ -645,7 +227,7 @@
             if (!selectedFirePoint) { showToast('火点が選択されていません'); return; }
             const id = selectedFirePoint.id;
             firePoints = firePoints.filter(f => f.id !== id);
-            const entity = firePointEntities.find(e => e.id === id || e._id === id);
+            const entity = firePointEntities.find(e => e.id === id);
             if (entity) { viewer.entities.remove(entity); firePointEntities = firePointEntities.filter(e => e !== entity); }
             selectedFirePoint = null; closePanel('fire'); updateFireArea();
             showToast('火点を削除しました');
@@ -674,15 +256,15 @@
             if (!w) return;
             closeAllPanels(); selectedWater = w;
             document.getElementById('waterType').textContent = { hydrant: '消火栓', tank: '防火水槽', natural: '自然水利' }[w.type] || w.type;
-            document.getElementById('waterLat').textContent = w.lat.toFixed(6) + '°';
-            document.getElementById('waterLon').textContent = w.lon.toFixed(6) + '°';
+            document.getElementById('waterLat').textContent = w.lat.toFixed(6);
+            document.getElementById('waterLon').textContent = w.lon.toFixed(6);
             document.getElementById('waterPanel').classList.add('active');
         }
         function deleteSelectedWater() {
             if (!selectedWater) { showToast('水利が選択されていません'); return; }
             const id = selectedWater.id;
             waterSources = waterSources.filter(w => w.id !== id);
-            const entity = waterEntities.find(e => e.id === id || e._id === id);
+            const entity = waterEntities.find(e => e.id === id);
             if (entity) { viewer.entities.remove(entity); waterEntities = waterEntities.filter(e => e !== entity); }
             selectedWater = null; closePanel('water');
             showToast('水利を削除しました');
@@ -691,12 +273,15 @@
         // ===== HOSE LINES =====
         let hoseLinePoints = [], hoseLineSegments = [], hoseLineMarkers = [], hoseLineEntities = [], hoseLineIdCounter = 0, selectedHoseLine = null;
         function updateHoseDisplay() {
-            let totalDist = 0, cumElev = 0;
-            for (let i = 1; i < hoseLinePoints.length; i++) { totalDist += geodesicDistance(hoseLinePoints[i-1].lon, hoseLinePoints[i-1].lat, hoseLinePoints[i].lon, hoseLinePoints[i].lat); cumElev += Math.abs(hoseLinePoints[i].height - hoseLinePoints[i-1].height); }
+            let totalDist = 0;
+            for (let i = 1; i < hoseLinePoints.length; i++) { totalDist += geodesicDistance(hoseLinePoints[i-1].lon, hoseLinePoints[i-1].lat, hoseLinePoints[i].lon, hoseLinePoints[i].lat); }
             document.getElementById('hoseTotalDist').textContent = formatDistance(totalDist);
             document.getElementById('hoseTotalCount').textContent = Math.ceil(totalDist / 20) + '本';
-            document.getElementById('hoseElevInfo').textContent = hoseLinePoints.length > 1 ? cumElev.toFixed(1) + 'm' : '-';
-            if (hoseLinePoints.length) document.getElementById('hoseHint').textContent = `${hoseLinePoints.length}点`;
+            if (hoseLinePoints.length > 1) {
+                const dh = hoseLinePoints[hoseLinePoints.length-1].height - hoseLinePoints[0].height;
+                document.getElementById('hoseElevInfo').textContent = (dh >= 0 ? '+' : '') + dh.toFixed(1) + 'm';
+            } else { document.getElementById('hoseElevInfo').textContent = '-'; }
+            document.getElementById('hoseHint').textContent = hoseLinePoints.length ? `${hoseLinePoints.length}点` : '連続タップでポイント追加';
         }
         function addHosePoint(lon, lat, height, cartesian) {
             hoseLinePoints.push({ lon, lat, height, cartesian });
@@ -709,7 +294,7 @@
             updateHoseDisplay();
         }
         function undoHosePoint() { if (!hoseLinePoints.length) return; hoseLinePoints.pop(); if (hoseLineMarkers.length) viewer.entities.remove(hoseLineMarkers.pop()); if (hoseLineSegments.length) viewer.entities.remove(hoseLineSegments.pop()); updateHoseDisplay(); }
-        function resetHoseLine() { hoseLinePoints = []; hoseLineMarkers.forEach(e => viewer.entities.remove(e)); hoseLineMarkers = []; hoseLineSegments.forEach(e => viewer.entities.remove(e)); hoseLineSegments = []; updateHoseDisplay(); document.getElementById('hoseHint').textContent = '連続タップでポイント追加'; }
+        function resetHoseLine() { hoseLinePoints = []; hoseLineMarkers.forEach(e => viewer.entities.remove(e)); hoseLineMarkers = []; hoseLineSegments.forEach(e => viewer.entities.remove(e)); hoseLineSegments = []; updateHoseDisplay(); }
 
         const hoseParams = { pumpOutputMPa: 0.6, minInletPressureMPa: 0.2, nozzleRequiredMPa: 0.4, lossPerHoseMPa: 0.02, hoseLengthM: 20 };
         const hoseSimState = { relayCandidateEntitiesByLine: new Map(), startEndMarkersByLine: new Map(), colorSegmentsByLine: new Map() };
@@ -807,9 +392,8 @@
         function confirmHoseLine() {
             if (hoseLinePoints.length < 2) { showToast('2点以上必要'); return; }
             const pathLLH = hoseLinePoints.map(p => ({ lon: p.lon, lat: p.lat, height: p.height })), id = `hose-${++hoseLineIdCounter}`;
-            let totalDist = 0; for (let i = 1; i < hoseLinePoints.length; i++) totalDist += geodesicDistance(hoseLinePoints[i-1].lon, hoseLinePoints[i-1].lat, hoseLinePoints[i].lon, hoseLinePoints[i].lat);
             const lineEntity = viewer.entities.add({ id: id, polyline: { positions: hoseLinePoints.map(p => p.cartesian), width: 4, material: Cesium.Color.ORANGE.withAlpha(0.5), clampToGround: true } });
-            const hoseData = { id, entity: lineEntity, totalDist, pathLLH };
+            const hoseData = { id, entity: lineEntity, pathLLH };
             hoseLineEntities.push(hoseData);
             hoseLineMarkers.forEach(e => viewer.entities.remove(e)); hoseLineSegments.forEach(e => viewer.entities.remove(e));
             hoseLinePoints = []; hoseLineMarkers = []; hoseLineSegments = [];
@@ -865,30 +449,56 @@
 
         // ===== CLICK HANDLER =====
         const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-        handler.setInputAction(async function(click) {
+        
+        // 長押し検出用
+        handler.setInputAction(function(click) {
             hideCoordPopup();
             const picked = viewer.scene.pick(click.position);
             if (picked && picked.id) {
                 const entity = picked.id;
-                const pickedId = typeof entity.id === 'string' ? entity.id : (entity._id || '');
+                const pickedId = typeof entity.id === 'string' ? entity.id : '';
                 if (pickedId.startsWith('fire-')) { selectFirePoint(pickedId); return; }
                 if (pickedId.startsWith('water-')) { selectWater(pickedId); return; }
                 if (pickedId.startsWith('hose-')) { selectHoseLine(pickedId); return; }
             }
+            
             const ray = viewer.camera.getPickRay(click.position);
             const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
             if (!cartesian) return;
             const carto = Cesium.Cartographic.fromCartesian(cartesian);
             const lon = Cesium.Math.toDegrees(carto.longitude), lat = Cesium.Math.toDegrees(carto.latitude);
-            let height = 0;
-            try { const u = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [Cesium.Cartographic.fromDegrees(lon, lat)]); height = u[0].height || 0; } catch(e) { height = carto.height || 0; }
+            
+            if (currentTool === 'fire' || currentTool === 'water' || currentTool === 'hose' || currentTool === 'measure') {
+                handleToolClick(lon, lat, carto.height || 0, cartesian, click.position);
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        // 長押し（座標ポップアップ）
+        handler.setInputAction(function(click) {
+            longPressTimer = setTimeout(async () => {
+                if (currentTool) return;
+                const ray = viewer.camera.getPickRay(click.position);
+                const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+                if (!cartesian) return;
+                const carto = Cesium.Cartographic.fromCartesian(cartesian);
+                const lon = Cesium.Math.toDegrees(carto.longitude), lat = Cesium.Math.toDegrees(carto.latitude);
+                showCoordPopup(lat, lon, click.position.x, click.position.y);
+            }, 500);
+        }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+        handler.setInputAction(function() {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+        async function handleToolClick(lon, lat, defaultHeight, cartesian, position) {
+            let height = defaultHeight;
+            try { const u = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [Cesium.Cartographic.fromDegrees(lon, lat)]); height = u[0].height || defaultHeight; } catch(e) {}
             
             if (currentTool === 'fire') { const id = addFirePoint(lon, lat, height); selectFirePoint(id); }
             else if (currentTool === 'water') { const id = addWaterSource('hydrant', `消火栓#${waterIdCounter + 1}`, lon, lat); selectWater(id); }
             else if (currentTool === 'hose') { addHosePoint(lon, lat, height, cartesian); }
             else if (currentTool === 'measure') { if (measurePoints.length >= 2) resetMeasure(); addMeasurePoint(lon, lat, height, cartesian); }
-            else { showCoordPopup(lat, lon, click.position.x, click.position.y); }
-        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        }
 
         // ===== UTILITIES =====
         function geodesicDistance(lon1, lat1, lon2, lat2) { return new Cesium.EllipsoidGeodesic(Cesium.Cartographic.fromDegrees(lon1, lat1), Cesium.Cartographic.fromDegrees(lon2, lat2)).surfaceDistance; }
@@ -897,7 +507,6 @@
         function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
         function setViewMode(mode) { document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active')); event.target.closest('.view-btn').classList.add('active'); viewer.scene.mode = mode === '2d' ? Cesium.SceneMode.SCENE2D : Cesium.SceneMode.SCENE3D; }
 
-        // ===== URL PARAMS =====
         const params = new URLSearchParams(location.search);
         if (params.has('lat') && params.has('lon')) { viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(parseFloat(params.get('lon')), parseFloat(params.get('lat')), parseFloat(params.get('h')) || 3000), duration: 2 }); }
     </script>
