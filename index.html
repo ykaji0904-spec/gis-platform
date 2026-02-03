@@ -291,15 +291,14 @@
         <div class="sim-warning" id="simWarning">
             <div class="sim-warning-text"><span class="material-icons">warning</span><span id="simWarningText">筒先圧が0.3MPa未満です</span></div>
         </div>
-        <div class="section-title" style="margin-top:8px;">区間詳細（🔶=中継位置）</div>
+        <div class="section-title" style="margin-top:8px;">ポンプ間の損失と残圧</div>
         <div class="segment-list" id="segmentList"></div>
         <div class="sim-legend">
-            <div class="legend-item"><div class="legend-dot conf"></div>P1(根本)</div>
-            <div class="legend-item"><div class="legend-dot conf"></div>P2,3...(中継)</div>
+            <div class="legend-item"><div class="legend-dot conf"></div>Pn(可搬)</div>
             <div class="legend-item"><div class="legend-dot end"></div>筒先</div>
-            <div class="legend-item"><div class="legend-dot green"></div>≥0.4</div>
-            <div class="legend-item"><div class="legend-dot yellow"></div>≥0.2</div>
-            <div class="legend-item"><div class="legend-dot red"></div>&lt;0.2</div>
+            <div class="legend-item"><div class="legend-dot green"></div>≥0.4MPa</div>
+            <div class="legend-item"><div class="legend-dot yellow"></div>≥0.2MPa</div>
+            <div class="legend-item"><div class="legend-dot red"></div>&lt;0.2MPa</div>
         </div>
         <div class="sim-params">
             <div class="sim-params-title">計算条件（林野65mm・固定）</div>
@@ -639,9 +638,10 @@
         }
 
         // 中継可搬の設置位置計算（損失予算方式）
-        // 根本可搬(P1, index=0)から0.6MPaで送水開始
-        // 累積損失が0.4MPaを超える直前に次の可搬(P2, P3...)を配置
-        // 最終区間は筒先圧0.3MPa確保のため予算0.3MPa
+        // P1(index=0)から0.6MPaで送水開始
+        // 累積損失が予算を超える「直前」に次の可搬を配置
+        // 中継区間: 予算0.4MPa（残圧0.2確保）
+        // 最終区間: 予算0.3MPa（筒先圧0.3確保）
         function computeRelayPositions(points, params) {
             const relays = []; // 中継可搬の位置（P2, P3...のindex）
             const relayBudget = params.pumpOutputMPa - params.minInletPressureMPa; // 0.4
@@ -649,43 +649,62 @@
             
             if (points.length < 2) return relays;
             
-            let pumpIdx = 0; // 現在の可搬位置（最初はP1=index 0）
+            let pumpIdx = 0; // 現在の可搬位置
+            let safetyCount = 0;
+            const maxIter = points.length * 2;
             
-            while (pumpIdx < points.length - 1) {
-                // pumpIdxから各点への累積損失を計算
+            while (pumpIdx < points.length - 1 && safetyCount < maxIter) {
+                safetyCount++;
+                
+                // pumpIdxから終点までの累積損失を計算し、どこに次の可搬を置くか決定
                 let accLoss = 0;
-                let nextPumpIdx = -1;
+                let bestRelayIdx = -1;
+                let lastSafeLoss = 0;
                 
                 for (let i = pumpIdx + 1; i < points.length; i++) {
-                    // pumpIdx → i への区間損失（pumpIdxからiまでの全区間）
                     const p1 = points[i - 1], p2 = points[i];
                     const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
                     const dh = (p2.height || 0) - (p1.height || 0);
                     const loss = calcSectionLoss(L, dh, params);
                     accLoss += loss.total;
                     
-                    // 終点かどうかで予算を変える
+                    // この点が終点かどうか
                     const isEnd = (i === points.length - 1);
-                    const budget = isEnd ? nozzleBudget : relayBudget;
                     
-                    if (accLoss > budget) {
-                        // 予算超過 → 1つ前の点に可搬を置く
-                        if (i - 1 > pumpIdx) {
-                            nextPumpIdx = i - 1;
+                    if (isEnd) {
+                        // 終点に到達：筒先圧0.3確保できるか？
+                        if (accLoss <= nozzleBudget) {
+                            // OK、これ以上中継不要
+                            pumpIdx = points.length; // ループ終了
                         } else {
-                            // 1区間で超過（置けない）→ この点に置く
-                            nextPumpIdx = i;
+                            // 筒先圧確保できない → 最後に置ける位置に中継
+                            if (bestRelayIdx > pumpIdx && bestRelayIdx < points.length - 1) {
+                                relays.push(bestRelayIdx);
+                                pumpIdx = bestRelayIdx;
+                            } else {
+                                // 置ける位置がない場合は終了
+                                pumpIdx = points.length;
+                            }
                         }
-                        break;
+                    } else {
+                        // 中継区間：残圧0.2確保できるか？
+                        if (accLoss <= relayBudget) {
+                            // まだ余裕あり、この点を候補として記録
+                            bestRelayIdx = i;
+                            lastSafeLoss = accLoss;
+                        } else {
+                            // 予算超過 → 1つ前の点（bestRelayIdx）に可搬を置く
+                            if (bestRelayIdx > pumpIdx) {
+                                relays.push(bestRelayIdx);
+                                pumpIdx = bestRelayIdx;
+                            } else {
+                                // 1区間で超過、やむなくこの点に置く
+                                relays.push(i);
+                                pumpIdx = i;
+                            }
+                            break;
+                        }
                     }
-                }
-                
-                if (nextPumpIdx > 0 && nextPumpIdx < points.length - 1) {
-                    relays.push(nextPumpIdx);
-                    pumpIdx = nextPumpIdx;
-                } else {
-                    // 終点まで届いた or 置けない
-                    break;
                 }
             }
             
@@ -835,23 +854,48 @@
                 warning.classList.remove('show');
             }
             
-            // 区間詳細リスト更新（中継位置を考慮した残圧表示）
-            if (data.sections) {
-                const relaySet = new Set(data.relayIndices || []);
+            // 区間詳細リスト更新（P1-P2形式）
+            if (data.sections && data.relayIndices) {
+                // ポンプ位置リスト作成: [0, relay1, relay2, ..., 終点]
+                const pumpPositions = [0, ...data.relayIndices];
                 const listEl = document.getElementById('segmentList');
-                listEl.innerHTML = data.sections.map((s, idx) => {
-                    const remainingP = s.remainingPressure;
-                    const colorClass = remainingP >= 0.4 ? 'green' : remainingP >= 0.2 ? 'yellow' : 'red';
-                    const elevStr = s.elevDiffM > 0 ? `↑${s.elevDiffM.toFixed(1)}m` : s.elevDiffM < 0 ? `↓${Math.abs(s.elevDiffM).toFixed(1)}m` : '±0';
-                    // この区間の始点（idx）が中継位置かどうか
-                    const isRelayStart = s.isRelayPoint;
-                    const pumpMark = isRelayStart ? '🔶' : '';
-                    return `<div class="segment-item">
+                
+                // 区間をポンプ間でグループ化
+                let currentPumpNum = 1;
+                let html = '';
+                let segmentStart = 0;
+                
+                for (let pIdx = 0; pIdx < pumpPositions.length; pIdx++) {
+                    const pumpStart = pumpPositions[pIdx];
+                    const pumpEnd = pIdx < pumpPositions.length - 1 ? pumpPositions[pIdx + 1] : data.sections.length;
+                    const nextPumpNum = pIdx < pumpPositions.length - 1 ? currentPumpNum + 1 : '筒先';
+                    
+                    // この区間（Pn → Pn+1 or 筒先）の集計
+                    let segDist = 0, segHose = 0, segElev = 0;
+                    let segEndPressure = 0;
+                    
+                    for (let i = segmentStart; i < pumpEnd && i < data.sections.length; i++) {
+                        const s = data.sections[i];
+                        segDist += s.lengthM;
+                        segHose += s.nHose;
+                        segElev += s.elevDiffM;
+                        segEndPressure = s.remainingPressure;
+                    }
+                    
+                    const colorClass = segEndPressure >= 0.4 ? 'green' : segEndPressure >= 0.2 ? 'yellow' : 'red';
+                    const elevStr = segElev >= 0 ? `+${segElev.toFixed(0)}m` : `${segElev.toFixed(0)}m`;
+                    
+                    html += `<div class="segment-item">
                         <div class="segment-color ${colorClass}"></div>
-                        <div class="segment-info">${pumpMark}区間${idx + 1}: ${s.lengthM.toFixed(0)}m/${s.nHose}本 (${elevStr})</div>
-                        <div class="segment-loss">残圧 ${remainingP.toFixed(2)} MPa</div>
+                        <div class="segment-info">P${currentPumpNum}→${nextPumpNum}: ${segDist.toFixed(0)}m/${segHose}本, ${elevStr}</div>
+                        <div class="segment-loss">${segEndPressure.toFixed(2)} MPa</div>
                     </div>`;
-                }).join('');
+                    
+                    currentPumpNum++;
+                    segmentStart = pumpEnd;
+                }
+                
+                listEl.innerHTML = html;
             }
         }
 
