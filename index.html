@@ -605,6 +605,155 @@
             const extra = params.extraLossPerHoseMPa * nHose;
             return { friction, head, extra, nHose, total: friction + head + extra };
         }
+        
+        // 距離ベースの損失計算（補間用）
+        function calcLossForDistance(L, dh, params) {
+            const friction = params.kFrictionMPaPer100m * (L / 100.0);
+            const head = 0.01 * Math.max(0, dh);
+            const nHose = Math.ceil(L / params.hoseLengthM);
+            const extra = params.extraLossPerHoseMPa * nHose;
+            return friction + head + extra;
+        }
+
+        // 経路を細かい点に補間（10m間隔）
+        function interpolatePath(points, intervalM = 10) {
+            const result = [];
+            if (points.length < 2) return points;
+            
+            result.push({ ...points[0], distFromStart: 0 });
+            let totalDist = 0;
+            
+            for (let i = 1; i < points.length; i++) {
+                const p1 = points[i - 1], p2 = points[i];
+                const segDist = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
+                const segDh = (p2.height || 0) - (p1.height || 0);
+                
+                // この区間を細分化
+                const numSteps = Math.max(1, Math.ceil(segDist / intervalM));
+                
+                for (let s = 1; s <= numSteps; s++) {
+                    const t = s / numSteps;
+                    const interpLon = p1.lon + (p2.lon - p1.lon) * t;
+                    const interpLat = p1.lat + (p2.lat - p1.lat) * t;
+                    const interpHeight = (p1.height || 0) + segDh * t;
+                    const stepDist = segDist * t;
+                    
+                    result.push({
+                        lon: interpLon,
+                        lat: interpLat,
+                        height: interpHeight,
+                        distFromStart: totalDist + stepDist
+                    });
+                }
+                totalDist += segDist;
+            }
+            
+            return result;
+        }
+
+        // 中継位置計算（補間点ベース）
+        // 返り値: 中継位置の情報配列 [{distFromStart, lon, lat, height}, ...]
+        function computeRelayPositionsInterpolated(points, params) {
+            const relays = [];
+            const relayBudget = params.pumpOutputMPa - params.minInletPressureMPa; // 0.4
+            const nozzleBudget = params.pumpOutputMPa - params.nozzleRequiredMPa;  // 0.3
+            
+            if (points.length < 2) return { relays, interpolated: points };
+            
+            // 経路を10m間隔で補間
+            const interp = interpolatePath(points, 10);
+            
+            let pumpIdx = 0; // 現在の可搬位置（補間点のindex）
+            let safetyCount = 0;
+            const maxIter = interp.length;
+            
+            while (pumpIdx < interp.length - 1 && safetyCount < maxIter) {
+                safetyCount++;
+                
+                let accLoss = 0;
+                let lastSafeIdx = pumpIdx;
+                
+                for (let i = pumpIdx + 1; i < interp.length; i++) {
+                    const p1 = interp[i - 1], p2 = interp[i];
+                    const segDist = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
+                    const segDh = (p2.height || 0) - (p1.height || 0);
+                    const loss = calcLossForDistance(segDist, segDh, params);
+                    accLoss += loss;
+                    
+                    const isEnd = (i === interp.length - 1);
+                    const budget = isEnd ? nozzleBudget : relayBudget;
+                    
+                    if (accLoss > budget) {
+                        // 予算超過 → lastSafeIdxの位置に中継
+                        if (lastSafeIdx > pumpIdx) {
+                            relays.push({
+                                index: lastSafeIdx,
+                                distFromStart: interp[lastSafeIdx].distFromStart,
+                                lon: interp[lastSafeIdx].lon,
+                                lat: interp[lastSafeIdx].lat,
+                                height: interp[lastSafeIdx].height
+                            });
+                            pumpIdx = lastSafeIdx;
+                        } else {
+                            // 1ステップで超過（10mで超過は通常ないが念のため）
+                            pumpIdx = i;
+                        }
+                        break;
+                    }
+                    
+                    lastSafeIdx = i;
+                    
+                    if (isEnd) {
+                        pumpIdx = interp.length;
+                    }
+                }
+            }
+            
+            return { relays, interpolated: interp };
+        }
+
+        // ポンプ区間計算（補間ベース）
+        function computePumpSegmentsFromRelays(interpolated, relays, params) {
+            const pumpSegments = [];
+            
+            // 中継位置のindexリスト
+            const relayIndices = [0, ...relays.map(r => r.index)];
+            
+            for (let p = 0; p < relayIndices.length; p++) {
+                const startIdx = relayIndices[p];
+                const endIdx = p < relayIndices.length - 1 ? relayIndices[p + 1] : interpolated.length - 1;
+                
+                // このポンプ区間の損失を集計
+                let segDist = 0, segElev = 0, segLoss = 0;
+                
+                for (let i = startIdx + 1; i <= endIdx; i++) {
+                    const p1 = interpolated[i - 1], p2 = interpolated[i];
+                    const d = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
+                    const dh = (p2.height || 0) - (p1.height || 0);
+                    segDist += d;
+                    segElev += dh;
+                    segLoss += calcLossForDistance(d, dh, params);
+                }
+                
+                const segHose = Math.ceil(segDist / params.hoseLengthM);
+                const remainingP = params.pumpOutputMPa - segLoss;
+                const isLast = p === relayIndices.length - 1;
+                
+                pumpSegments.push({
+                    pumpNum: p + 1,
+                    nextLabel: isLast ? '筒先' : `P${p + 2}`,
+                    distance: segDist,
+                    hoses: segHose,
+                    elevation: segElev,
+                    loss: segLoss,
+                    remainingPressure: remainingP,
+                    startPos: interpolated[startIdx],
+                    endPos: interpolated[endIdx]
+                });
+            }
+            
+            return pumpSegments;
+        }
 
         function simulateHoseExtension(points, params) {
             const sections = [];
@@ -860,14 +1009,13 @@
             return c.toDataURL();
         }
 
-        // パネル更新（中継位置考慮版）
+        // パネル更新（補間ベース版）
         function updateHoseInfoPanel(data) {
             document.getElementById('hoseInfoDist').textContent = formatDistance(data.totalLengthM);
             document.getElementById('hoseInfoCount').textContent = data.totalHoses20m + '本';
             document.getElementById('hoseInfoLoss').textContent = data.totalLossMPa.toFixed(2) + ' MPa';
             
             const endPEl = document.getElementById('hoseInfoEndP');
-            // 末端圧表示（中継込みの計算結果）
             endPEl.textContent = data.endPressureMPa.toFixed(2) + ' MPa';
             if (data.endPressureMPa >= hoseParams.nozzleRequiredMPa) {
                 endPEl.className = 'panel-stat-value ok';
@@ -877,46 +1025,31 @@
                 endPEl.className = 'panel-stat-value warning';
             }
             
-            // 可搬台数表示（根本1 + 中継N）
+            // 可搬台数表示
             document.getElementById('hoseInfoRelay').textContent = `${data.totalPumps}台 (中継${data.relayCount})`;
             document.getElementById('hoseInfoElev').textContent = (data.totalClimbM || 0).toFixed(1) + 'm↑';
             
-            // 警告表示（末端圧が0.3未満の場合）
+            // 警告表示は常に非表示（補間により正確な計算が可能）
             const warning = document.getElementById('simWarning');
-            if (data.endPressureMPa < hoseParams.nozzleRequiredMPa) {
-                document.getElementById('simWarningText').textContent = 
-                    `筒先圧${data.endPressureMPa.toFixed(2)}MPa < 要求0.3MPa（プロット点を細かくしてください）`;
-                warning.classList.add('show');
-            } else {
-                warning.classList.remove('show');
-            }
+            warning.classList.remove('show');
             
-            // 区間詳細リスト更新（pumpSegmentsを使用）
+            // 区間詳細リスト更新
             if (data.pumpSegments) {
                 const listEl = document.getElementById('segmentList');
                 let html = '';
-                let hasOverBudget = false;
                 
                 for (const seg of data.pumpSegments) {
                     const colorClass = seg.remainingPressure >= 0.4 ? 'green' : seg.remainingPressure >= 0.2 ? 'yellow' : 'red';
                     const elevStr = seg.elevation >= 0 ? `+${seg.elevation.toFixed(0)}m` : `${seg.elevation.toFixed(0)}m`;
-                    const warnMark = seg.isOverBudget ? '⚠️' : '';
-                    if (seg.isOverBudget) hasOverBudget = true;
                     
                     html += `<div class="segment-item">
                         <div class="segment-color ${colorClass}"></div>
-                        <div class="segment-info">${warnMark}P${seg.pumpNum}→${seg.nextLabel}: ${seg.distance.toFixed(0)}m/${seg.hoses}本, ${elevStr}</div>
+                        <div class="segment-info">P${seg.pumpNum}→${seg.nextLabel}: ${seg.distance.toFixed(0)}m/${seg.hoses}本, ${elevStr}</div>
                         <div class="segment-loss">${seg.remainingPressure.toFixed(2)} MPa</div>
                     </div>`;
                 }
                 
                 listEl.innerHTML = html;
-                
-                // 超過区間がある場合、警告を更新
-                if (hasOverBudget && data.endPressureMPa < hoseParams.nozzleRequiredMPa) {
-                    document.getElementById('simWarningText').textContent = 
-                        `⚠️ プロット間隔が粗いため正確な中継位置を計算できません。細かくプロットし直してください。`;
-                }
             }
         }
 
@@ -966,25 +1099,24 @@
             hoseSimState.colorSegmentsByLine.set(lineId, segs);
         }
 
-        // シミュレーション実行（中継位置を考慮した新仕様）
+        // シミュレーション実行（補間ベースの新仕様）
         function runSimulationForLine(lineId, pathLLH) {
             // パラメータ更新（UIから）
             hoseParams.kFrictionMPaPer100m = parseFloat(document.getElementById('paramK').value) || 0.04;
             hoseParams.extraLossPerHoseMPa = parseFloat(document.getElementById('paramExtra').value) || 0.02;
 
-            // 中継位置を計算
-            const relayIndices = computeRelayPositions(pathLLH, hoseParams);
+            // 補間ベースで中継位置を計算
+            const { relays, interpolated } = computeRelayPositionsInterpolated(pathLLH, hoseParams);
             
-            // 中継位置を考慮した区間計算
-            const sim = computeSectionsWithPressure(pathLLH, hoseParams, relayIndices);
-            
-            // ポンプ区間ごとの集計（表示用）
-            const pumpSegments = computePumpSegments(sim.sections, relayIndices, hoseParams);
+            // ポンプ区間ごとの集計
+            const pumpSegments = computePumpSegmentsFromRelays(interpolated, relays, hoseParams);
 
-            // マーカー描画
+            // マーカー描画（中継位置は補間点の座標を使用）
             renderStartEndMarkers(lineId, pathLLH);
-            renderRelayMarkers(lineId, pathLLH, relayIndices);
-            renderColorizedSegments(lineId, pathLLH, sim.sections);
+            renderRelayMarkersFromPositions(lineId, relays);
+            
+            // 色分け描画（ポンプ区間ごとに色分け）
+            renderColorizedByPumpSegments(lineId, interpolated, relays, pumpSegments);
 
             // 筒先圧 = 最後のポンプ区間の残圧
             const endP = pumpSegments.length > 0 
@@ -997,21 +1129,101 @@
                 const dh = (pathLLH[i].height || 0) - (pathLLH[i-1].height || 0);
                 if (dh > 0) totalClimb += dh;
             }
+            
+            // 総延長・ホース本数
+            const totalLength = pumpSegments.reduce((s, p) => s + p.distance, 0);
+            const totalHoses = pumpSegments.reduce((s, p) => s + p.hoses, 0);
+            const totalLoss = pumpSegments.reduce((s, p) => s + p.loss, 0);
 
-            // 可搬台数 = 根本(1) + 中継(relayIndices.length)
-            const totalPumps = 1 + relayIndices.length;
+            // 可搬台数 = 根本(1) + 中継
+            const totalPumps = 1 + relays.length;
 
             updateHoseInfoPanel({
-                totalLengthM: sim.totalLengthM,
-                totalHoses20m: sim.totalHoses20m,
-                totalLossMPa: sim.totalLossMPa,
+                totalLengthM: totalLength,
+                totalHoses20m: totalHoses,
+                totalLossMPa: totalLoss,
                 endPressureMPa: endP,
                 totalPumps: totalPumps,
-                relayCount: relayIndices.length,
+                relayCount: relays.length,
                 totalClimbM: totalClimb,
-                pumpSegments: pumpSegments,
-                relayIndices: relayIndices
+                pumpSegments: pumpSegments
             });
+        }
+        
+        // 中継マーカー描画（座標指定版）
+        function renderRelayMarkersFromPositions(lineId, relays) {
+            const prev = hoseSimState.relayCandidateEntitiesByLine.get(lineId) || [];
+            prev.forEach(e => viewer.entities.remove(e));
+            
+            const ents = relays.map((r, k) => {
+                const pumpNum = k + 2;
+                return viewer.entities.add({
+                    id: `relay-${lineId}-${k}`,
+                    position: Cesium.Cartesian3.fromDegrees(r.lon, r.lat, r.height || 0),
+                    point: { pixelSize: 14, color: Cesium.Color.fromCssColorString('#ff9800'), outlineColor: Cesium.Color.WHITE, outlineWidth: 2, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND },
+                    label: {
+                        text: `P${pumpNum}`,
+                        font: 'bold 11px sans-serif',
+                        fillColor: Cesium.Color.WHITE,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        pixelOffset: new Cesium.Cartesian2(0, -10)
+                    }
+                });
+            });
+            hoseSimState.relayCandidateEntitiesByLine.set(lineId, ents);
+        }
+        
+        // ポンプ区間ごとの色分け描画
+        function renderColorizedByPumpSegments(lineId, interpolated, relays, pumpSegments) {
+            const prevSegs = hoseSimState.colorSegmentsByLine?.get(lineId) || [];
+            prevSegs.forEach(e => viewer.entities.remove(e));
+            
+            if (!hoseSimState.colorSegmentsByLine) {
+                hoseSimState.colorSegmentsByLine = new Map();
+            }
+            
+            const segs = [];
+            const relayIndices = [0, ...relays.map(r => r.index)];
+            
+            for (let p = 0; p < pumpSegments.length; p++) {
+                const seg = pumpSegments[p];
+                const startIdx = relayIndices[p];
+                const endIdx = p < relayIndices.length - 1 ? relayIndices[p + 1] : interpolated.length - 1;
+                
+                // この区間の色
+                let color;
+                if (seg.remainingPressure >= 0.4) {
+                    color = Cesium.Color.fromCssColorString('#4ade80');
+                } else if (seg.remainingPressure >= 0.2) {
+                    color = Cesium.Color.fromCssColorString('#fbbf24');
+                } else {
+                    color = Cesium.Color.fromCssColorString('#ef4444');
+                }
+                
+                // ポリラインの座標を構築
+                const positions = [];
+                for (let i = startIdx; i <= endIdx; i++) {
+                    const pt = interpolated[i];
+                    positions.push(Cesium.Cartesian3.fromDegrees(pt.lon, pt.lat, pt.height || 0));
+                }
+                
+                if (positions.length >= 2) {
+                    const entity = viewer.entities.add({
+                        polyline: {
+                            positions: positions,
+                            width: 6,
+                            material: color,
+                            clampToGround: true
+                        }
+                    });
+                    segs.push(entity);
+                }
+            }
+            
+            hoseSimState.colorSegmentsByLine.set(lineId, segs);
         }
 
         function onParamChange() {
