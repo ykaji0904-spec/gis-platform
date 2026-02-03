@@ -1425,12 +1425,19 @@
         let currentTool = null;
         function clearTool() { document.querySelectorAll('.tool-item').forEach(t => t.classList.remove('active')); document.getElementById('modeIndicator').classList.remove('show', 'water-mode', 'hose-mode', 'measure-mode'); currentTool = null; }
         function setTool(tool) {
+            // 同じツールをタップしたらオフにする
+            if (currentTool === tool) {
+                clearTool();
+                document.getElementById('toolMenu').classList.remove('show');
+                return;
+            }
+            
             clearTool();
             document.getElementById('hosePanel').classList.remove('active');
             document.getElementById('measurePanel').classList.remove('active');
             document.getElementById('toolMenu').classList.remove('show');
             closeAllPanels();
-            if (currentTool === tool) return;
+            
             currentTool = tool;
             const ind = document.getElementById('modeIndicator'), icon = document.getElementById('modeIcon'), text = document.getElementById('modeText');
             if (tool === 'fire') { document.getElementById('toolFire').classList.add('active'); icon.textContent = 'local_fire_department'; text.textContent = '火点追加'; ind.classList.add('show'); }
