@@ -367,10 +367,18 @@
         let lastClickedCoords = null;
 
         // ===== BASEMAP =====
-        function initBasemaps() {
-            // デフォルトの衛星レイヤーを取得（最初のレイヤー）
-            if (viewer.imageryLayers.length > 0) {
-                satelliteLayer = viewer.imageryLayers.get(0);
+        async function initBasemaps() {
+            // Cesium Ionの衛星画像を明示的に追加
+            try {
+                const ionImagery = await Cesium.IonImageryProvider.fromAssetId(2);
+                // 既存のレイヤーをクリアして新しく追加
+                viewer.imageryLayers.removeAll();
+                satelliteLayer = viewer.imageryLayers.addImageryProvider(ionImagery);
+            } catch(e) {
+                console.warn('Ion imagery failed, using default:', e);
+                if (viewer.imageryLayers.length > 0) {
+                    satelliteLayer = viewer.imageryLayers.get(0);
+                }
             }
             // 国土地理院地図レイヤーを追加
             try {
@@ -383,8 +391,9 @@
                 stdLayer.show = false;
             } catch(e) { console.warn('GSI layer failed:', e); }
         }
-        // 少し遅延してベースマップ初期化（Cesiumの初期化完了を待つ）
-        setTimeout(initBasemaps, 500);
+        // Cesiumの初期化完了を待ってからベースマップ初期化
+        viewer.scene.globe.tileLoadProgressEvent.addEventListener(() => {});
+        setTimeout(initBasemaps, 100);
 
         function setBasemap(type) {
             document.querySelectorAll('.map-type-btn').forEach(b => b.classList.remove('active'));
