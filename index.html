@@ -639,61 +639,53 @@
         }
 
         // 中継可搬の設置位置計算（損失予算方式）
-        // 根本可搬(1台目)から0.6MPaで送水開始
-        // 区間1で損失→第2可搬入口で0.2MPa（損失予算0.4MPa消費）の位置に第2可搬
-        // 以降繰り返し、最終的に筒先で0.3MPa以上を確保
+        // 根本可搬(P1, index=0)から0.6MPaで送水開始
+        // 累積損失が0.4MPaを超える直前に次の可搬(P2, P3...)を配置
+        // 最終区間は筒先圧0.3MPa確保のため予算0.3MPa
         function computeRelayPositions(points, params) {
-            const relays = []; // 中継可搬の位置（pointsのindex）
-            const relayBudget = params.pumpOutputMPa - params.minInletPressureMPa; // 0.6 - 0.2 = 0.4
-            const nozzleBudget = params.pumpOutputMPa - params.nozzleRequiredMPa;  // 0.6 - 0.3 = 0.3
+            const relays = []; // 中継可搬の位置（P2, P3...のindex）
+            const relayBudget = params.pumpOutputMPa - params.minInletPressureMPa; // 0.4
+            const nozzleBudget = params.pumpOutputMPa - params.nozzleRequiredMPa;  // 0.3
             
-            let currentAnchor = 0; // 現在の可搬位置
-            let maxIterations = points.length * 2; // 無限ループ防止
-            let iterations = 0;
+            if (points.length < 2) return relays;
             
-            while (currentAnchor < points.length - 1 && iterations < maxIterations) {
-                iterations++;
+            let pumpIdx = 0; // 現在の可搬位置（最初はP1=index 0）
+            
+            while (pumpIdx < points.length - 1) {
+                // pumpIdxから各点への累積損失を計算
                 let accLoss = 0;
-                let foundRelay = false;
+                let nextPumpIdx = -1;
                 
-                // currentAnchorから先に進みながら損失を累積
-                for (let i = currentAnchor + 1; i < points.length; i++) {
+                for (let i = pumpIdx + 1; i < points.length; i++) {
+                    // pumpIdx → i への区間損失（pumpIdxからiまでの全区間）
                     const p1 = points[i - 1], p2 = points[i];
                     const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
                     const dh = (p2.height || 0) - (p1.height || 0);
                     const loss = calcSectionLoss(L, dh, params);
                     accLoss += loss.total;
                     
-                    // 最終区間かどうかで判定基準を変える
-                    const isLastSegment = (i === points.length - 1);
-                    const budget = isLastSegment ? nozzleBudget : relayBudget;
+                    // 終点かどうかで予算を変える
+                    const isEnd = (i === points.length - 1);
+                    const budget = isEnd ? nozzleBudget : relayBudget;
                     
                     if (accLoss > budget) {
-                        // 損失予算を超えた → 直前の点に中継を置く
-                        const relayIdx = Math.max(currentAnchor + 1, i - 1);
-                        
-                        if (relayIdx < points.length - 1 && relayIdx > currentAnchor) {
-                            relays.push(relayIdx);
-                            currentAnchor = relayIdx;
-                            foundRelay = true;
+                        // 予算超過 → 1つ前の点に可搬を置く
+                        if (i - 1 > pumpIdx) {
+                            nextPumpIdx = i - 1;
                         } else {
-                            // 中継を置けない（1区間で予算超過）→ 次の点に進む
-                            currentAnchor = i;
-                            foundRelay = true;
+                            // 1区間で超過（置けない）→ この点に置く
+                            nextPumpIdx = i;
                         }
                         break;
                     }
-                    
-                    // 終点に到達
-                    if (i === points.length - 1) {
-                        currentAnchor = points.length; // ループ終了
-                        foundRelay = true;
-                    }
                 }
                 
-                // forループが何も処理しなかった場合の安全策
-                if (!foundRelay) {
-                    currentAnchor++;
+                if (nextPumpIdx > 0 && nextPumpIdx < points.length - 1) {
+                    relays.push(nextPumpIdx);
+                    pumpIdx = nextPumpIdx;
+                } else {
+                    // 終点まで届いた or 置けない
+                    break;
                 }
             }
             
@@ -701,22 +693,26 @@
         }
 
         // 各区間の残圧を計算（中継位置を考慮）
+        // relayIndices = 中継可搬の位置（P2, P3, ...の位置）
+        // index 0 は常に根本P1
         function computeSectionsWithPressure(points, params, relayIndices) {
             const sections = [];
-            let currentPressure = params.pumpOutputMPa; // 0.6から開始
-            let relaySet = new Set(relayIndices);
+            let currentPressure = params.pumpOutputMPa; // P1から0.6で開始
+            const relaySet = new Set(relayIndices);
             let totalHoses = 0;
             let cumulative = 0;
             
             for (let i = 1; i < points.length; i++) {
-                const p1 = points[i - 1], p2 = points[i];
+                const startIdx = i - 1; // この区間の始点index
+                const p1 = points[startIdx], p2 = points[i];
                 const L = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat);
                 const dh = (p2.height || 0) - (p1.height || 0);
                 const loss = calcSectionLoss(L, dh, params);
                 
-                // 前の点が中継位置なら圧力リセット
-                if (relaySet.has(i - 1)) {
-                    currentPressure = params.pumpOutputMPa;
+                // この区間の始点が中継位置なら圧力リセット（根本index=0以外）
+                const isRelayStart = relaySet.has(startIdx);
+                if (isRelayStart) {
+                    currentPressure = params.pumpOutputMPa; // 0.6にリセット
                 }
                 
                 // この区間の損失を引く
@@ -725,14 +721,16 @@
                 totalHoses += loss.nHose;
                 
                 sections.push({
-                    i,
+                    sectionNum: i, // 区間番号（1から）
+                    startIdx: startIdx,
+                    endIdx: i,
                     lengthM: L,
                     elevDiffM: dh,
                     nHose: loss.nHose,
                     sectionLossMPa: loss.total,
                     cumulativeLossMPa: cumulative,
                     remainingPressure: currentPressure,
-                    isRelayPoint: relaySet.has(i - 1) // この区間の始点が中継位置
+                    isRelayPoint: isRelayStart
                 });
             }
             
