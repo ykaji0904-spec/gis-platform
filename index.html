@@ -525,19 +525,12 @@
         function selectFirePoint(id) {
             const f = firePoints.find(p => p.id === id);
             if (!f) return;
-            selectedFirePoint = f;
             closeAllPanels();
+            selectedFirePoint = f;  // closeAllPanelsの後にセット
             document.getElementById('fireLat').textContent = f.lat.toFixed(5) + '°';
             document.getElementById('fireLon').textContent = f.lon.toFixed(5) + '°';
             document.getElementById('fireElev').textContent = f.height.toFixed(1) + 'm';
             document.getElementById('firePanel').classList.add('active');
-            updateNearbyWaterList(f.lon, f.lat);
-        }
-        function updateNearbyWaterList(lon, lat) {
-            const list = document.getElementById('nearbyWaterList');
-            if (!waterSources.length) { list.innerHTML = '<span style="color:rgba(255,255,255,0.3);font-size:8px;">水利なし</span>'; return; }
-            const sorted = waterSources.map(w => ({ ...w, d: geodesicDistance(lon, lat, w.lon, w.lat) })).sort((a, b) => a.d - b.d).slice(0, 5);
-            list.innerHTML = sorted.map(w => `<div class="water-chip" onclick="selectWater('${w.id}')">${w.type[0].toUpperCase()} ${formatDistance(w.d)}</div>`).join('');
         }
         function updateFireArea() {
             if (fireAreaEntity) { viewer.entities.remove(fireAreaEntity); fireAreaEntity = null; }
@@ -573,8 +566,8 @@
         function selectWater(id) {
             const w = waterSources.find(x => x.id === id);
             if (!w) return;
-            selectedWater = w;
             closeAllPanels();
+            selectedWater = w;  // closeAllPanelsの後にセット
             document.getElementById('waterType').textContent = { hydrant: '消火栓', tank: '防火水槽', natural: '自然水利' }[w.type] || w.type;
             document.getElementById('waterLat').textContent = w.lat.toFixed(5) + '°';
             document.getElementById('waterLon').textContent = w.lon.toFixed(5) + '°';
