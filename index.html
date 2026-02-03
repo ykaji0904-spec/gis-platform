@@ -345,11 +345,16 @@
         Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjkwN2E2MC1jYjM5LTRmNzUtOTEyZS1hYTBlNmYzNWRhMjUiLCJpZCI6MjU5MjkyLCJpYXQiOjE3MzI2MTg4MDB9.vvcLKVhx_sUMFYMYwZzArW2DfXRxXdJdgfxDqpE7ba8';
         
         const viewer = new Cesium.Viewer('cesiumContainer', {
-            terrain: Cesium.Terrain.fromWorldTerrain(),
             baseLayerPicker: false, geocoder: false, homeButton: false, sceneModePicker: false,
             navigationHelpButton: false, animation: false, timeline: false, fullscreenButton: false,
             infoBox: false, selectionIndicator: false
         });
+        
+        // 地形を非同期で設定
+        Cesium.createWorldTerrainAsync().then(terrain => {
+            viewer.terrainProvider = terrain;
+        }).catch(e => console.warn('Terrain failed:', e));
+        
         viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(132.4553, 34.3853, 3000), orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 }, duration: 2 });
 
         // ===== STATE =====
@@ -363,19 +368,23 @@
 
         // ===== BASEMAP =====
         function initBasemaps() {
-            satelliteLayer = viewer.imageryLayers.get(0);
+            // デフォルトの衛星レイヤーを取得（最初のレイヤー）
+            if (viewer.imageryLayers.length > 0) {
+                satelliteLayer = viewer.imageryLayers.get(0);
+            }
+            // 国土地理院地図レイヤーを追加
             try {
-                stdLayer = viewer.imageryLayers.addImageryProvider(
-                    new Cesium.UrlTemplateImageryProvider({ 
-                        url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', 
-                        maximumLevel: 18,
-                        credit: '国土地理院'
-                    })
-                );
+                const gsiProvider = new Cesium.UrlTemplateImageryProvider({ 
+                    url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', 
+                    maximumLevel: 18,
+                    credit: '国土地理院'
+                });
+                stdLayer = viewer.imageryLayers.addImageryProvider(gsiProvider);
                 stdLayer.show = false;
             } catch(e) { console.warn('GSI layer failed:', e); }
         }
-        initBasemaps();
+        // 少し遅延してベースマップ初期化（Cesiumの初期化完了を待つ）
+        setTimeout(initBasemaps, 500);
 
         function setBasemap(type) {
             document.querySelectorAll('.map-type-btn').forEach(b => b.classList.remove('active'));
