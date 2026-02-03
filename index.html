@@ -545,8 +545,12 @@
             if (!selectedFirePoint) { showToast('火点が選択されていません'); return; }
             const id = selectedFirePoint.id;
             firePoints = firePoints.filter(f => f.id !== id);
-            const entity = firePointEntities.find(e => e.id === id);
-            if (entity) { viewer.entities.remove(entity); firePointEntities = firePointEntities.filter(e => e.id !== id); }
+            // エンティティを検索して削除
+            const entity = firePointEntities.find(e => e.id === id || e._id === id);
+            if (entity) { 
+                viewer.entities.remove(entity); 
+                firePointEntities = firePointEntities.filter(e => e !== entity); 
+            }
             selectedFirePoint = null;
             closePanel('fire');
             updateFireArea();
@@ -578,14 +582,17 @@
             if (!selectedWater) { showToast('水利が選択されていません'); return; }
             const id = selectedWater.id;
             waterSources = waterSources.filter(w => w.id !== id);
-            const entity = waterEntities.find(e => e.id === id);
-            if (entity) { viewer.entities.remove(entity); waterEntities = waterEntities.filter(e => e.id !== id); }
+            // エンティティを検索して削除
+            const entity = waterEntities.find(e => e.id === id || e._id === id);
+            if (entity) { 
+                viewer.entities.remove(entity); 
+                waterEntities = waterEntities.filter(e => e !== entity); 
+            }
             selectedWater = null;
             closePanel('water');
             showToast('水利を削除しました');
         }
-        addWaterSource('hydrant', '消火栓#1', 132.4548, 34.3858);
-        addWaterSource('tank', '防火水槽', 132.4563, 34.3863);
+        // 初期水利データなし（ユーザーが追加）
 
         // ========== HOSE LINES (with Simulation) ==========
         let hoseLinePoints = [], hoseLineSegments = [], hoseLineMarkers = [], hoseLineEntities = [], hoseLineIdCounter = 0, selectedHoseLine = null;
@@ -1443,8 +1450,10 @@
         handler.setInputAction(async function(click) {
             const picked = viewer.scene.pick(click.position);
             
-            if (picked && picked.id && picked.id.id) {
-                const pickedId = picked.id.id;
+            // エンティティがクリックされた場合
+            if (picked && picked.id) {
+                const entity = picked.id;
+                const pickedId = typeof entity.id === 'string' ? entity.id : (entity._id || '');
                 
                 if (pickedId.startsWith('fire-')) { selectFirePoint(pickedId); return; }
                 if (pickedId.startsWith('water-')) { selectWater(pickedId); return; }
