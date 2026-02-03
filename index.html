@@ -648,10 +648,13 @@
             const nozzleBudget = params.pumpOutputMPa - params.nozzleRequiredMPa;  // 0.6 - 0.3 = 0.3
             
             let currentAnchor = 0; // 現在の可搬位置
+            let maxIterations = points.length * 2; // 無限ループ防止
+            let iterations = 0;
             
-            while (currentAnchor < points.length - 1) {
+            while (currentAnchor < points.length - 1 && iterations < maxIterations) {
+                iterations++;
                 let accLoss = 0;
-                let lastValidIdx = currentAnchor;
+                let foundRelay = false;
                 
                 // currentAnchorから先に進みながら損失を累積
                 for (let i = currentAnchor + 1; i < points.length; i++) {
@@ -669,19 +672,28 @@
                         // 損失予算を超えた → 直前の点に中継を置く
                         const relayIdx = Math.max(currentAnchor + 1, i - 1);
                         
-                        if (relayIdx < points.length - 1) { // 終点には置かない
+                        if (relayIdx < points.length - 1 && relayIdx > currentAnchor) {
                             relays.push(relayIdx);
                             currentAnchor = relayIdx;
+                            foundRelay = true;
+                        } else {
+                            // 中継を置けない（1区間で予算超過）→ 次の点に進む
+                            currentAnchor = i;
+                            foundRelay = true;
                         }
                         break;
                     }
                     
-                    lastValidIdx = i;
-                    
-                    // 終点に到達 → ループ終了
+                    // 終点に到達
                     if (i === points.length - 1) {
                         currentAnchor = points.length; // ループ終了
+                        foundRelay = true;
                     }
+                }
+                
+                // forループが何も処理しなかった場合の安全策
+                if (!foundRelay) {
+                    currentAnchor++;
                 }
             }
             
