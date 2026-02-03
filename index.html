@@ -130,6 +130,30 @@
         .sim-param-input { width: 60px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 3px 6px; color: white; font-size: 10px; text-align: right; }
         .sim-param-unit { color: rgba(255,255,255,0.4); font-size: 9px; }
 
+        /* New param grid */
+        .sim-param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+        .sim-param-item { display: flex; flex-direction: column; gap: 2px; }
+        .sim-param-item label { font-size: 9px; color: rgba(255,255,255,0.5); }
+        .sim-param-input-wrap { display: flex; align-items: center; gap: 4px; }
+        .sim-param-input-wrap input { width: 50px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 4px 6px; color: white; font-size: 11px; text-align: right; }
+        .sim-param-input-wrap span { font-size: 9px; color: rgba(255,255,255,0.4); }
+        .recalc-btn { margin-top: 10px; width: 100%; padding: 8px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; border-radius: 6px; color: white; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .recalc-btn:hover { opacity: 0.9; }
+        .recalc-btn .material-icons { font-size: 14px; }
+
+        /* Segment table */
+        .segment-table-wrap { max-height: 150px; overflow-y: auto; margin-top: 6px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; }
+        .segment-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+        .segment-table th { background: rgba(255,255,255,0.05); padding: 6px 4px; text-align: center; color: rgba(255,255,255,0.6); font-weight: 500; position: sticky; top: 0; }
+        .segment-table td { padding: 5px 4px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+        .segment-table tr.green td { background: rgba(74, 222, 128, 0.1); }
+        .segment-table tr.yellow td { background: rgba(251, 191, 36, 0.1); }
+        .segment-table tr.red td { background: rgba(239, 68, 68, 0.1); }
+        .segment-table td:first-child { font-weight: 600; color: white; }
+        .segment-table td:last-child { font-weight: 600; }
+        .segment-table .elev-up { color: #ef4444; }
+        .segment-table .elev-down { color: #4ade80; }
+
         /* Warning message */
         .sim-warning { background: rgba(244, 67, 54, 0.15); border: 1px solid rgba(244, 67, 54, 0.3); border-radius: 6px; padding: 6px 10px; margin-top: 8px; display: none; }
         .sim-warning.show { display: block; }
@@ -147,8 +171,8 @@
         .segment-loss { color: white; font-weight: 500; min-width: 60px; text-align: right; }
 
         /* Legend */
-        .sim-legend { display: flex; gap: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); }
-        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 8px; color: rgba(255,255,255,0.5); }
+        .sim-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .legend-item { display: flex; align-items: center; gap: 3px; font-size: 8px; color: rgba(255,255,255,0.5); }
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
         .legend-dot.green { background: #4ade80; }
         .legend-dot.yellow { background: #fbbf24; }
@@ -280,56 +304,71 @@
     <!-- Hose Info Panel (シミュレーション結果) -->
     <div class="bottom-panel hose-info" id="hoseInfoPanel">
         <div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長シミュレーション</span><button class="panel-close" onclick="closePanel('hoseInfo')"><span class="material-icons">close</span></button></div>
+        
+        <!-- サマリー -->
         <div class="panel-stats">
             <div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseInfoDist">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">ホース本数</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">総損失</div><div class="panel-stat-value" id="hoseInfoLoss">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">筒先圧</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">ホース</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div>
             <div class="panel-stat"><div class="panel-stat-label">可搬台数</div><div class="panel-stat-value" id="hoseInfoRelay">-</div></div>
-            <div class="panel-stat"><div class="panel-stat-label">累計上り</div><div class="panel-stat-value" id="hoseInfoElev">-</div></div>
+            <div class="panel-stat"><div class="panel-stat-label">筒先圧</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div>
         </div>
-        <div class="sim-warning" id="simWarning">
-            <div class="sim-warning-text"><span class="material-icons">warning</span><span id="simWarningText">筒先圧が0.3MPa未満です</span></div>
+        
+        <!-- 区間詳細テーブル -->
+        <div class="section-title" style="margin-top:8px;">区間詳細</div>
+        <div class="segment-table-wrap">
+            <table class="segment-table" id="segmentTable">
+                <thead>
+                    <tr><th>区間</th><th>距離</th><th>本数</th><th>高低差</th><th>損失</th><th>残圧</th></tr>
+                </thead>
+                <tbody id="segmentTableBody"></tbody>
+            </table>
         </div>
-        <div class="section-title" style="margin-top:8px;">ポンプ間の損失と残圧</div>
-        <div class="segment-list" id="segmentList"></div>
+        
+        <!-- 凡例 -->
         <div class="sim-legend">
-            <div class="legend-item"><div class="legend-dot conf"></div>Pn(可搬)</div>
+            <div class="legend-item"><div class="legend-dot conf"></div>可搬</div>
             <div class="legend-item"><div class="legend-dot end"></div>筒先</div>
-            <div class="legend-item"><div class="legend-dot green"></div>≥0.4MPa</div>
-            <div class="legend-item"><div class="legend-dot yellow"></div>≥0.2MPa</div>
-            <div class="legend-item"><div class="legend-dot red"></div>&lt;0.2MPa</div>
+            <div class="legend-item"><div class="legend-dot green"></div>≥0.4</div>
+            <div class="legend-item"><div class="legend-dot yellow"></div>≥0.2</div>
+            <div class="legend-item"><div class="legend-dot red"></div>&lt;0.2</div>
         </div>
+        
+        <!-- 計算条件（調整可能） -->
         <div class="sim-params">
-            <div class="sim-params-title">計算条件（林野65mm・固定）</div>
-            <div class="sim-param-row">
-                <span class="sim-param-label">吐出圧</span>
-                <span class="sim-param-input" style="background:transparent;border:none;color:#4ade80;">0.6</span>
-                <span class="sim-param-unit">MPa（固定）</span>
+            <div class="sim-params-title">計算条件</div>
+            <div class="sim-param-grid">
+                <div class="sim-param-item">
+                    <label>送水圧</label>
+                    <div class="sim-param-input-wrap">
+                        <input type="number" id="paramPumpOut" value="0.6" step="0.05" min="0.3" max="1.0">
+                        <span>MPa</span>
+                    </div>
+                </div>
+                <div class="sim-param-item">
+                    <label>受水圧</label>
+                    <div class="sim-param-input-wrap">
+                        <input type="number" id="paramInlet" value="0.2" step="0.05" min="0.1" max="0.4">
+                        <span>MPa</span>
+                    </div>
+                </div>
+                <div class="sim-param-item">
+                    <label>筒先圧</label>
+                    <div class="sim-param-input-wrap">
+                        <input type="number" id="paramNozzle" value="0.4" step="0.05" min="0.2" max="0.5">
+                        <span>MPa</span>
+                    </div>
+                </div>
+                <div class="sim-param-item">
+                    <label>損失/本</label>
+                    <div class="sim-param-input-wrap">
+                        <input type="number" id="paramLossPerHose" value="0.02" step="0.005" min="0.01" max="0.05">
+                        <span>MPa</span>
+                    </div>
+                </div>
             </div>
-            <div class="sim-param-row">
-                <span class="sim-param-label">中継入口最低</span>
-                <span class="sim-param-input" style="background:transparent;border:none;color:#fbbf24;">0.2</span>
-                <span class="sim-param-unit">MPa（固定）</span>
-            </div>
-            <div class="sim-param-row">
-                <span class="sim-param-label">筒先要求</span>
-                <span class="sim-param-input" style="background:transparent;border:none;color:#ef4444;">0.3</span>
-                <span class="sim-param-unit">MPa（固定）</span>
-            </div>
-            <div class="sim-params-title" style="margin-top:8px;">調整可能</div>
-            <div class="sim-param-row">
-                <span class="sim-param-label">摩擦損失係数</span>
-                <input type="number" class="sim-param-input" id="paramK" value="0.04" step="0.01" onchange="onParamChange()">
-                <span class="sim-param-unit">MPa/100m</span>
-            </div>
-            <div class="sim-param-row">
-                <span class="sim-param-label">付加損失</span>
-                <input type="number" class="sim-param-input" id="paramExtra" value="0.02" step="0.01" onchange="onParamChange()">
-                <span class="sim-param-unit">MPa/本</span>
-            </div>
+            <button class="recalc-btn" onclick="onParamChange()"><span class="material-icons">refresh</span>再計算</button>
         </div>
-        <div class="panel-hint">赤丸 = 中継可搬の設置候補位置（残圧0.2MPa到達点）</div>
+        
         <div class="panel-actions"><button class="panel-btn danger" onclick="deleteSelectedHose()"><span class="material-icons">delete</span>削除</button></div>
     </div>
 
@@ -396,16 +435,12 @@
 
         // ========== 林野用シミュレーションパラメータ（新仕様） ==========
         const hoseParams = {
-            // 固定条件
-            pumpOutputMPa: 0.6,           // 可搬吐出圧（固定）
-            minInletPressureMPa: 0.2,     // 中継入口最低圧
-            nozzleRequiredMPa: 0.3,       // 筒先要求圧
-            // 損失予算
-            relayBudgetMPa: 0.4,          // 中継区間の許容損失（0.6 - 0.2）
-            tailBudgetMPa: 0.3,           // 末端区間の許容損失（0.6 - 0.3）
-            // 損失係数
-            kFrictionMPaPer100m: 0.04,    // 摩擦損失係数
-            extraLossPerHoseMPa: 0.02,    // 付加損失（1本20mあたり）
+            // 圧力条件（UI調整可能）
+            pumpOutputMPa: 0.6,           // 送水圧（可搬吐出圧）
+            minInletPressureMPa: 0.2,     // 受水圧（中継入口圧）
+            nozzleRequiredMPa: 0.4,       // 筒先圧（要求）
+            // 損失係数（UI調整可能）
+            lossPerHoseMPa: 0.02,         // 摩擦損失/本（65mmホース）
             hoseLengthM: 20               // 1本の長さ
         };
 
@@ -594,25 +629,46 @@
         function resetHoseLine() { hoseLinePoints = []; hoseLineMarkers.forEach(e => viewer.entities.remove(e)); hoseLineMarkers = []; hoseLineSegments.forEach(e => viewer.entities.remove(e)); hoseLineSegments = []; updateHoseDisplay(); document.getElementById('hoseHint').textContent = '連続タップでポイント追加'; }
 
         // ========== シミュレーション計算（新仕様） ==========
-        // 区間損失計算
-        // - 摩擦損失: k × (L / 100)
-        // - 高低差損失: 0.01 × max(0, Δh) ※上りのみ（安全側）
-        // - 付加損失: 0.02 × ceil(L / 20) ※ホース本数ベース
-        function calcSectionLoss(L, dh, params) {
-            const friction = params.kFrictionMPaPer100m * (L / 100.0);
-            const head = 0.01 * Math.max(0, dh);  // 下りは0扱い（安全側）
+        // 損失計算（新方式）
+        // - 摩擦損失: lossPerHose × ホース本数
+        // - 高低差損失: 上り +0.01×Δh, 下り -0.01×Δh÷3（加圧効果1/3）
+        function calcLossForSegment(L, dh, params) {
             const nHose = Math.ceil(L / params.hoseLengthM);
-            const extra = params.extraLossPerHoseMPa * nHose;
-            return { friction, head, extra, nHose, total: friction + head + extra };
+            const frictionLoss = params.lossPerHoseMPa * nHose;
+            
+            // 高低差による損失/加圧
+            let headLoss;
+            if (dh >= 0) {
+                // 上り: 損失
+                headLoss = 0.01 * dh;
+            } else {
+                // 下り: 加圧（1/3の効果）
+                headLoss = 0.01 * dh / 3;  // dhが負なので結果も負（加圧）
+            }
+            
+            return {
+                nHose,
+                frictionLoss,
+                headLoss,
+                totalLoss: frictionLoss + headLoss
+            };
+        }
+        
+        // 旧関数（互換性のため残す）
+        function calcSectionLoss(L, dh, params) {
+            const result = calcLossForSegment(L, dh, params);
+            return { 
+                friction: result.frictionLoss, 
+                head: result.headLoss, 
+                extra: 0, 
+                nHose: result.nHose, 
+                total: result.totalLoss 
+            };
         }
         
         // 距離ベースの損失計算（補間用）
         function calcLossForDistance(L, dh, params) {
-            const friction = params.kFrictionMPaPer100m * (L / 100.0);
-            const head = 0.01 * Math.max(0, dh);
-            const nHose = Math.ceil(L / params.hoseLengthM);
-            const extra = params.extraLossPerHoseMPa * nHose;
-            return friction + head + extra;
+            return calcLossForSegment(L, dh, params).totalLoss;
         }
 
         // 経路を細かい点に補間（10m間隔）
@@ -1013,7 +1069,6 @@
         function updateHoseInfoPanel(data) {
             document.getElementById('hoseInfoDist').textContent = formatDistance(data.totalLengthM);
             document.getElementById('hoseInfoCount').textContent = data.totalHoses20m + '本';
-            document.getElementById('hoseInfoLoss').textContent = data.totalLossMPa.toFixed(2) + ' MPa';
             
             const endPEl = document.getElementById('hoseInfoEndP');
             endPEl.textContent = data.endPressureMPa.toFixed(2) + ' MPa';
@@ -1026,30 +1081,35 @@
             }
             
             // 可搬台数表示
-            document.getElementById('hoseInfoRelay').textContent = `${data.totalPumps}台 (中継${data.relayCount})`;
-            document.getElementById('hoseInfoElev').textContent = (data.totalClimbM || 0).toFixed(1) + 'm↑';
+            document.getElementById('hoseInfoRelay').textContent = `${data.totalPumps}台`;
             
-            // 警告表示は常に非表示（補間により正確な計算が可能）
-            const warning = document.getElementById('simWarning');
-            warning.classList.remove('show');
-            
-            // 区間詳細リスト更新
+            // 区間詳細テーブル更新
             if (data.pumpSegments) {
-                const listEl = document.getElementById('segmentList');
+                const tbody = document.getElementById('segmentTableBody');
                 let html = '';
                 
                 for (const seg of data.pumpSegments) {
                     const colorClass = seg.remainingPressure >= 0.4 ? 'green' : seg.remainingPressure >= 0.2 ? 'yellow' : 'red';
-                    const elevStr = seg.elevation >= 0 ? `+${seg.elevation.toFixed(0)}m` : `${seg.elevation.toFixed(0)}m`;
+                    const elevClass = seg.elevation >= 0 ? 'elev-up' : 'elev-down';
+                    const elevStr = seg.elevation >= 0 ? `+${seg.elevation.toFixed(0)}` : `${seg.elevation.toFixed(0)}`;
                     
-                    html += `<div class="segment-item">
-                        <div class="segment-color ${colorClass}"></div>
-                        <div class="segment-info">P${seg.pumpNum}→${seg.nextLabel}: ${seg.distance.toFixed(0)}m/${seg.hoses}本, ${elevStr}</div>
-                        <div class="segment-loss">${seg.remainingPressure.toFixed(2)} MPa</div>
-                    </div>`;
+                    // 摩擦損失と高低差損失を分離表示
+                    const frictionLoss = seg.hoses * hoseParams.lossPerHoseMPa;
+                    const headLoss = seg.elevation >= 0 
+                        ? seg.elevation * 0.01 
+                        : seg.elevation * 0.01 / 3;
+                    
+                    html += `<tr class="${colorClass}">
+                        <td>P${seg.pumpNum}→${seg.nextLabel}</td>
+                        <td>${seg.distance.toFixed(0)}m</td>
+                        <td>${seg.hoses}本</td>
+                        <td class="${elevClass}">${elevStr}m</td>
+                        <td>${seg.loss.toFixed(2)}</td>
+                        <td>${seg.remainingPressure.toFixed(2)}</td>
+                    </tr>`;
                 }
                 
-                listEl.innerHTML = html;
+                tbody.innerHTML = html;
             }
         }
 
@@ -1102,8 +1162,10 @@
         // シミュレーション実行（補間ベースの新仕様）
         function runSimulationForLine(lineId, pathLLH) {
             // パラメータ更新（UIから）
-            hoseParams.kFrictionMPaPer100m = parseFloat(document.getElementById('paramK').value) || 0.04;
-            hoseParams.extraLossPerHoseMPa = parseFloat(document.getElementById('paramExtra').value) || 0.02;
+            hoseParams.pumpOutputMPa = parseFloat(document.getElementById('paramPumpOut').value) || 0.6;
+            hoseParams.minInletPressureMPa = parseFloat(document.getElementById('paramInlet').value) || 0.2;
+            hoseParams.nozzleRequiredMPa = parseFloat(document.getElementById('paramNozzle').value) || 0.4;
+            hoseParams.lossPerHoseMPa = parseFloat(document.getElementById('paramLossPerHose').value) || 0.02;
 
             // 補間ベースで中継位置を計算
             const { relays, interpolated } = computeRelayPositionsInterpolated(pathLLH, hoseParams);
@@ -1123,17 +1185,9 @@
                 ? pumpSegments[pumpSegments.length - 1].remainingPressure 
                 : hoseParams.pumpOutputMPa;
             
-            // 高低差（上りのみカウント）
-            let totalClimb = 0;
-            for (let i = 1; i < pathLLH.length; i++) {
-                const dh = (pathLLH[i].height || 0) - (pathLLH[i-1].height || 0);
-                if (dh > 0) totalClimb += dh;
-            }
-            
             // 総延長・ホース本数
             const totalLength = pumpSegments.reduce((s, p) => s + p.distance, 0);
             const totalHoses = pumpSegments.reduce((s, p) => s + p.hoses, 0);
-            const totalLoss = pumpSegments.reduce((s, p) => s + p.loss, 0);
 
             // 可搬台数 = 根本(1) + 中継
             const totalPumps = 1 + relays.length;
@@ -1141,11 +1195,9 @@
             updateHoseInfoPanel({
                 totalLengthM: totalLength,
                 totalHoses20m: totalHoses,
-                totalLossMPa: totalLoss,
                 endPressureMPa: endP,
                 totalPumps: totalPumps,
                 relayCount: relays.length,
-                totalClimbM: totalClimb,
                 pumpSegments: pumpSegments
             });
         }
