@@ -1311,8 +1311,10 @@
             hoseLineSegments.forEach(e => viewer.entities.remove(e));
             hoseLinePoints = []; hoseLineMarkers = []; hoseLineSegments = [];
             updateHoseDisplay();
-            document.getElementById('hoseHint').textContent = '確定！';
 
+            // ツールモード解除
+            clearTool();
+            
             // シミュレーション実行＆パネル表示
             selectedHoseLine = hoseData;
             runSimulationForLine(id, pathLLH);
@@ -1438,7 +1440,7 @@
         }
 
         // Panel helpers
-        function closeAllPanels() { ['firePanel', 'waterPanel', 'hoseInfoPanel'].forEach(id => document.getElementById(id).classList.remove('active')); selectedFirePoint = null; selectedWater = null; }
+        function closeAllPanels() { ['firePanel', 'waterPanel', 'hoseInfoPanel', 'hosePanel'].forEach(id => document.getElementById(id).classList.remove('active')); selectedFirePoint = null; selectedWater = null; }
         function closePanel(type) { document.getElementById(type + 'Panel').classList.remove('active'); if (type === 'fire') selectedFirePoint = null; if (type === 'water') selectedWater = null; if (type === 'hoseInfo') selectedHoseLine = null; }
 
         // ========== Click handler ==========
