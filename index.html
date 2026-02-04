@@ -4,59 +4,583 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GIS Platform</title>
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans JP',sans-serif;overflow:hidden;background:#000}#cesiumContainer{width:100vw;height:100vh}.top-bar{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(15,15,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:1000}.logo{display:flex;align-items:center;gap:10px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#ff6b35,#f7931e);border-radius:10px;display:flex;align-items:center;justify-content:center}.logo-icon .material-icons{color:white;font-size:22px}.logo-text{color:white;font-size:16px;font-weight:700}.map-type-switch{display:flex;background:rgba(255,255,255,0.1);border-radius:8px;padding:3px}.map-type-btn{padding:8px 16px;border:none;background:transparent;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:6px}.map-type-btn.active{background:rgba(0,212,255,0.25);color:#00d4ff}.map-type-btn .material-icons{font-size:18px}.menu-btn{width:44px;height:44px;background:rgba(255,255,255,0.08);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}.menu-btn .material-icons{color:white;font-size:26px}.side-panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;opacity:0;visibility:hidden;transition:all 0.3s}.side-panel-overlay.show{opacity:1;visibility:visible}.side-panel{position:fixed;top:0;right:0;bottom:0;width:320px;max-width:85vw;background:rgba(20,20,20,0.98);z-index:2001;transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto}.side-panel.show{transform:translateX(0)}.side-panel-header{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid rgba(255,255,255,0.1)}.side-panel-title{color:white;font-size:16px;font-weight:600}.side-panel-close{background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;padding:8px}.panel-section{padding:16px;border-bottom:1px solid rgba(255,255,255,0.06)}.panel-section-title{color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;margin-bottom:12px;font-weight:600}.layer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.layer-card{display:flex;flex-direction:column;align-items:center;padding:12px 8px;border-radius:12px;cursor:pointer;background:rgba(255,255,255,0.04);border:2px solid transparent}.layer-card.active{background:rgba(0,212,255,0.12);border-color:#00d4ff}.layer-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}.layer-card-icon .material-icons{font-size:22px}.layer-card-icon.fire{background:rgba(244,67,54,0.2);color:#f44336}.layer-card-icon.water{background:rgba(33,150,243,0.2);color:#2196f3}.layer-card-icon.hose{background:rgba(255,152,0,0.2);color:#ff9800}.layer-card-icon.measure{background:rgba(0,212,255,0.2);color:#00d4ff}.layer-card-icon.building{background:rgba(139,195,74,0.2);color:#8bc34a}.layer-card-icon.trail{background:rgba(76,175,80,0.2);color:#4caf50}.layer-card-icon.flood{background:rgba(33,150,243,0.2);color:#2196f3}.layer-card-icon.tsunami{background:rgba(0,188,212,0.2);color:#00bcd4}.layer-card-icon.landslide{background:rgba(255,87,34,0.2);color:#ff5722}.layer-card-name{color:white;font-size:11px;text-align:center;font-weight:500}.mode-indicator{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(244,67,54,0.95);padding:8px 16px;border-radius:20px;display:none;align-items:center;gap:8px;z-index:1000}.mode-indicator.show{display:flex}.mode-indicator.water-mode{background:rgba(33,150,243,0.95)}.mode-indicator.hose-mode{background:rgba(255,152,0,0.95)}.mode-indicator.measure-mode{background:rgba(0,212,255,0.95)}.mode-indicator .material-icons{color:white;font-size:18px}.mode-indicator span{color:white;font-size:13px;font-weight:600}.coord-popup{position:fixed;background:rgba(30,30,30,0.95);padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);z-index:1500;display:none}.coord-popup.show{display:block}.coord-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}.coord-popup-title{color:rgba(255,255,255,0.6);font-size:9px}.coord-popup-close{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:0;font-size:14px;line-height:1}.coord-popup-value{color:white;font-size:11px;font-family:monospace;margin-bottom:5px}.coord-popup-btn{width:100%;padding:4px;background:rgba(0,212,255,0.2);border:1px solid rgba(0,212,255,0.3);border-radius:4px;color:#00d4ff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px}.coord-popup-btn .material-icons{font-size:11px}.bottom-panel{position:fixed;bottom:60px;left:10px;right:10px;background:rgba(15,15,15,0.95);padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);z-index:900;display:none}.bottom-panel.active{display:block}.bottom-panel.fire{border-color:rgba(244,67,54,0.3)}.bottom-panel.water{border-color:rgba(33,150,243,0.3)}.bottom-panel.hose,.bottom-panel.hose-info{border-color:rgba(255,152,0,0.3)}.bottom-panel.measure{border-color:rgba(0,212,255,0.3)}.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.panel-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px}.panel-title.fire{color:#f44336}.panel-title.water{color:#2196f3}.panel-title.hose{color:#ff9800}.panel-title.measure{color:#00d4ff}.panel-title .material-icons{font-size:16px}.panel-close{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px}.panel-stats{display:flex;gap:14px;flex-wrap:wrap}.panel-stat{flex:1;min-width:65px}.panel-stat-label{color:rgba(255,255,255,0.5);font-size:9px;text-transform:uppercase;margin-bottom:2px}.panel-stat-value{color:white;font-size:14px;font-weight:600}.panel-stat-value.highlight{color:#00d4ff}.panel-stat-value.fire-highlight{color:#f44336}.panel-stat-value.water-highlight{color:#2196f3}.panel-stat-value.ok{color:#4ade80}.panel-stat-value.warning{color:#ef4444}.panel-hint{color:rgba(255,255,255,0.4);font-size:10px;margin-top:8px}.panel-actions{display:flex;gap:8px;margin-top:10px}.panel-btn{flex:1;padding:8px;border:none;border-radius:6px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:500}.panel-btn .material-icons{font-size:14px}.panel-btn.primary{background:linear-gradient(135deg,#00d4ff,#0099cc);color:white}.panel-btn.secondary{background:rgba(255,255,255,0.1);color:white}.panel-btn.danger{background:rgba(244,67,54,0.2);color:#f44336}.section-title{color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;margin-bottom:6px;font-weight:500}.segment-table-wrap{max-height:150px;overflow-y:auto;margin-top:6px;border:1px solid rgba(255,255,255,0.1);border-radius:6px}.segment-table{width:100%;border-collapse:collapse;font-size:12px}.segment-table th{background:#333;padding:10px 6px;text-align:center;color:rgba(255,255,255,0.9);font-weight:600;position:sticky;top:0;z-index:1}.segment-table td{padding:8px 6px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.85)}.segment-table tr.green td{background:rgba(74,222,128,0.1)}.segment-table tr.yellow td{background:rgba(251,191,36,0.1)}.segment-table tr.red td{background:rgba(239,68,68,0.1)}.sim-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1)}.legend-item{display:flex;align-items:center;gap:3px;font-size:9px;color:rgba(255,255,255,0.6)}.legend-dot{width:8px;height:8px;border-radius:50%}.legend-dot.green{background:#4ade80}.legend-dot.yellow{background:#fbbf24}.legend-dot.red{background:#ef4444}.legend-dot.conf{background:#ff9800}.legend-dot.end{background:#3b82f6}.sim-params{background:rgba(255,255,255,0.03);border-radius:6px;padding:6px 8px;margin-top:6px}.sim-params-title{color:rgba(255,255,255,0.5);font-size:9px;font-weight:600;margin-bottom:3px}.sim-param-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 6px}.sim-param-item label{font-size:9px;color:rgba(255,255,255,0.5);display:block;margin-bottom:1px}.sim-param-input-wrap{display:flex;align-items:center;gap:2px}.sim-param-input-wrap input{width:48px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:2px 4px;color:white;font-size:11px;text-align:right}.sim-param-input-wrap span{font-size:9px;color:rgba(255,255,255,0.5)}.recalc-btn{margin-top:4px;width:100%;padding:5px;background:linear-gradient(135deg,#00d4ff,#0099cc);border:none;border-radius:4px;color:white;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px}.recalc-btn .material-icons{font-size:13px}.bottom-bar{position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(15,15,15,0.95);border-top:1px solid rgba(255,255,255,0.1);padding:0 12px;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:10px}.my-location{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;cursor:pointer}.my-location .material-icons{font-size:16px;color:#4ade80}.my-location-coords{color:white;font-size:10px;font-family:monospace}.search-box{flex:1;max-width:200px}.search-input{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:7px 12px;color:white;font-size:11px;outline:none}.search-input::placeholder{color:rgba(255,255,255,0.4)}.view-toggle{display:flex;background:rgba(255,255,255,0.06);border-radius:8px}.view-btn{padding:7px 12px;border:none;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px}.view-btn.active{background:rgba(0,212,255,0.2);color:#00d4ff;border-radius:8px}.view-btn .material-icons{font-size:14px}.map-info{position:fixed;bottom:60px;right:12px;z-index:800;display:flex;flex-direction:column;align-items:flex-end;gap:4px}.credit-bar{background:rgba(0,0,0,0.7);padding:3px 8px;border-radius:4px;font-size:9px;color:rgba(255,255,255,0.8)}.scale-bar{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.7);padding:3px 8px;border-radius:4px}.scale-line{height:3px;background:white;border-radius:1px;min-width:40px}.scale-text{color:white;font-size:9px;font-weight:500}.coord-display{position:fixed;bottom:60px;left:12px;background:rgba(0,0,0,0.7);padding:4px 8px;border-radius:4px;font-size:9px;color:rgba(255,255,255,0.9);font-family:monospace;z-index:800}.toast{position:fixed;top:110px;left:50%;transform:translateX(-50%);background:rgba(50,50,50,0.95);padding:12px 20px;border-radius:10px;color:white;font-size:13px;z-index:3000;display:none}.toast.show{display:block;animation:fadeInOut 2.5s ease}@keyframes fadeInOut{0%,100%{opacity:0}10%,90%{opacity:1}}.search-results{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:260px;max-height:180px;overflow-y:auto;background:rgba(20,20,20,0.98);border-radius:10px;border:1px solid rgba(255,255,255,0.15);z-index:1100;display:none}.search-results.show{display:block}.search-result-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06)}.search-result-item:hover{background:rgba(255,255,255,0.06)}.search-result-name{color:white;font-size:11px;font-weight:500}.cesium-viewer-toolbar,.cesium-viewer-animationContainer,.cesium-viewer-timelineContainer,.cesium-viewer-fullscreenContainer,.cesium-viewer-bottom{display:none!important}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans JP', sans-serif; overflow: hidden; background: #000; }
+        #cesiumContainer { width: 100vw; height: 100vh; }
+        
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: rgba(15,15,15,0.95); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 1000; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #ff6b35, #f7931e); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .logo-icon .material-icons { color: white; font-size: 22px; }
+        .logo-text { color: white; font-size: 16px; font-weight: 700; }
+        
+        .map-type-switch { display: flex; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 3px; }
+        .map-type-btn { padding: 8px 16px; border: none; background: transparent; color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .map-type-btn.active { background: rgba(0,212,255,0.25); color: #00d4ff; }
+        .map-type-btn .material-icons { font-size: 18px; }
+        
+        .menu-btn { width: 44px; height: 44px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .menu-btn:hover { background: rgba(255,255,255,0.15); }
+        .menu-btn .material-icons { color: white; font-size: 26px; }
+        
+        .side-panel-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s; }
+        .side-panel-overlay.show { opacity: 1; visibility: visible; }
+        .side-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 85vw; background: rgba(20,20,20,0.98); z-index: 2001; transform: translateX(100%); transition: transform 0.3s ease; overflow-y: auto; }
+        .side-panel.show { transform: translateX(0); }
+        .side-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .side-panel-title { color: white; font-size: 16px; font-weight: 600; }
+        .side-panel-close { background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 8px; }
+        .panel-section { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .panel-section-title { color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
+        .layer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .layer-card { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.04); border: 2px solid transparent; transition: all 0.2s; }
+        .layer-card:hover { background: rgba(255,255,255,0.08); }
+        .layer-card.active { background: rgba(0,212,255,0.12); border-color: #00d4ff; }
+        .layer-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+        .layer-card-icon .material-icons { font-size: 22px; }
+        .layer-card-icon.fire { background: rgba(244,67,54,0.2); color: #f44336; }
+        .layer-card-icon.water { background: rgba(33,150,243,0.2); color: #2196f3; }
+        .layer-card-icon.hose { background: rgba(255,152,0,0.2); color: #ff9800; }
+        .layer-card-icon.measure { background: rgba(0,212,255,0.2); color: #00d4ff; }
+        .layer-card-icon.building { background: rgba(139,195,74,0.2); color: #8bc34a; }
+        .layer-card-icon.flood { background: rgba(33,150,243,0.2); color: #2196f3; }
+        .layer-card-icon.tsunami { background: rgba(0,188,212,0.2); color: #00bcd4; }
+        .layer-card-icon.landslide { background: rgba(255,87,34,0.2); color: #ff5722; }
+        .layer-card-name { color: white; font-size: 11px; text-align: center; font-weight: 500; }
+        
+        .mode-indicator { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(244,67,54,0.95); padding: 8px 16px; border-radius: 20px; display: none; align-items: center; gap: 8px; z-index: 1000; }
+        .mode-indicator.show { display: flex; }
+        .mode-indicator.water-mode { background: rgba(33,150,243,0.95); }
+        .mode-indicator.hose-mode { background: rgba(255,152,0,0.95); }
+        .mode-indicator.measure-mode { background: rgba(0,212,255,0.95); }
+        .mode-indicator .material-icons { color: white; font-size: 18px; }
+        .mode-indicator span { color: white; font-size: 13px; font-weight: 600; }
+        
+        .bottom-panel { position: fixed; bottom: 60px; left: 10px; right: 10px; background: rgba(15,15,15,0.95); padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); z-index: 900; display: none; }
+        .bottom-panel.active { display: block; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .panel-title { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; color: #ff9800; }
+        .panel-title .material-icons { font-size: 16px; }
+        .panel-close { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px; }
+        .panel-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+        .panel-stat { flex: 1; min-width: 65px; }
+        .panel-stat-label { color: rgba(255,255,255,0.5); font-size: 9px; text-transform: uppercase; margin-bottom: 2px; }
+        .panel-stat-value { color: white; font-size: 14px; font-weight: 600; }
+        .panel-stat-value.highlight { color: #00d4ff; }
+        .panel-hint { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 8px; }
+        .panel-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .panel-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: 500; }
+        .panel-btn .material-icons { font-size: 14px; }
+        .panel-btn.primary { background: linear-gradient(135deg, #00d4ff, #0099cc); color: white; }
+        .panel-btn.secondary { background: rgba(255,255,255,0.1); color: white; }
+        .panel-btn.danger { background: rgba(244,67,54,0.2); color: #f44336; }
+        
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 52px; background: rgba(15,15,15,0.95); border-top: 1px solid rgba(255,255,255,0.1); padding: 0 12px; z-index: 1000; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .my-location { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+        .my-location .material-icons { font-size: 16px; color: #4ade80; }
+        .my-location-coords { color: white; font-size: 10px; font-family: monospace; }
+        .view-toggle { display: flex; background: rgba(255,255,255,0.06); border-radius: 8px; }
+        .view-btn { padding: 7px 12px; border: none; background: transparent; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; }
+        .view-btn.active { background: rgba(0,212,255,0.2); color: #00d4ff; border-radius: 8px; }
+        .view-btn .material-icons { font-size: 14px; }
+        
+        .map-info { position: fixed; bottom: 60px; right: 12px; z-index: 800; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .credit-bar { background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; font-size: 9px; color: rgba(255,255,255,0.8); }
+        .coord-display { position: fixed; bottom: 60px; left: 12px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; font-size: 9px; color: rgba(255,255,255,0.9); font-family: monospace; z-index: 800; }
+        
+        .toast { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); background: rgba(50,50,50,0.95); padding: 12px 20px; border-radius: 10px; color: white; font-size: 13px; z-index: 3000; display: none; }
+        .toast.show { display: block; }
+        
+        .cesium-viewer-toolbar, .cesium-viewer-animationContainer, .cesium-viewer-timelineContainer, .cesium-viewer-fullscreenContainer, .cesium-viewer-bottom { display: none !important; }
     </style>
 </head>
 <body>
     <div id="cesiumContainer"></div>
     <div class="toast" id="toast"></div>
-    <div class="coord-popup" id="coordPopup"><div class="coord-popup-header"><span class="coord-popup-title">座標</span><button class="coord-popup-close" id="coordPopupClose">×</button></div><div class="coord-popup-value" id="coordPopupValue">--</div><button class="coord-popup-btn" id="coordCopyBtn"><span class="material-icons">content_copy</span>コピー</button></div>
-    <div class="top-bar"><div class="logo"><div class="logo-icon"><span class="material-icons">local_fire_department</span></div><span class="logo-text">GIS Platform</span></div><div class="map-type-switch"><button class="map-type-btn active" id="mapBtnSatellite"><span class="material-icons">satellite_alt</span><span>衛星</span></button><button class="map-type-btn" id="mapBtnStd"><span class="material-icons">map</span><span>地図</span></button></div><button class="menu-btn" id="menuBtn"><span class="material-icons">menu</span></button></div>
-    <div class="mode-indicator" id="modeIndicator"><span class="material-icons" id="modeIcon">local_fire_department</span><span id="modeText">火点追加</span></div>
+    
+    <div class="top-bar">
+        <div class="logo">
+            <div class="logo-icon"><span class="material-icons">local_fire_department</span></div>
+            <span class="logo-text">GIS Platform</span>
+        </div>
+        <div class="map-type-switch">
+            <button class="map-type-btn active" id="mapBtnSatellite"><span class="material-icons">satellite_alt</span><span>衛星</span></button>
+            <button class="map-type-btn" id="mapBtnStd"><span class="material-icons">map</span><span>地図</span></button>
+        </div>
+        <button class="menu-btn" id="menuBtn"><span class="material-icons">menu</span></button>
+    </div>
+    
+    <div class="mode-indicator" id="modeIndicator">
+        <span class="material-icons" id="modeIcon">local_fire_department</span>
+        <span id="modeText">火点追加</span>
+    </div>
+    
     <div class="side-panel-overlay" id="sidePanelOverlay"></div>
-    <div class="side-panel" id="sidePanel"><div class="side-panel-header"><span class="side-panel-title">メニュー</span><button class="side-panel-close" id="sidePanelClose"><span class="material-icons">close</span></button></div><div class="panel-section"><div class="panel-section-title">地図レイヤ</div><div class="layer-grid"><div class="layer-card active" id="layerBuildings"><div class="layer-card-icon building"><span class="material-icons">location_city</span></div><span class="layer-card-name">3D建物</span></div><div class="layer-card" id="layerTrails"><div class="layer-card-icon trail"><span class="material-icons">hiking</span></div><span class="layer-card-name">登山道</span></div></div></div><div class="panel-section"><div class="panel-section-title">オペレーション</div><div class="layer-grid"><div class="layer-card" id="opFire"><div class="layer-card-icon fire"><span class="material-icons">local_fire_department</span></div><span class="layer-card-name">火点</span></div><div class="layer-card" id="opWater"><div class="layer-card-icon water"><span class="material-icons">water_drop</span></div><span class="layer-card-name">水利</span></div><div class="layer-card" id="opHose"><div class="layer-card-icon hose"><span class="material-icons">route</span></div><span class="layer-card-name">ホース延長</span></div><div class="layer-card" id="opMeasure"><div class="layer-card-icon measure"><span class="material-icons">straighten</span></div><span class="layer-card-name">2点計測</span></div></div></div><div class="panel-section"><div class="panel-section-title">情報レイヤ（ハザード）</div><div class="layer-grid"><div class="layer-card" id="layerFlood"><div class="layer-card-icon flood"><span class="material-icons">water</span></div><span class="layer-card-name">洪水</span></div><div class="layer-card" id="layerTsunami"><div class="layer-card-icon tsunami"><span class="material-icons">waves</span></div><span class="layer-card-name">津波</span></div><div class="layer-card" id="layerLandslide"><div class="layer-card-icon landslide"><span class="material-icons">landslide</span></div><span class="layer-card-name">土砂</span></div></div></div></div>
-    <div class="bottom-panel fire" id="firePanel"><div class="panel-header"><span class="panel-title fire"><span class="material-icons">local_fire_department</span>火点</span><button class="panel-close" id="firePanelClose"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value" id="fireLat">-</div></div><div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value" id="fireLon">-</div></div><div class="panel-stat"><div class="panel-stat-label">標高</div><div class="panel-stat-value fire-highlight" id="fireElev">-</div></div></div><div class="panel-actions"><button class="panel-btn danger" id="deleteFireBtn"><span class="material-icons">delete</span>削除</button></div></div>
-    <div class="bottom-panel water" id="waterPanel"><div class="panel-header"><span class="panel-title water"><span class="material-icons">water_drop</span>水利</span><button class="panel-close" id="waterPanelClose"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">種別</div><div class="panel-stat-value water-highlight" id="waterType">-</div></div><div class="panel-stat"><div class="panel-stat-label">緯度</div><div class="panel-stat-value" id="waterLat">-</div></div><div class="panel-stat"><div class="panel-stat-label">経度</div><div class="panel-stat-value" id="waterLon">-</div></div></div><div class="panel-actions"><button class="panel-btn danger" id="deleteWaterBtn"><span class="material-icons">delete</span>削除</button></div></div>
-    <div class="bottom-panel hose-info" id="hoseInfoPanel"><div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長シミュレーション</span><button class="panel-close" id="hoseInfoPanelClose"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseInfoDist">-</div></div><div class="panel-stat"><div class="panel-stat-label">ホース</div><div class="panel-stat-value" id="hoseInfoCount">-</div></div><div class="panel-stat"><div class="panel-stat-label">可搬台数</div><div class="panel-stat-value" id="hoseInfoRelay">-</div></div><div class="panel-stat"><div class="panel-stat-label">筒先圧</div><div class="panel-stat-value" id="hoseInfoEndP">-</div></div></div><div class="section-title" style="margin-top:8px">区間詳細</div><div class="segment-table-wrap"><table class="segment-table"><thead><tr><th>区間</th><th>距離</th><th>本数</th><th>高低差</th><th>損失</th><th>残圧</th></tr></thead><tbody id="segmentTableBody"></tbody></table></div><div class="sim-legend"><div class="legend-item"><div class="legend-dot conf"></div>可搬</div><div class="legend-item"><div class="legend-dot end"></div>筒先</div><div class="legend-item"><div class="legend-dot green"></div>≥0.4</div><div class="legend-item"><div class="legend-dot yellow"></div>≥0.2</div><div class="legend-item"><div class="legend-dot red"></div>&lt;0.2</div></div><div class="sim-params"><div class="sim-params-title">計算条件</div><div class="sim-param-grid"><div class="sim-param-item"><label>送水圧</label><div class="sim-param-input-wrap"><input type="number" id="paramPumpOut" value="0.6" step="0.05"><span>MPa</span></div></div><div class="sim-param-item"><label>受水圧</label><div class="sim-param-input-wrap"><input type="number" id="paramInlet" value="0.2" step="0.05"><span>MPa</span></div></div><div class="sim-param-item"><label>筒先圧</label><div class="sim-param-input-wrap"><input type="number" id="paramNozzle" value="0.4" step="0.05"><span>MPa</span></div></div><div class="sim-param-item"><label>損失/本</label><div class="sim-param-input-wrap"><input type="number" id="paramLossPerHose" value="0.02" step="0.005"><span>MPa</span></div></div></div><button class="recalc-btn" id="recalcBtn"><span class="material-icons">refresh</span>再計算</button></div><div class="panel-actions"><button class="panel-btn danger" id="deleteHoseBtn"><span class="material-icons">delete</span>削除</button></div></div>
-    <div class="bottom-panel hose" id="hosePanel"><div class="panel-header"><span class="panel-title hose"><span class="material-icons">route</span>ホース延長(林野)</span><button class="panel-close" id="hosePanelClose"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">総延長</div><div class="panel-stat-value highlight" id="hoseTotalDist">0m</div></div><div class="panel-stat"><div class="panel-stat-label">本数(20m)</div><div class="panel-stat-value" id="hoseTotalCount">0本</div></div><div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="hoseElevInfo">-</div></div></div><div class="panel-hint" id="hoseHint">連続タップでポイント追加</div><div class="panel-actions"><button class="panel-btn secondary" id="undoHoseBtn"><span class="material-icons">undo</span>戻す</button><button class="panel-btn danger" id="resetHoseBtn"><span class="material-icons">delete</span></button><button class="panel-btn primary" id="confirmHoseBtn"><span class="material-icons">check</span>確定</button></div></div>
-    <div class="bottom-panel measure" id="measurePanel"><div class="panel-header"><span class="panel-title measure"><span class="material-icons">straighten</span>2点計測</span><button class="panel-close" id="measurePanelClose"><span class="material-icons">close</span></button></div><div class="panel-stats"><div class="panel-stat"><div class="panel-stat-label">地表距離</div><div class="panel-stat-value highlight" id="measureDistance">-</div></div><div class="panel-stat"><div class="panel-stat-label">直線距離</div><div class="panel-stat-value" id="measureStraight">-</div></div><div class="panel-stat"><div class="panel-stat-label">高低差</div><div class="panel-stat-value" id="measureElev">-</div></div></div><div class="panel-hint" id="measureHint">2点をタップして計測</div><div class="panel-actions"><button class="panel-btn secondary" id="resetMeasureBtn"><span class="material-icons">refresh</span>リセット</button></div></div>
-    <div class="map-info"><div class="scale-bar"><div class="scale-line" id="scaleLine"></div><span class="scale-text" id="scaleText">--</span></div><div class="credit-bar" id="creditBar">© Cesium Ion</div></div>
+    <div class="side-panel" id="sidePanel">
+        <div class="side-panel-header">
+            <span class="side-panel-title">メニュー</span>
+            <button class="side-panel-close" id="sidePanelClose"><span class="material-icons">close</span></button>
+        </div>
+        <div class="panel-section">
+            <div class="panel-section-title">地図レイヤ</div>
+            <div class="layer-grid">
+                <div class="layer-card active" id="layerBuildings">
+                    <div class="layer-card-icon building"><span class="material-icons">location_city</span></div>
+                    <span class="layer-card-name">3D建物</span>
+                </div>
+            </div>
+        </div>
+        <div class="panel-section">
+            <div class="panel-section-title">オペレーション</div>
+            <div class="layer-grid">
+                <div class="layer-card" id="opFire">
+                    <div class="layer-card-icon fire"><span class="material-icons">local_fire_department</span></div>
+                    <span class="layer-card-name">火点</span>
+                </div>
+                <div class="layer-card" id="opWater">
+                    <div class="layer-card-icon water"><span class="material-icons">water_drop</span></div>
+                    <span class="layer-card-name">水利</span>
+                </div>
+                <div class="layer-card" id="opHose">
+                    <div class="layer-card-icon hose"><span class="material-icons">route</span></div>
+                    <span class="layer-card-name">ホース延長</span>
+                </div>
+                <div class="layer-card" id="opMeasure">
+                    <div class="layer-card-icon measure"><span class="material-icons">straighten</span></div>
+                    <span class="layer-card-name">2点計測</span>
+                </div>
+            </div>
+        </div>
+        <div class="panel-section">
+            <div class="panel-section-title">ハザードマップ</div>
+            <div class="layer-grid">
+                <div class="layer-card" id="layerFlood">
+                    <div class="layer-card-icon flood"><span class="material-icons">water</span></div>
+                    <span class="layer-card-name">洪水</span>
+                </div>
+                <div class="layer-card" id="layerTsunami">
+                    <div class="layer-card-icon tsunami"><span class="material-icons">waves</span></div>
+                    <span class="layer-card-name">津波</span>
+                </div>
+                <div class="layer-card" id="layerLandslide">
+                    <div class="layer-card-icon landslide"><span class="material-icons">landslide</span></div>
+                    <span class="layer-card-name">土砂</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-panel" id="hosePanel">
+        <div class="panel-header">
+            <span class="panel-title"><span class="material-icons">route</span>ホース延長</span>
+            <button class="panel-close" id="hosePanelClose"><span class="material-icons">close</span></button>
+        </div>
+        <div class="panel-stats">
+            <div class="panel-stat">
+                <div class="panel-stat-label">総延長</div>
+                <div class="panel-stat-value highlight" id="hoseTotalDist">0m</div>
+            </div>
+            <div class="panel-stat">
+                <div class="panel-stat-label">本数(20m)</div>
+                <div class="panel-stat-value" id="hoseTotalCount">0本</div>
+            </div>
+        </div>
+        <div class="panel-hint" id="hoseHint">連続タップでポイント追加</div>
+        <div class="panel-actions">
+            <button class="panel-btn secondary" id="undoHoseBtn"><span class="material-icons">undo</span>戻す</button>
+            <button class="panel-btn danger" id="resetHoseBtn"><span class="material-icons">delete</span></button>
+            <button class="panel-btn primary" id="confirmHoseBtn"><span class="material-icons">check</span>確定</button>
+        </div>
+    </div>
+    
+    <div class="bottom-panel" id="measurePanel">
+        <div class="panel-header">
+            <span class="panel-title" style="color:#00d4ff"><span class="material-icons">straighten</span>2点計測</span>
+            <button class="panel-close" id="measurePanelClose"><span class="material-icons">close</span></button>
+        </div>
+        <div class="panel-stats">
+            <div class="panel-stat">
+                <div class="panel-stat-label">距離</div>
+                <div class="panel-stat-value highlight" id="measureDistance">-</div>
+            </div>
+            <div class="panel-stat">
+                <div class="panel-stat-label">高低差</div>
+                <div class="panel-stat-value" id="measureElev">-</div>
+            </div>
+        </div>
+        <div class="panel-hint" id="measureHint">2点をタップして計測</div>
+        <div class="panel-actions">
+            <button class="panel-btn secondary" id="resetMeasureBtn"><span class="material-icons">refresh</span>リセット</button>
+        </div>
+    </div>
+    
+    <div class="map-info">
+        <div class="credit-bar" id="creditBar">© 国土地理院</div>
+    </div>
     <div class="coord-display" id="coordDisplay">--</div>
-    <div class="bottom-bar"><div class="my-location" id="myLocationBtn"><span class="material-icons">my_location</span><span class="my-location-coords" id="myLocationText">取得中...</span></div><div class="search-box"><input type="text" class="search-input" id="searchInput" placeholder="住所を検索..."></div><div class="view-toggle"><button class="view-btn" id="view2dBtn"><span class="material-icons">map</span>2D</button><button class="view-btn active" id="view3dBtn"><span class="material-icons">view_in_ar</span>3D</button></div></div>
-    <div class="search-results" id="searchResults"></div>
+    
+    <div class="bottom-bar">
+        <div class="my-location" id="myLocationBtn">
+            <span class="material-icons">my_location</span>
+            <span class="my-location-coords" id="myLocationText">取得中...</span>
+        </div>
+        <div class="view-toggle">
+            <button class="view-btn" id="view2dBtn"><span class="material-icons">map</span>2D</button>
+            <button class="view-btn active" id="view3dBtn"><span class="material-icons">view_in_ar</span>3D</button>
+        </div>
+    </div>
 
-        function calcLossForDistance(L, dh, params) { var nHose = Math.ceil(L / params.hoseLengthM); var frictionLoss = params.lossPerHoseMPa * nHose; var headLoss = dh >= 0 ? 0.01 * dh : 0.01 * dh / 3; return frictionLoss + headLoss; }
-        function interpolatePath(points, intervalM) { intervalM = intervalM || 10; var result = []; if (points.length < 2) return points; result.push({ lon: points[0].lon, lat: points[0].lat, height: points[0].height || 0, distFromStart: 0 }); var totalDist = 0; for (var i = 1; i < points.length; i++) { var p1 = points[i - 1], p2 = points[i]; var segDist = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat); var segDh = (p2.height || 0) - (p1.height || 0); var numSteps = Math.max(1, Math.ceil(segDist / intervalM)); for (var s = 1; s <= numSteps; s++) { var t = s / numSteps; result.push({ lon: p1.lon + (p2.lon - p1.lon) * t, lat: p1.lat + (p2.lat - p1.lat) * t, height: (p1.height || 0) + segDh * t, distFromStart: totalDist + segDist * t }); } totalDist += segDist; } return result; }
-        function computeRelayPositionsInterpolated(points, params) { var relays = []; var relayBudget = params.pumpOutputMPa - params.minInletPressureMPa; var nozzleBudget = params.pumpOutputMPa - params.nozzleRequiredMPa; if (points.length < 2) return { relays: relays, interpolated: points }; var interp = interpolatePath(points, 10); var pumpIdx = 0, safetyCount = 0; var maxIter = interp.length; while (pumpIdx < interp.length - 1 && safetyCount < maxIter) { safetyCount++; var accLoss = 0, lastSafeIdx = pumpIdx; for (var i = pumpIdx + 1; i < interp.length; i++) { var p1 = interp[i - 1], p2 = interp[i]; var segDist = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat); var segDh = (p2.height || 0) - (p1.height || 0); accLoss += calcLossForDistance(segDist, segDh, params); var isEnd = (i === interp.length - 1); var budget = isEnd ? nozzleBudget : relayBudget; if (accLoss > budget) { if (lastSafeIdx > pumpIdx) { relays.push({ index: lastSafeIdx, distFromStart: interp[lastSafeIdx].distFromStart, lon: interp[lastSafeIdx].lon, lat: interp[lastSafeIdx].lat, height: interp[lastSafeIdx].height }); pumpIdx = lastSafeIdx; } else { pumpIdx = i; } break; } lastSafeIdx = i; if (isEnd) pumpIdx = interp.length; } } return { relays: relays, interpolated: interp }; }
-        function computePumpSegmentsFromRelays(interpolated, relays, params) { var pumpSegments = []; var relayIndices = [0]; for (var r = 0; r < relays.length; r++) relayIndices.push(relays[r].index); for (var p = 0; p < relayIndices.length; p++) { var startIdx = relayIndices[p]; var endIdx = p < relayIndices.length - 1 ? relayIndices[p + 1] : interpolated.length - 1; var segDist = 0, segElev = 0, segLoss = 0; for (var i = startIdx + 1; i <= endIdx; i++) { var p1 = interpolated[i - 1], p2 = interpolated[i]; var d = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat); var dh = (p2.height || 0) - (p1.height || 0); segDist += d; segElev += dh; segLoss += calcLossForDistance(d, dh, params); } var segHose = Math.ceil(segDist / params.hoseLengthM); var remainingP = params.pumpOutputMPa - segLoss; var isLast = p === relayIndices.length - 1; pumpSegments.push({ pumpNum: p + 1, nextLabel: isLast ? '筒先' : 'P' + (p + 2), distance: segDist, hoses: segHose, elevation: segElev, loss: segLoss, remainingPressure: remainingP }); } return pumpSegments; }
-        function renderStartEndMarkers(lineId, pathLLH) { var prev = hoseSimState.startEndMarkersByLine[lineId] || []; prev.forEach(function(e) { viewer.entities.remove(e); }); var markers = []; if (pathLLH.length >= 1) { var start = pathLLH[0]; markers.push(viewer.entities.add({ position: Cesium.Cartesian3.fromDegrees(start.lon, start.lat, start.height || 0), point: { pixelSize: 14, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND }, label: { text: 'P1', font: 'bold 12px sans-serif', fillColor: Cesium.Color.WHITE, style: Cesium.LabelStyle.FILL_AND_OUTLINE, outlineWidth: 2, verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -12) } })); } if (pathLLH.length >= 2) { var end = pathLLH[pathLLH.length - 1]; markers.push(viewer.entities.add({ position: Cesium.Cartesian3.fromDegrees(end.lon, end.lat, end.height || 0), point: { pixelSize: 12, color: Cesium.Color.BLUE, outlineColor: Cesium.Color.WHITE, outlineWidth: 2, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND }, label: { text: '筒先', font: 'bold 11px sans-serif', fillColor: Cesium.Color.WHITE, style: Cesium.LabelStyle.FILL_AND_OUTLINE, outlineWidth: 2, verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -12) } })); } hoseSimState.startEndMarkersByLine[lineId] = markers; }
-        function renderRelayMarkersFromPositions(lineId, relays) { var prev = hoseSimState.relayCandidateEntitiesByLine[lineId] || []; prev.forEach(function(e) { viewer.entities.remove(e); }); var ents = relays.map(function(r, k) { return viewer.entities.add({ position: Cesium.Cartesian3.fromDegrees(r.lon, r.lat, r.height || 0), point: { pixelSize: 14, color: Cesium.Color.fromCssColorString('#ff9800'), outlineColor: Cesium.Color.WHITE, outlineWidth: 2, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND }, label: { text: 'P' + (k + 2), font: 'bold 12px sans-serif', fillColor: Cesium.Color.WHITE, style: Cesium.LabelStyle.FILL_AND_OUTLINE, outlineWidth: 2, verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -12) } }); }); hoseSimState.relayCandidateEntitiesByLine[lineId] = ents; }
-        function renderColorizedByPumpSegments(lineId, interpolated, relays, pumpSegments) { var prevSegs = hoseSimState.colorSegmentsByLine[lineId] || []; prevSegs.forEach(function(e) { viewer.entities.remove(e); }); var segs = []; var relayIndices = [0]; for (var r = 0; r < relays.length; r++) relayIndices.push(relays[r].index); for (var p = 0; p < pumpSegments.length; p++) { var seg = pumpSegments[p]; var startIdx = relayIndices[p]; var endIdx = p < relayIndices.length - 1 ? relayIndices[p + 1] : interpolated.length - 1; var color = seg.remainingPressure >= 0.4 ? Cesium.Color.fromCssColorString('#4ade80') : seg.remainingPressure >= 0.2 ? Cesium.Color.fromCssColorString('#fbbf24') : Cesium.Color.fromCssColorString('#ef4444'); var positions = []; for (var i = startIdx; i <= endIdx; i++) positions.push(Cesium.Cartesian3.fromDegrees(interpolated[i].lon, interpolated[i].lat, interpolated[i].height || 0)); if (positions.length >= 2) segs.push(viewer.entities.add({ polyline: { positions: positions, width: 5, material: color, clampToGround: true } })); } hoseSimState.colorSegmentsByLine[lineId] = segs; }
-        function updateHoseInfoPanel(data) { document.getElementById('hoseInfoDist').textContent = formatDistance(data.totalLengthM); document.getElementById('hoseInfoCount').textContent = data.totalHoses20m + '本'; var endPEl = document.getElementById('hoseInfoEndP'); endPEl.textContent = data.endPressureMPa.toFixed(2) + ' MPa'; endPEl.className = data.endPressureMPa >= hoseParams.nozzleRequiredMPa ? 'panel-stat-value ok' : data.endPressureMPa >= hoseParams.minInletPressureMPa ? 'panel-stat-value highlight' : 'panel-stat-value warning'; document.getElementById('hoseInfoRelay').textContent = data.totalPumps + '台'; if (data.pumpSegments) { var tbody = document.getElementById('segmentTableBody'); var html = ''; for (var i = 0; i < data.pumpSegments.length; i++) { var seg = data.pumpSegments[i]; var colorClass = seg.remainingPressure >= 0.4 ? 'green' : seg.remainingPressure >= 0.2 ? 'yellow' : 'red'; var elevStr = seg.elevation >= 0 ? '+' + seg.elevation.toFixed(0) : seg.elevation.toFixed(0); html += '<tr class="' + colorClass + '"><td>P' + seg.pumpNum + '→' + seg.nextLabel + '</td><td>' + seg.distance.toFixed(0) + 'm</td><td>' + seg.hoses + '本</td><td>' + elevStr + 'm</td><td>' + seg.loss.toFixed(2) + '</td><td>' + seg.remainingPressure.toFixed(2) + '</td></tr>'; } tbody.innerHTML = html; } }
-        function runSimulationForLine(lineId, pathLLH) { hoseParams.pumpOutputMPa = parseFloat(document.getElementById('paramPumpOut').value) || 0.6; hoseParams.minInletPressureMPa = parseFloat(document.getElementById('paramInlet').value) || 0.2; hoseParams.nozzleRequiredMPa = parseFloat(document.getElementById('paramNozzle').value) || 0.4; hoseParams.lossPerHoseMPa = parseFloat(document.getElementById('paramLossPerHose').value) || 0.02; var result = computeRelayPositionsInterpolated(pathLLH, hoseParams); var pumpSegments = computePumpSegmentsFromRelays(result.interpolated, result.relays, hoseParams); renderStartEndMarkers(lineId, pathLLH); renderRelayMarkersFromPositions(lineId, result.relays); renderColorizedByPumpSegments(lineId, result.interpolated, result.relays, pumpSegments); var endP = pumpSegments.length > 0 ? pumpSegments[pumpSegments.length - 1].remainingPressure : hoseParams.pumpOutputMPa; var totalLength = 0, totalHoses = 0; for (var i = 0; i < pumpSegments.length; i++) { totalLength += pumpSegments[i].distance; totalHoses += pumpSegments[i].hoses; } updateHoseInfoPanel({ totalLengthM: totalLength, totalHoses20m: totalHoses, endPressureMPa: endP, totalPumps: 1 + result.relays.length, pumpSegments: pumpSegments }); }
-        function onParamChange() { if (selectedHoseLine && selectedHoseLine.pathLLH) runSimulationForLine(selectedHoseLine.id, selectedHoseLine.pathLLH); }
-
-        var measurePoints = [], measureMarkers = [], measureLine = null;
-        function addMeasurePoint(lon, lat, height, cartesian) { measurePoints.push({ lon: lon, lat: lat, height: height, cartesian: cartesian }); var m = viewer.entities.add({ position: cartesian, point: { pixelSize: 12, color: Cesium.Color.CYAN, outlineColor: Cesium.Color.WHITE, outlineWidth: 2, heightReference: Cesium.HeightReference.CLAMP_TO_GROUND } }); measureMarkers.push(m); if (measurePoints.length === 2) { if (measureLine) viewer.entities.remove(measureLine); measureLine = viewer.entities.add({ polyline: { positions: [measurePoints[0].cartesian, measurePoints[1].cartesian], width: 4, material: Cesium.Color.CYAN, clampToGround: true } }); var p1 = measurePoints[0], p2 = measurePoints[1]; var groundDist = geodesicDistance(p1.lon, p1.lat, p2.lon, p2.lat); var elevDiff = p2.height - p1.height; var straightDist = Math.sqrt(groundDist * groundDist + elevDiff * elevDiff); document.getElementById('measureDistance').textContent = formatDistance(groundDist); document.getElementById('measureStraight').textContent = formatDistance(straightDist); document.getElementById('measureElev').textContent = (elevDiff >= 0 ? '+' : '') + elevDiff.toFixed(1) + 'm'; document.getElementById('measureHint').textContent = '計測完了'; } else { document.getElementById('measureHint').textContent = measurePoints.length + '点目'; } }
-        function resetMeasure() { measurePoints = []; measureMarkers.forEach(function(e) { viewer.entities.remove(e); }); measureMarkers = []; if (measureLine) { viewer.entities.remove(measureLine); measureLine = null; } document.getElementById('measureDistance').textContent = '-'; document.getElementById('measureStraight').textContent = '-'; document.getElementById('measureElev').textContent = '-'; document.getElementById('measureHint').textContent = '2点をタップして計測'; }
-        function closeMeasurePanel() { document.getElementById('measurePanel').classList.remove('active'); resetMeasure(); clearTool(); }
-        function closeAllPanels() { ['firePanel', 'waterPanel', 'hoseInfoPanel', 'hosePanel', 'measurePanel'].forEach(function(id) { document.getElementById(id).classList.remove('active'); }); selectedFirePoint = null; selectedWater = null; hideCoordPopup(); }
-        function closePanel(type) { document.getElementById(type + 'Panel').classList.remove('active'); if (type === 'fire') selectedFirePoint = null; if (type === 'water') selectedWater = null; if (type === 'hoseInfo') selectedHoseLine = null; }
-        function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2500); }
-        function setViewMode(mode) { document.querySelectorAll('.view-btn').forEach(function(b) { b.classList.remove('active'); }); if (mode === '2d') { document.getElementById('view2dBtn').classList.add('active'); viewer.scene.mode = Cesium.SceneMode.SCENE2D; } else { document.getElementById('view3dBtn').classList.add('active'); viewer.scene.mode = Cesium.SceneMode.SCENE3D; } }
-
-        document.getElementById('menuBtn').addEventListener('click', openSidePanel);
+    <script>
+    (function() {
+        'use strict';
+        
+        console.log('Starting GIS Platform...');
+        
+        // Cesium Ion Token
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjkwN2E2MC1jYjM5LTRmNzUtOTEyZS1hYTBlNmYzNWRhMjUiLCJpZCI6MjU5MjkyLCJpYXQiOjE3MzI2MTg4MDB9.vvcLKVhx_sUMFYMYwZzArW2DfXRxXdJdgfxDqpE7ba8';
+        
+        // Viewer作成（国土地理院航空写真）
+        var viewer = new Cesium.Viewer('cesiumContainer', {
+            imageryProvider: new Cesium.UrlTemplateImageryProvider({
+                url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
+                maximumLevel: 18,
+                credit: '国土地理院'
+            }),
+            baseLayerPicker: false,
+            geocoder: false,
+            homeButton: false,
+            sceneModePicker: false,
+            navigationHelpButton: false,
+            animation: false,
+            timeline: false,
+            fullscreenButton: false,
+            infoBox: false,
+            selectionIndicator: false
+        });
+        
+        console.log('Viewer created');
+        
+        // 広島市へ移動
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(132.4553, 34.3853, 5000),
+            orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
+            duration: 2
+        });
+        
+        // 状態
+        var currentBasemap = 'satellite';
+        var currentTool = null;
+        var layers = { buildings: true };
+        var osmBuildingsTileset = null;
+        var hazardLayers = {};
+        var satelliteLayer = viewer.imageryLayers.get(0);
+        var stdLayer = null;
+        
+        // 標準地図レイヤー追加
+        stdLayer = viewer.imageryLayers.addImageryProvider(
+            new Cesium.UrlTemplateImageryProvider({
+                url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+                maximumLevel: 18
+            })
+        );
+        stdLayer.show = false;
+        
+        // 3D建物
+        Cesium.createOsmBuildingsAsync().then(function(tileset) {
+            osmBuildingsTileset = tileset;
+            viewer.scene.primitives.add(osmBuildingsTileset);
+            console.log('3D Buildings loaded');
+        }).catch(function(e) {
+            console.warn('3D Buildings failed:', e);
+        });
+        
+        // ベースマップ切り替え
+        function setBasemap(type) {
+            currentBasemap = type;
+            if (type === 'satellite') {
+                satelliteLayer.show = true;
+                stdLayer.show = false;
+                document.getElementById('mapBtnSatellite').classList.add('active');
+                document.getElementById('mapBtnStd').classList.remove('active');
+            } else {
+                satelliteLayer.show = false;
+                stdLayer.show = true;
+                document.getElementById('mapBtnSatellite').classList.remove('active');
+                document.getElementById('mapBtnStd').classList.add('active');
+            }
+            document.getElementById('creditBar').textContent = '© 国土地理院';
+        }
+        
+        // サイドパネル
+        function openSidePanel() {
+            console.log('Opening side panel');
+            document.getElementById('sidePanelOverlay').classList.add('show');
+            document.getElementById('sidePanel').classList.add('show');
+        }
+        
+        function closeSidePanel() {
+            console.log('Closing side panel');
+            document.getElementById('sidePanelOverlay').classList.remove('show');
+            document.getElementById('sidePanel').classList.remove('show');
+        }
+        
+        // ハザードレイヤー
+        function toggleHazardLayer(name) {
+            var urls = {
+                flood: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png',
+                tsunami: 'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',
+                landslide: 'https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki/{z}/{x}/{y}.png'
+            };
+            
+            // 全てオフ
+            ['flood', 'tsunami', 'landslide'].forEach(function(n) {
+                if (hazardLayers[n]) {
+                    viewer.imageryLayers.remove(hazardLayers[n]);
+                    hazardLayers[n] = null;
+                }
+                document.getElementById('layer' + n.charAt(0).toUpperCase() + n.slice(1)).classList.remove('active');
+            });
+            
+            // 選択したものをオン
+            if (!hazardLayers[name]) {
+                hazardLayers[name] = viewer.imageryLayers.addImageryProvider(
+                    new Cesium.UrlTemplateImageryProvider({ url: urls[name], maximumLevel: 17 })
+                );
+                hazardLayers[name].alpha = 0.6;
+                document.getElementById('layer' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+                document.getElementById('creditBar').textContent = '© 国土交通省';
+            } else {
+                document.getElementById('creditBar').textContent = '© 国土地理院';
+            }
+        }
+        
+        // オペレーション
+        function setOperation(op) {
+            console.log('Setting operation:', op);
+            if (currentTool === op) {
+                clearTool();
+                return;
+            }
+            clearTool();
+            currentTool = op;
+            
+            var ind = document.getElementById('modeIndicator');
+            var icon = document.getElementById('modeIcon');
+            var text = document.getElementById('modeText');
+            
+            ind.className = 'mode-indicator show';
+            
+            if (op === 'fire') {
+                icon.textContent = 'local_fire_department';
+                text.textContent = '火点追加';
+            } else if (op === 'water') {
+                icon.textContent = 'water_drop';
+                text.textContent = '水利追加';
+                ind.classList.add('water-mode');
+            } else if (op === 'hose') {
+                icon.textContent = 'route';
+                text.textContent = 'ホース延長';
+                ind.classList.add('hose-mode');
+                document.getElementById('hosePanel').classList.add('active');
+            } else if (op === 'measure') {
+                icon.textContent = 'straighten';
+                text.textContent = '2点計測';
+                ind.classList.add('measure-mode');
+                document.getElementById('measurePanel').classList.add('active');
+            }
+            
+            closeSidePanel();
+        }
+        
+        function clearTool() {
+            currentTool = null;
+            document.getElementById('modeIndicator').className = 'mode-indicator';
+            document.getElementById('hosePanel').classList.remove('active');
+            document.getElementById('measurePanel').classList.remove('active');
+        }
+        
+        // ホース
+        var hosePoints = [];
+        var hoseMarkers = [];
+        var hoseSegments = [];
+        
+        function addHosePoint(lon, lat, cartesian) {
+            hosePoints.push({ lon: lon, lat: lat, cartesian: cartesian });
+            var m = viewer.entities.add({
+                position: cartesian,
+                point: { pixelSize: 10, color: Cesium.Color.ORANGE, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 }
+            });
+            hoseMarkers.push(m);
+            
+            if (hosePoints.length >= 2) {
+                var s = viewer.entities.add({
+                    polyline: {
+                        positions: [hosePoints[hosePoints.length - 2].cartesian, cartesian],
+                        width: 5,
+                        material: Cesium.Color.ORANGE,
+                        clampToGround: true
+                    }
+                });
+                hoseSegments.push(s);
+            }
+            updateHoseDisplay();
+        }
+        
+        function updateHoseDisplay() {
+            var total = 0;
+            for (var i = 1; i < hosePoints.length; i++) {
+                var p1 = hosePoints[i - 1], p2 = hosePoints[i];
+                total += new Cesium.EllipsoidGeodesic(
+                    Cesium.Cartographic.fromDegrees(p1.lon, p1.lat),
+                    Cesium.Cartographic.fromDegrees(p2.lon, p2.lat)
+                ).surfaceDistance;
+            }
+            document.getElementById('hoseTotalDist').textContent = total >= 1000 ? (total / 1000).toFixed(2) + 'km' : total.toFixed(0) + 'm';
+            document.getElementById('hoseTotalCount').textContent = Math.ceil(total / 20) + '本';
+        }
+        
+        function resetHose() {
+            hosePoints = [];
+            hoseMarkers.forEach(function(m) { viewer.entities.remove(m); });
+            hoseMarkers = [];
+            hoseSegments.forEach(function(s) { viewer.entities.remove(s); });
+            hoseSegments = [];
+            updateHoseDisplay();
+        }
+        
+        // 計測
+        var measurePts = [];
+        var measureMks = [];
+        var measureLn = null;
+        
+        function addMeasurePt(lon, lat, h, cartesian) {
+            if (measurePts.length >= 2) resetMeasure();
+            measurePts.push({ lon: lon, lat: lat, h: h, cartesian: cartesian });
+            var m = viewer.entities.add({
+                position: cartesian,
+                point: { pixelSize: 12, color: Cesium.Color.CYAN, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 }
+            });
+            measureMks.push(m);
+            
+            if (measurePts.length === 2) {
+                measureLn = viewer.entities.add({
+                    polyline: {
+                        positions: [measurePts[0].cartesian, measurePts[1].cartesian],
+                        width: 4,
+                        material: Cesium.Color.CYAN,
+                        clampToGround: true
+                    }
+                });
+                var p1 = measurePts[0], p2 = measurePts[1];
+                var dist = new Cesium.EllipsoidGeodesic(
+                    Cesium.Cartographic.fromDegrees(p1.lon, p1.lat),
+                    Cesium.Cartographic.fromDegrees(p2.lon, p2.lat)
+                ).surfaceDistance;
+                var diff = p2.h - p1.h;
+                document.getElementById('measureDistance').textContent = dist >= 1000 ? (dist / 1000).toFixed(2) + 'km' : dist.toFixed(0) + 'm';
+                document.getElementById('measureElev').textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'm';
+                document.getElementById('measureHint').textContent = '計測完了';
+            }
+        }
+        
+        function resetMeasure() {
+            measurePts = [];
+            measureMks.forEach(function(m) { viewer.entities.remove(m); });
+            measureMks = [];
+            if (measureLn) { viewer.entities.remove(measureLn); measureLn = null; }
+            document.getElementById('measureDistance').textContent = '-';
+            document.getElementById('measureElev').textContent = '-';
+            document.getElementById('measureHint').textContent = '2点をタップして計測';
+        }
+        
+        // 現在地
+        function goToMyLocation() {
+            if (!navigator.geolocation) {
+                document.getElementById('myLocationText').textContent = '非対応';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                var lat = pos.coords.latitude, lon = pos.coords.longitude;
+                document.getElementById('myLocationText').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
+                viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1000), duration: 1.5 });
+            }, function() {
+                document.getElementById('myLocationText').textContent = '取得失敗';
+            });
+        }
+        goToMyLocation();
+        
+        // Toast
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(function() { t.classList.remove('show'); }, 2000);
+        }
+        
+        // 2D/3D
+        function setViewMode(mode) {
+            if (mode === '2d') {
+                viewer.scene.mode = Cesium.SceneMode.SCENE2D;
+                document.getElementById('view2dBtn').classList.add('active');
+                document.getElementById('view3dBtn').classList.remove('active');
+            } else {
+                viewer.scene.mode = Cesium.SceneMode.SCENE3D;
+                document.getElementById('view2dBtn').classList.remove('active');
+                document.getElementById('view3dBtn').classList.add('active');
+            }
+        }
+        
+        // 座標表示
+        viewer.camera.moveEnd.addEventListener(function() {
+            var c = viewer.camera.positionCartographic;
+            document.getElementById('coordDisplay').textContent = 
+                Cesium.Math.toDegrees(c.latitude).toFixed(5) + ', ' + Cesium.Math.toDegrees(c.longitude).toFixed(5);
+        });
+        
+        // クリック
+        var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+        handler.setInputAction(function(click) {
+            var ray = viewer.camera.getPickRay(click.position);
+            var cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            if (!cartesian) return;
+            
+            var carto = Cesium.Cartographic.fromCartesian(cartesian);
+            var lon = Cesium.Math.toDegrees(carto.longitude);
+            var lat = Cesium.Math.toDegrees(carto.latitude);
+            var h = carto.height || 0;
+            
+            if (currentTool === 'fire') {
+                viewer.entities.add({ position: cartesian, point: { pixelSize: 16, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 } });
+                showToast('火点を追加');
+            } else if (currentTool === 'water') {
+                viewer.entities.add({ position: cartesian, point: { pixelSize: 14, color: Cesium.Color.BLUE, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 } });
+                showToast('水利を追加');
+            } else if (currentTool === 'hose') {
+                addHosePoint(lon, lat, cartesian);
+            } else if (currentTool === 'measure') {
+                addMeasurePt(lon, lat, h, cartesian);
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        
+        // イベントリスナー
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            console.log('Menu button clicked');
+            openSidePanel();
+        });
         document.getElementById('sidePanelOverlay').addEventListener('click', closeSidePanel);
         document.getElementById('sidePanelClose').addEventListener('click', closeSidePanel);
         document.getElementById('mapBtnSatellite').addEventListener('click', function() { setBasemap('satellite'); });
         document.getElementById('mapBtnStd').addEventListener('click', function() { setBasemap('std'); });
-        document.getElementById('layerBuildings').addEventListener('click', function() { toggleMapLayer('buildings'); });
-        document.getElementById('layerTrails').addEventListener('click', function() { toggleMapLayer('trails'); });
+        document.getElementById('layerBuildings').addEventListener('click', function() {
+            layers.buildings = !layers.buildings;
+            if (osmBuildingsTileset) osmBuildingsTileset.show = layers.buildings;
+            document.getElementById('layerBuildings').classList.toggle('active', layers.buildings);
+        });
         document.getElementById('layerFlood').addEventListener('click', function() { toggleHazardLayer('flood'); });
         document.getElementById('layerTsunami').addEventListener('click', function() { toggleHazardLayer('tsunami'); });
         document.getElementById('layerLandslide').addEventListener('click', function() { toggleHazardLayer('landslide'); });
@@ -64,146 +588,31 @@
         document.getElementById('opWater').addEventListener('click', function() { setOperation('water'); });
         document.getElementById('opHose').addEventListener('click', function() { setOperation('hose'); });
         document.getElementById('opMeasure').addEventListener('click', function() { setOperation('measure'); });
-        document.getElementById('firePanelClose').addEventListener('click', function() { closePanel('fire'); });
-        document.getElementById('waterPanelClose').addEventListener('click', function() { closePanel('water'); });
-        document.getElementById('hoseInfoPanelClose').addEventListener('click', function() { closePanel('hoseInfo'); });
-        document.getElementById('hosePanelClose').addEventListener('click', closeHosePanel);
-        document.getElementById('measurePanelClose').addEventListener('click', closeMeasurePanel);
-        document.getElementById('deleteFireBtn').addEventListener('click', deleteSelectedFire);
-        document.getElementById('deleteWaterBtn').addEventListener('click', deleteSelectedWater);
-        document.getElementById('deleteHoseBtn').addEventListener('click', deleteSelectedHose);
-        document.getElementById('undoHoseBtn').addEventListener('click', undoHosePoint);
-        document.getElementById('resetHoseBtn').addEventListener('click', resetHoseLine);
-        document.getElementById('confirmHoseBtn').addEventListener('click', confirmHoseLine);
+        document.getElementById('hosePanelClose').addEventListener('click', function() { clearTool(); resetHose(); });
+        document.getElementById('measurePanelClose').addEventListener('click', function() { clearTool(); resetMeasure(); });
+        document.getElementById('undoHoseBtn').addEventListener('click', function() {
+            if (hosePoints.length > 0) {
+                hosePoints.pop();
+                if (hoseMarkers.length > 0) viewer.entities.remove(hoseMarkers.pop());
+                if (hoseSegments.length > 0) viewer.entities.remove(hoseSegments.pop());
+                updateHoseDisplay();
+            }
+        });
+        document.getElementById('resetHoseBtn').addEventListener('click', resetHose);
+        document.getElementById('confirmHoseBtn').addEventListener('click', function() {
+            if (hosePoints.length >= 2) {
+                showToast('ホース経路を確定');
+                clearTool();
+            } else {
+                showToast('2点以上必要');
+            }
+        });
         document.getElementById('resetMeasureBtn').addEventListener('click', resetMeasure);
-        document.getElementById('recalcBtn').addEventListener('click', onParamChange);
         document.getElementById('myLocationBtn').addEventListener('click', goToMyLocation);
         document.getElementById('view2dBtn').addEventListener('click', function() { setViewMode('2d'); });
         document.getElementById('view3dBtn').addEventListener('click', function() { setViewMode('3d'); });
-        document.getElementById('searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
-        document.getElementById('searchResults').addEventListener('click', function(e) { var item = e.target.closest('.search-result-item'); if (item && item.dataset.lon) { viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(parseFloat(item.dataset.lon), parseFloat(item.dataset.lat), 1500), duration: 1.5 }); document.getElementById('searchResults').classList.remove('show'); } });
-        document.getElementById('coordPopupClose').addEventListener('click', hideCoordPopup);
-        document.getElementById('coordCopyBtn').addEventListener('click', copyCoords);
-        document.addEventListener('click', function(e) { if (!e.target.closest('.search-box') && !e.target.closest('.search-results')) document.getElementById('searchResults').classList.remove('show'); });
-
-        var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-        handler.setInputAction(function(click) { hideCoordPopup(); longPressTimer = setTimeout(function() { var ray = viewer.camera.getPickRay(click.position); var cartesian = viewer.scene.globe.pick(ray, viewer.scene); if (cartesian) { var carto = Cesium.Cartographic.fromCartesian(cartesian); showCoordPopup(Cesium.Math.toDegrees(carto.latitude), Cesium.Math.toDegrees(carto.longitude), click.position.x, click.position.y); } }, 500); }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
-        handler.setInputAction(function() { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } }, Cesium.ScreenSpaceEventType.LEFT_UP);
-        handler.setInputAction(function(click) { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } var picked = viewer.scene.pick(click.position); if (picked && picked.id) { var pickedId = typeof picked.id.id === 'string' ? picked.id.id : ''; if (pickedId.indexOf('fire-') === 0) { selectFirePoint(pickedId); return; } if (pickedId.indexOf('water-') === 0) { selectWater(pickedId); return; } if (pickedId.indexOf('hose-') === 0) { selectHoseLine(pickedId); return; } } var ray = viewer.camera.getPickRay(click.position); var cartesian = viewer.scene.globe.pick(ray, viewer.scene); if (!cartesian) return; var carto = Cesium.Cartographic.fromCartesian(cartesian); var lon = Cesium.Math.toDegrees(carto.longitude); var lat = Cesium.Math.toDegrees(carto.latitude); var height = carto.height || 0; if (currentTool === 'fire') { var id = addFirePoint(lon, lat, height); selectFirePoint(id); } else if (currentTool === 'water') { var id = addWaterSource('hydrant', lon, lat); selectWater(id); } else if (currentTool === 'hose') { addHosePoint(lon, lat, height, cartesian); } else if (currentTool === 'measure') { if (measurePoints.length >= 2) resetMeasure(); addMeasurePoint(lon, lat, height, cartesian); } }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
-        console.log('GIS Platform initialized with Cesium Ion satellite imagery');
-    })();
-    </script>
-</body>
-</html>
-    <script>
-    (function() {
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjkwN2E2MC1jYjM5LTRmNzUtOTEyZS1hYTBlNmYzNWRhMjUiLCJpZCI6MjU5MjkyLCJpYXQiOjE3MzI2MTg4MDB9.vvcLKVhx_sUMFYMYwZzArW2DfXRxXdJdgfxDqpE7ba8';
-        var viewer = new Cesium.Viewer('cesiumContainer', {baseLayerPicker:false,geocoder:false,homeButton:false,sceneModePicker:false,navigationHelpButton:false,animation:false,timeline:false,fullscreenButton:false,infoBox:false,selectionIndicator:false});
-        viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(132.4553,34.3853,3000),orientation:{heading:0,pitch:Cesium.Math.toRadians(-45),roll:0},duration:2});
-        var layers={buildings:true,trails:false,flood:false,tsunami:false,landslide:false},currentTool=null,osmBuildingsTileset=null,hazardLayers={flood:null,tsunami:null,landslide:null},stdLayer=null,satelliteLayer=null,currentBasemap='satellite',myLocationEntity=null,lastClickedCoords=null,longPressTimer=null;
-        satelliteLayer=viewer.imageryLayers.get(0);
-        stdLayer=viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({url:'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',maximumLevel:18}));
-        stdLayer.show=false;
-        function setBasemap(t){document.querySelectorAll('.map-type-btn').forEach(function(b){b.classList.remove('active')});if(t==='satellite'){document.getElementById('mapBtnSatellite').classList.add('active');satelliteLayer.show=true;stdLayer.show=false}else{document.getElementById('mapBtnStd').classList.add('active');satelliteLayer.show=false;stdLayer.show=true}currentBasemap=t;updateCredit()}
-        function updateCredit(){if(layers.flood||layers.tsunami||layers.landslide)document.getElementById('creditBar').textContent='© 国土交通省ハザードマップ';else if(currentBasemap==='std')document.getElementById('creditBar').textContent='© 国土地理院';else document.getElementById('creditBar').textContent='© Cesium Ion'}
-        Cesium.createOsmBuildingsAsync().then(function(t){osmBuildingsTileset=t;viewer.scene.primitives.add(osmBuildingsTileset)}).catch(function(e){console.warn('Buildings:',e)});
-        function openSidePanel(){document.getElementById('sidePanelOverlay').classList.add('show');document.getElementById('sidePanel').classList.add('show');updateLayerCards()}
-        function closeSidePanel(){document.getElementById('sidePanelOverlay').classList.remove('show');document.getElementById('sidePanel').classList.remove('show')}
-        function updateLayerCards(){document.getElementById('layerBuildings').classList.toggle('active',layers.buildings);document.getElementById('layerTrails').classList.toggle('active',layers.trails);document.getElementById('layerFlood').classList.toggle('active',layers.flood);document.getElementById('layerTsunami').classList.toggle('active',layers.tsunami);document.getElementById('layerLandslide').classList.toggle('active',layers.landslide);['opFire','opWater','opHose','opMeasure'].forEach(function(id){document.getElementById(id).classList.remove('active')});if(currentTool==='fire')document.getElementById('opFire').classList.add('active');if(currentTool==='water')document.getElementById('opWater').classList.add('active');if(currentTool==='hose')document.getElementById('opHose').classList.add('active');if(currentTool==='measure')document.getElementById('opMeasure').classList.add('active')}
-        function toggleMapLayer(l){layers[l]=!layers[l];if(l==='buildings'&&osmBuildingsTileset)osmBuildingsTileset.show=layers.buildings;updateLayerCards()}
-        function toggleHazardLayer(l){var w=layers[l];['flood','tsunami','landslide'].forEach(function(h){layers[h]=false;if(hazardLayers[h]){viewer.imageryLayers.remove(hazardLayers[h]);hazardLayers[h]=null}});if(!w){layers[l]=true;loadHazardLayer(l)}updateLayerCards();updateCredit()}
-        function loadHazardLayer(l){var urls={flood:'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png',tsunami:'https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png',landslide:'https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki/{z}/{x}/{y}.png'};if(urls[l]){hazardLayers[l]=viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({url:urls[l],maximumLevel:17}));hazardLayers[l].alpha=0.6}}
-        function setOperation(op){if(currentTool===op){clearTool();updateLayerCards();return}clearTool();currentTool=op;var ind=document.getElementById('modeIndicator'),icon=document.getElementById('modeIcon'),text=document.getElementById('modeText');if(op==='fire'){icon.textContent='local_fire_department';text.textContent='火点追加';ind.className='mode-indicator show'}else if(op==='water'){icon.textContent='water_drop';text.textContent='水利追加';ind.className='mode-indicator show water-mode'}else if(op==='hose'){icon.textContent='route';text.textContent='ホース延長';ind.className='mode-indicator show hose-mode';document.getElementById('hosePanel').classList.add('active');resetHoseLine()}else if(op==='measure'){icon.textContent='straighten';text.textContent='2点計測';ind.className='mode-indicator show measure-mode';document.getElementById('measurePanel').classList.add('active');resetMeasure()}updateLayerCards();closeSidePanel()}
-        function clearTool(){currentTool=null;document.getElementById('modeIndicator').className='mode-indicator';document.getElementById('hosePanel').classList.remove('active');document.getElementById('measurePanel').classList.remove('active')}
-        function doSearch(){var q=document.getElementById('searchInput').value.trim();if(!q)return;fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&countrycodes=jp&limit=5').then(function(r){return r.json()}).then(function(d){var sr=document.getElementById('searchResults');if(d.length===0){sr.innerHTML='<div class="search-result-item"><span class="search-result-name">結果なし</span></div>'}else{sr.innerHTML=d.map(function(r){return'<div class="search-result-item" data-lon="'+r.lon+'" data-lat="'+r.lat+'"><div class="search-result-name">'+r.display_name.split(',')[0]+'</div></div>'}).join('')}sr.classList.add('show')}).catch(function(e){showToast('検索エラー')})}
-        function goToMyLocation(){if(!navigator.geolocation){document.getElementById('myLocationText').textContent='非対応';return}navigator.geolocation.getCurrentPosition(function(p){var lat=p.coords.latitude,lon=p.coords.longitude;document.getElementById('myLocationText').textContent=lat.toFixed(5)+', '+lon.toFixed(5);viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lon,lat,1000),duration:1.5});if(myLocationEntity)viewer.entities.remove(myLocationEntity);myLocationEntity=viewer.entities.add({position:Cesium.Cartesian3.fromDegrees(lon,lat),point:{pixelSize:12,color:Cesium.Color.fromCssColorString('#4ade80'),outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND}})},function(){document.getElementById('myLocationText').textContent='取得失敗'})}
-        goToMyLocation();
-        function updateScaleBar(){try{var w=viewer.canvas.clientWidth,l=viewer.scene.camera.getPickRay(new Cesium.Cartesian2(w*0.3,viewer.canvas.clientHeight/2)),r=viewer.scene.camera.getPickRay(new Cesium.Cartesian2(w*0.7,viewer.canvas.clientHeight/2));if(!l||!r)return;var lp=viewer.scene.globe.pick(l,viewer.scene),rp=viewer.scene.globe.pick(r,viewer.scene);if(!lp||!rp)return;var d=Cesium.Cartesian3.distance(lp,rp)/2,sv=d*(60/(w*0.2)),sc=[1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000],b=sc[0];for(var i=0;i<sc.length;i++){if(sv>=sc[i])b=sc[i]}var sw=Math.round(60*(b/sv));document.getElementById('scaleLine').style.width=Math.max(30,Math.min(80,sw))+'px';document.getElementById('scaleText').textContent=b>=1000?(b/1000)+'km':b+'m'}catch(e){}}
-        viewer.camera.moveEnd.addEventListener(updateScaleBar);setTimeout(updateScaleBar,3000);
-        viewer.camera.moveEnd.addEventListener(function(){var c=viewer.camera.positionCartographic;document.getElementById('coordDisplay').textContent=Cesium.Math.toDegrees(c.latitude).toFixed(5)+', '+Cesium.Math.toDegrees(c.longitude).toFixed(5)});
-        function showCoordPopup(lat,lon,x,y){lastClickedCoords={lat:lat,lon:lon};var p=document.getElementById('coordPopup');document.getElementById('coordPopupValue').textContent=lat.toFixed(6)+', '+lon.toFixed(6);p.style.left=Math.min(x,window.innerWidth-150)+'px';p.style.top=Math.min(y,window.innerHeight-90)+'px';p.classList.add('show')}
-        function hideCoordPopup(){document.getElementById('coordPopup').classList.remove('show')}
-        function copyCoords(){if(lastClickedCoords){navigator.clipboard.writeText(lastClickedCoords.lat.toFixed(6)+', '+lastClickedCoords.lon.toFixed(6));showToast('座標をコピーしました');hideCoordPopup()}}
-        var firePoints=[],firePointEntities=[],selectedFirePoint=null,firePointIdCounter=0;
-        function addFirePoint(lon,lat,h){var id='fire-'+(++firePointIdCounter);firePoints.push({id:id,lon:lon,lat:lat,height:h});var e=viewer.entities.add({id:id,position:Cesium.Cartesian3.fromDegrees(lon,lat,h),point:{pixelSize:16,color:Cesium.Color.RED,outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND}});firePointEntities.push(e);return id}
-        function selectFirePoint(id){var f=firePoints.find(function(p){return p.id===id});if(!f)return;closeAllPanels();selectedFirePoint=f;document.getElementById('fireLat').textContent=f.lat.toFixed(6);document.getElementById('fireLon').textContent=f.lon.toFixed(6);document.getElementById('fireElev').textContent=f.height.toFixed(1)+'m';document.getElementById('firePanel').classList.add('active')}
-        function deleteSelectedFire(){if(!selectedFirePoint){showToast('火点が選択されていません');return}var id=selectedFirePoint.id;firePoints=firePoints.filter(function(f){return f.id!==id});var e=firePointEntities.find(function(e){return e.id===id});if(e){viewer.entities.remove(e);firePointEntities=firePointEntities.filter(function(x){return x!==e})}selectedFirePoint=null;closePanel('fire');showToast('火点を削除しました')}
-        var waterSources=[],waterEntities=[],selectedWater=null,waterIdCounter=0;
-        function addWaterSource(t,lon,lat){var id='water-'+(++waterIdCounter);waterSources.push({id:id,type:t,lon:lon,lat:lat});var e=viewer.entities.add({id:id,position:Cesium.Cartesian3.fromDegrees(lon,lat,0),point:{pixelSize:14,color:Cesium.Color.BLUE,outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND}});waterEntities.push(e);return id}
-        function selectWater(id){var w=waterSources.find(function(x){return x.id===id});if(!w)return;closeAllPanels();selectedWater=w;document.getElementById('waterType').textContent='消火栓';document.getElementById('waterLat').textContent=w.lat.toFixed(6);document.getElementById('waterLon').textContent=w.lon.toFixed(6);document.getElementById('waterPanel').classList.add('active')}
-        function deleteSelectedWater(){if(!selectedWater){showToast('水利が選択されていません');return}var id=selectedWater.id;waterSources=waterSources.filter(function(w){return w.id!==id});var e=waterEntities.find(function(e){return e.id===id});if(e){viewer.entities.remove(e);waterEntities=waterEntities.filter(function(x){return x!==e})}selectedWater=null;closePanel('water');showToast('水利を削除しました')}
-        var hoseLinePoints=[],hoseLineSegments=[],hoseLineMarkers=[],hoseLineEntities=[],hoseLineIdCounter=0,selectedHoseLine=null;
-        var hoseParams={pumpOutputMPa:0.6,minInletPressureMPa:0.2,nozzleRequiredMPa:0.4,lossPerHoseMPa:0.02,hoseLengthM:20};
-        var hoseSimState={relayCandidateEntitiesByLine:{},startEndMarkersByLine:{},colorSegmentsByLine:{}};
-        function geodesicDistance(lon1,lat1,lon2,lat2){return new Cesium.EllipsoidGeodesic(Cesium.Cartographic.fromDegrees(lon1,lat1),Cesium.Cartographic.fromDegrees(lon2,lat2)).surfaceDistance}
-        function formatDistance(m){return m>=1000?(m/1000).toFixed(2)+'km':m.toFixed(0)+'m'}
-        function updateHoseDisplay(){var td=0;for(var i=1;i<hoseLinePoints.length;i++){td+=geodesicDistance(hoseLinePoints[i-1].lon,hoseLinePoints[i-1].lat,hoseLinePoints[i].lon,hoseLinePoints[i].lat)}document.getElementById('hoseTotalDist').textContent=formatDistance(td);document.getElementById('hoseTotalCount').textContent=Math.ceil(td/20)+'本';if(hoseLinePoints.length)document.getElementById('hoseHint').textContent=hoseLinePoints.length+'点'}
-        function addHosePoint(lon,lat,h,c){hoseLinePoints.push({lon:lon,lat:lat,height:h,cartesian:c});var m=viewer.entities.add({position:c,point:{pixelSize:10,color:Cesium.Color.ORANGE,outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND}});hoseLineMarkers.push(m);if(hoseLinePoints.length>=2){var s=viewer.entities.add({polyline:{positions:[hoseLinePoints[hoseLinePoints.length-2].cartesian,c],width:5,material:new Cesium.PolylineDashMaterialProperty({color:Cesium.Color.ORANGE,dashLength:12}),clampToGround:true}});hoseLineSegments.push(s)}updateHoseDisplay()}
-        function undoHosePoint(){if(!hoseLinePoints.length)return;hoseLinePoints.pop();if(hoseLineMarkers.length)viewer.entities.remove(hoseLineMarkers.pop());if(hoseLineSegments.length)viewer.entities.remove(hoseLineSegments.pop());updateHoseDisplay()}
-        function resetHoseLine(){hoseLinePoints=[];hoseLineMarkers.forEach(function(e){viewer.entities.remove(e)});hoseLineMarkers=[];hoseLineSegments.forEach(function(e){viewer.entities.remove(e)});hoseLineSegments=[];updateHoseDisplay();document.getElementById('hoseHint').textContent='連続タップでポイント追加'}
-        function confirmHoseLine(){if(hoseLinePoints.length<2){showToast('2点以上必要');return}var pathLLH=hoseLinePoints.map(function(p){return{lon:p.lon,lat:p.lat,height:p.height}});var id='hose-'+(++hoseLineIdCounter);var td=0;for(var i=1;i<hoseLinePoints.length;i++)td+=geodesicDistance(hoseLinePoints[i-1].lon,hoseLinePoints[i-1].lat,hoseLinePoints[i].lon,hoseLinePoints[i].lat);var le=viewer.entities.add({id:id,polyline:{positions:hoseLinePoints.map(function(p){return p.cartesian}),width:4,material:Cesium.Color.ORANGE,clampToGround:true}});var hd={id:id,entity:le,totalDist:td,pathLLH:pathLLH};hoseLineEntities.push(hd);hoseLineMarkers.forEach(function(e){viewer.entities.remove(e)});hoseLineSegments.forEach(function(e){viewer.entities.remove(e)});hoseLinePoints=[];hoseLineMarkers=[];hoseLineSegments=[];updateHoseDisplay();clearTool();selectedHoseLine=hd;runSimulationForLine(id,pathLLH);closeAllPanels();document.getElementById('hoseInfoPanel').classList.add('active');showToast('ホース経路を確定しました')}
-        function selectHoseLine(id){var h=hoseLineEntities.find(function(x){return x.id===id});if(!h)return;selectedHoseLine=h;closeAllPanels();if(h.pathLLH)runSimulationForLine(id,h.pathLLH);document.getElementById('hoseInfoPanel').classList.add('active')}
-        function deleteSelectedHose(){if(!selectedHoseLine){showToast('ホースラインが選択されていません');return}var id=selectedHoseLine.id;var hd=hoseLineEntities.find(function(h){return h.id===id});if(hd&&hd.entity)viewer.entities.remove(hd.entity);hoseLineEntities=hoseLineEntities.filter(function(h){return h.id!==id});(hoseSimState.relayCandidateEntitiesByLine[id]||[]).forEach(function(e){viewer.entities.remove(e)});(hoseSimState.startEndMarkersByLine[id]||[]).forEach(function(e){viewer.entities.remove(e)});(hoseSimState.colorSegmentsByLine[id]||[]).forEach(function(e){viewer.entities.remove(e)});selectedHoseLine=null;closePanel('hoseInfo');showToast('ホースラインを削除しました')}
-        function closeHosePanel(){document.getElementById('hosePanel').classList.remove('active');resetHoseLine();clearTool()}
-        function calcLossForDistance(L,dh,p){var n=Math.ceil(L/p.hoseLengthM);var fl=p.lossPerHoseMPa*n;var hl=dh>=0?0.01*dh:0.01*dh/3;return fl+hl}
-        function interpolatePath(pts,iv){iv=iv||10;var r=[];if(pts.length<2)return pts;r.push({lon:pts[0].lon,lat:pts[0].lat,height:pts[0].height||0,distFromStart:0});var td=0;for(var i=1;i<pts.length;i++){var p1=pts[i-1],p2=pts[i];var sd=geodesicDistance(p1.lon,p1.lat,p2.lon,p2.lat);var dh=(p2.height||0)-(p1.height||0);var ns=Math.max(1,Math.ceil(sd/iv));for(var s=1;s<=ns;s++){var t=s/ns;r.push({lon:p1.lon+(p2.lon-p1.lon)*t,lat:p1.lat+(p2.lat-p1.lat)*t,height:(p1.height||0)+dh*t,distFromStart:td+sd*t})}td+=sd}return r}
-        function computeRelayPositionsInterpolated(pts,pm){var rl=[];var rb=pm.pumpOutputMPa-pm.minInletPressureMPa;var nb=pm.pumpOutputMPa-pm.nozzleRequiredMPa;if(pts.length<2)return{relays:rl,interpolated:pts};var ip=interpolatePath(pts,10);var pi=0,sc=0;var mx=ip.length;while(pi<ip.length-1&&sc<mx){sc++;var al=0,ls=pi;for(var i=pi+1;i<ip.length;i++){var p1=ip[i-1],p2=ip[i];var sd=geodesicDistance(p1.lon,p1.lat,p2.lon,p2.lat);var dh=(p2.height||0)-(p1.height||0);al+=calcLossForDistance(sd,dh,pm);var ie=(i===ip.length-1);var bg=ie?nb:rb;if(al>bg){if(ls>pi){rl.push({index:ls,distFromStart:ip[ls].distFromStart,lon:ip[ls].lon,lat:ip[ls].lat,height:ip[ls].height});pi=ls}else{pi=i}break}ls=i;if(ie)pi=ip.length}}return{relays:rl,interpolated:ip}}
-        function computePumpSegmentsFromRelays(ip,rl,pm){var ps=[];var ri=[0];for(var r=0;r<rl.length;r++)ri.push(rl[r].index);for(var p=0;p<ri.length;p++){var si=ri[p];var ei=p<ri.length-1?ri[p+1]:ip.length-1;var sd=0,se=0,sl=0;for(var i=si+1;i<=ei;i++){var p1=ip[i-1],p2=ip[i];var d=geodesicDistance(p1.lon,p1.lat,p2.lon,p2.lat);var dh=(p2.height||0)-(p1.height||0);sd+=d;se+=dh;sl+=calcLossForDistance(d,dh,pm)}var sh=Math.ceil(sd/pm.hoseLengthM);var rp=pm.pumpOutputMPa-sl;var il=p===ri.length-1;ps.push({pumpNum:p+1,nextLabel:il?'筒先':'P'+(p+2),distance:sd,hoses:sh,elevation:se,loss:sl,remainingPressure:rp})}return ps}
-        function renderStartEndMarkers(lid,pth){var pv=hoseSimState.startEndMarkersByLine[lid]||[];pv.forEach(function(e){viewer.entities.remove(e)});var mk=[];if(pth.length>=1){var st=pth[0];mk.push(viewer.entities.add({position:Cesium.Cartesian3.fromDegrees(st.lon,st.lat,st.height||0),point:{pixelSize:14,color:Cesium.Color.RED,outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND},label:{text:'P1',font:'bold 12px sans-serif',fillColor:Cesium.Color.WHITE,style:Cesium.LabelStyle.FILL_AND_OUTLINE,outlineWidth:2,verticalOrigin:Cesium.VerticalOrigin.BOTTOM,pixelOffset:new Cesium.Cartesian2(0,-12)}}))}if(pth.length>=2){var en=pth[pth.length-1];mk.push(viewer.entities.add({position:Cesium.Cartesian3.fromDegrees(en.lon,en.lat,en.height||0),point:{pixelSize:12,color:Cesium.Color.BLUE,outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND},label:{text:'筒先',font:'bold 11px sans-serif',fillColor:Cesium.Color.WHITE,style:Cesium.LabelStyle.FILL_AND_OUTLINE,outlineWidth:2,verticalOrigin:Cesium.VerticalOrigin.BOTTOM,pixelOffset:new Cesium.Cartesian2(0,-12)}}))}hoseSimState.startEndMarkersByLine[lid]=mk}
-        function renderRelayMarkersFromPositions(lid,rl){var pv=hoseSimState.relayCandidateEntitiesByLine[lid]||[];pv.forEach(function(e){viewer.entities.remove(e)});var et=rl.map(function(r,k){return viewer.entities.add({position:Cesium.Cartesian3.fromDegrees(r.lon,r.lat,r.height||0),point:{pixelSize:14,color:Cesium.Color.fromCssColorString('#ff9800'),outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND},label:{text:'P'+(k+2),font:'bold 12px sans-serif',fillColor:Cesium.Color.WHITE,style:Cesium.LabelStyle.FILL_AND_OUTLINE,outlineWidth:2,verticalOrigin:Cesium.VerticalOrigin.BOTTOM,pixelOffset:new Cesium.Cartesian2(0,-12)}})});hoseSimState.relayCandidateEntitiesByLine[lid]=et}
-        function renderColorizedByPumpSegments(lid,ip,rl,ps){var pv=hoseSimState.colorSegmentsByLine[lid]||[];pv.forEach(function(e){viewer.entities.remove(e)});var sg=[];var ri=[0];for(var r=0;r<rl.length;r++)ri.push(rl[r].index);for(var p=0;p<ps.length;p++){var s=ps[p];var si=ri[p];var ei=p<ri.length-1?ri[p+1]:ip.length-1;var cl=s.remainingPressure>=0.4?Cesium.Color.fromCssColorString('#4ade80'):s.remainingPressure>=0.2?Cesium.Color.fromCssColorString('#fbbf24'):Cesium.Color.fromCssColorString('#ef4444');var pt=[];for(var i=si;i<=ei;i++)pt.push(Cesium.Cartesian3.fromDegrees(ip[i].lon,ip[i].lat,ip[i].height||0));if(pt.length>=2)sg.push(viewer.entities.add({polyline:{positions:pt,width:5,material:cl,clampToGround:true}}))}hoseSimState.colorSegmentsByLine[lid]=sg}
-        function updateHoseInfoPanel(d){document.getElementById('hoseInfoDist').textContent=formatDistance(d.totalLengthM);document.getElementById('hoseInfoCount').textContent=d.totalHoses20m+'本';var ep=document.getElementById('hoseInfoEndP');ep.textContent=d.endPressureMPa.toFixed(2)+' MPa';ep.className=d.endPressureMPa>=hoseParams.nozzleRequiredMPa?'panel-stat-value ok':d.endPressureMPa>=hoseParams.minInletPressureMPa?'panel-stat-value highlight':'panel-stat-value warning';document.getElementById('hoseInfoRelay').textContent=d.totalPumps+'台';if(d.pumpSegments){var tb=document.getElementById('segmentTableBody');var ht='';for(var i=0;i<d.pumpSegments.length;i++){var s=d.pumpSegments[i];var cc=s.remainingPressure>=0.4?'green':s.remainingPressure>=0.2?'yellow':'red';var es=s.elevation>=0?'+'+s.elevation.toFixed(0):s.elevation.toFixed(0);ht+='<tr class="'+cc+'"><td>P'+s.pumpNum+'→'+s.nextLabel+'</td><td>'+s.distance.toFixed(0)+'m</td><td>'+s.hoses+'本</td><td>'+es+'m</td><td>'+s.loss.toFixed(2)+'</td><td>'+s.remainingPressure.toFixed(2)+'</td></tr>'}tb.innerHTML=ht}}
-        function runSimulationForLine(lid,pth){hoseParams.pumpOutputMPa=parseFloat(document.getElementById('paramPumpOut').value)||0.6;hoseParams.minInletPressureMPa=parseFloat(document.getElementById('paramInlet').value)||0.2;hoseParams.nozzleRequiredMPa=parseFloat(document.getElementById('paramNozzle').value)||0.4;hoseParams.lossPerHoseMPa=parseFloat(document.getElementById('paramLossPerHose').value)||0.02;var rs=computeRelayPositionsInterpolated(pth,hoseParams);var ps=computePumpSegmentsFromRelays(rs.interpolated,rs.relays,hoseParams);renderStartEndMarkers(lid,pth);renderRelayMarkersFromPositions(lid,rs.relays);renderColorizedByPumpSegments(lid,rs.interpolated,rs.relays,ps);var ep=ps.length>0?ps[ps.length-1].remainingPressure:hoseParams.pumpOutputMPa;var tl=0,th=0;for(var i=0;i<ps.length;i++){tl+=ps[i].distance;th+=ps[i].hoses}updateHoseInfoPanel({totalLengthM:tl,totalHoses20m:th,endPressureMPa:ep,totalPumps:1+rs.relays.length,pumpSegments:ps})}
-        function onParamChange(){if(selectedHoseLine&&selectedHoseLine.pathLLH)runSimulationForLine(selectedHoseLine.id,selectedHoseLine.pathLLH)}
-        var measurePoints=[],measureMarkers=[],measureLine=null;
-        function addMeasurePoint(lon,lat,h,c){measurePoints.push({lon:lon,lat:lat,height:h,cartesian:c});var m=viewer.entities.add({position:c,point:{pixelSize:12,color:Cesium.Color.CYAN,outlineColor:Cesium.Color.WHITE,outlineWidth:2,heightReference:Cesium.HeightReference.CLAMP_TO_GROUND}});measureMarkers.push(m);if(measurePoints.length===2){if(measureLine)viewer.entities.remove(measureLine);measureLine=viewer.entities.add({polyline:{positions:[measurePoints[0].cartesian,measurePoints[1].cartesian],width:4,material:Cesium.Color.CYAN,clampToGround:true}});var p1=measurePoints[0],p2=measurePoints[1];var gd=geodesicDistance(p1.lon,p1.lat,p2.lon,p2.lat);var ed=p2.height-p1.height;var sd=Math.sqrt(gd*gd+ed*ed);document.getElementById('measureDistance').textContent=formatDistance(gd);document.getElementById('measureStraight').textContent=formatDistance(sd);document.getElementById('measureElev').textContent=(ed>=0?'+':'')+ed.toFixed(1)+'m';document.getElementById('measureHint').textContent='計測完了'}else{document.getElementById('measureHint').textContent=measurePoints.length+'点目'}}
-        function resetMeasure(){measurePoints=[];measureMarkers.forEach(function(e){viewer.entities.remove(e)});measureMarkers=[];if(measureLine){viewer.entities.remove(measureLine);measureLine=null}document.getElementById('measureDistance').textContent='-';document.getElementById('measureStraight').textContent='-';document.getElementById('measureElev').textContent='-';document.getElementById('measureHint').textContent='2点をタップして計測'}
-        function closeMeasurePanel(){document.getElementById('measurePanel').classList.remove('active');resetMeasure();clearTool()}
-        function closeAllPanels(){['firePanel','waterPanel','hoseInfoPanel','hosePanel','measurePanel'].forEach(function(id){document.getElementById(id).classList.remove('active')});selectedFirePoint=null;selectedWater=null;hideCoordPopup()}
-        function closePanel(t){document.getElementById(t+'Panel').classList.remove('active');if(t==='fire')selectedFirePoint=null;if(t==='water')selectedWater=null;if(t==='hoseInfo')selectedHoseLine=null}
-        function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.remove('show');void t.offsetWidth;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
-        function setViewMode(m){document.querySelectorAll('.view-btn').forEach(function(b){b.classList.remove('active')});if(m==='2d'){document.getElementById('view2dBtn').classList.add('active');viewer.scene.mode=Cesium.SceneMode.SCENE2D}else{document.getElementById('view3dBtn').classList.add('active');viewer.scene.mode=Cesium.SceneMode.SCENE3D}}
-        document.getElementById('menuBtn').addEventListener('click',openSidePanel);
-        document.getElementById('sidePanelOverlay').addEventListener('click',closeSidePanel);
-        document.getElementById('sidePanelClose').addEventListener('click',closeSidePanel);
-        document.getElementById('mapBtnSatellite').addEventListener('click',function(){setBasemap('satellite')});
-        document.getElementById('mapBtnStd').addEventListener('click',function(){setBasemap('std')});
-        document.getElementById('layerBuildings').addEventListener('click',function(){toggleMapLayer('buildings')});
-        document.getElementById('layerTrails').addEventListener('click',function(){toggleMapLayer('trails')});
-        document.getElementById('layerFlood').addEventListener('click',function(){toggleHazardLayer('flood')});
-        document.getElementById('layerTsunami').addEventListener('click',function(){toggleHazardLayer('tsunami')});
-        document.getElementById('layerLandslide').addEventListener('click',function(){toggleHazardLayer('landslide')});
-        document.getElementById('opFire').addEventListener('click',function(){setOperation('fire')});
-        document.getElementById('opWater').addEventListener('click',function(){setOperation('water')});
-        document.getElementById('opHose').addEventListener('click',function(){setOperation('hose')});
-        document.getElementById('opMeasure').addEventListener('click',function(){setOperation('measure')});
-        document.getElementById('firePanelClose').addEventListener('click',function(){closePanel('fire')});
-        document.getElementById('waterPanelClose').addEventListener('click',function(){closePanel('water')});
-        document.getElementById('hoseInfoPanelClose').addEventListener('click',function(){closePanel('hoseInfo')});
-        document.getElementById('hosePanelClose').addEventListener('click',closeHosePanel);
-        document.getElementById('measurePanelClose').addEventListener('click',closeMeasurePanel);
-        document.getElementById('deleteFireBtn').addEventListener('click',deleteSelectedFire);
-        document.getElementById('deleteWaterBtn').addEventListener('click',deleteSelectedWater);
-        document.getElementById('deleteHoseBtn').addEventListener('click',deleteSelectedHose);
-        document.getElementById('undoHoseBtn').addEventListener('click',undoHosePoint);
-        document.getElementById('resetHoseBtn').addEventListener('click',resetHoseLine);
-        document.getElementById('confirmHoseBtn').addEventListener('click',confirmHoseLine);
-        document.getElementById('resetMeasureBtn').addEventListener('click',resetMeasure);
-        document.getElementById('recalcBtn').addEventListener('click',onParamChange);
-        document.getElementById('myLocationBtn').addEventListener('click',goToMyLocation);
-        document.getElementById('view2dBtn').addEventListener('click',function(){setViewMode('2d')});
-        document.getElementById('view3dBtn').addEventListener('click',function(){setViewMode('3d')});
-        document.getElementById('searchInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSearch()});
-        document.getElementById('searchResults').addEventListener('click',function(e){var it=e.target.closest('.search-result-item');if(it&&it.dataset.lon){viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(parseFloat(it.dataset.lon),parseFloat(it.dataset.lat),1500),duration:1.5});document.getElementById('searchResults').classList.remove('show')}});
-        document.getElementById('coordPopupClose').addEventListener('click',hideCoordPopup);
-        document.getElementById('coordCopyBtn').addEventListener('click',copyCoords);
-        document.addEventListener('click',function(e){if(!e.target.closest('.search-box')&&!e.target.closest('.search-results'))document.getElementById('searchResults').classList.remove('show')});
-        var handler=new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-        handler.setInputAction(function(c){hideCoordPopup();longPressTimer=setTimeout(function(){var r=viewer.camera.getPickRay(c.position);var cs=viewer.scene.globe.pick(r,viewer.scene);if(cs){var ct=Cesium.Cartographic.fromCartesian(cs);showCoordPopup(Cesium.Math.toDegrees(ct.latitude),Cesium.Math.toDegrees(ct.longitude),c.position.x,c.position.y)}},500)},Cesium.ScreenSpaceEventType.LEFT_DOWN);
-        handler.setInputAction(function(){if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null}},Cesium.ScreenSpaceEventType.LEFT_UP);
-        handler.setInputAction(function(c){if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null}var pk=viewer.scene.pick(c.position);if(pk&&pk.id){var pi=typeof pk.id.id==='string'?pk.id.id:'';if(pi.indexOf('fire-')===0){selectFirePoint(pi);return}if(pi.indexOf('water-')===0){selectWater(pi);return}if(pi.indexOf('hose-')===0){selectHoseLine(pi);return}}var r=viewer.camera.getPickRay(c.position);var cs=viewer.scene.globe.pick(r,viewer.scene);if(!cs)return;var ct=Cesium.Cartographic.fromCartesian(cs);var lon=Cesium.Math.toDegrees(ct.longitude);var lat=Cesium.Math.toDegrees(ct.latitude);var h=ct.height||0;if(currentTool==='fire'){var id=addFirePoint(lon,lat,h);selectFirePoint(id)}else if(currentTool==='water'){var id=addWaterSource('hydrant',lon,lat);selectWater(id)}else if(currentTool==='hose'){addHosePoint(lon,lat,h,cs)}else if(currentTool==='measure'){if(measurePoints.length>=2)resetMeasure();addMeasurePoint(lon,lat,h,cs)}},Cesium.ScreenSpaceEventType.LEFT_CLICK);
-        console.log('GIS Platform initialized with Cesium Ion');
+        
+        console.log('GIS Platform initialized successfully');
     })();
     </script>
 </body>
