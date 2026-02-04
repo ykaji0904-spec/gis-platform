@@ -305,7 +305,7 @@
             else if (currentBasemap === 'std') document.getElementById('creditBar').textContent = '© 国土地理院';
             else document.getElementById('creditBar').textContent = '© Cesium Ion';
         }
-        async function init3DBuildings() { try { osmBuildingsTileset = await Cesium.createOsmBuildingsAsync(); viewer.scene.primitives.add(osmBuildingsTileset); osmBuildingsTileset.show = layers.buildings; } catch(e) { console.warn('Buildings:', e); } }
+        async function init3DBuildings() { try { osmBuildingsTileset = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({ url: Cesium.IonResource.fromAssetId(96188) })); osmBuildingsTileset.show = layers.buildings; } catch(e) { console.warn('Buildings:', e); } }
         init3DBuildings();
 
         function openSidePanel() { document.getElementById('sidePanelOverlay').classList.add('show'); document.getElementById('sidePanel').classList.add('show'); updateLayerCards(); }
