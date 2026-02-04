@@ -153,6 +153,78 @@
         .search-result-name{color:white;font-size:11px;font-weight:500}
         .search-result-address{color:rgba(255,255,255,0.5);font-size:9px;margin-top:2px}
         .cesium-viewer-toolbar,.cesium-viewer-animationContainer,.cesium-viewer-timelineContainer,.cesium-viewer-fullscreenContainer,.cesium-viewer-bottom{display:none!important}
+        
+        /* デスクトップ対応 */
+        @media (min-width: 768px) {
+            .top-bar { height: 60px; padding: 0 24px; }
+            .logo-icon { width: 42px; height: 42px; }
+            .logo-icon .material-icons { font-size: 26px; }
+            .logo-text { font-size: 18px; }
+            .map-type-btn { padding: 10px 20px; font-size: 14px; }
+            .map-type-btn .material-icons { font-size: 20px; }
+            .menu-btn { width: 48px; height: 48px; }
+            .menu-btn .material-icons { font-size: 28px; }
+            .side-panel { width: 380px; }
+            .side-panel-header { padding: 20px; }
+            .side-panel-title { font-size: 18px; }
+            .panel-section { padding: 20px; }
+            .panel-section-title { font-size: 12px; margin-bottom: 16px; }
+            .layer-card { padding: 16px 12px; }
+            .layer-card-icon { width: 52px; height: 52px; }
+            .layer-card-icon .material-icons { font-size: 26px; }
+            .layer-card-name { font-size: 13px; }
+            .mode-indicator { top: 70px; padding: 10px 20px; border-radius: 24px; }
+            .mode-indicator .material-icons { font-size: 22px; }
+            .mode-indicator span { font-size: 15px; }
+            .bottom-panel { bottom: 70px; left: auto; right: 20px; width: 420px; padding: 16px 20px; border-radius: 16px; }
+            .panel-header { margin-bottom: 12px; }
+            .panel-title { font-size: 14px; }
+            .panel-title .material-icons { font-size: 20px; }
+            .panel-stat-label { font-size: 11px; }
+            .panel-stat-value { font-size: 16px; }
+            .panel-hint { font-size: 12px; }
+            .panel-btn { padding: 10px; font-size: 13px; }
+            .panel-btn .material-icons { font-size: 18px; }
+            .segment-table { font-size: 13px; }
+            .segment-table th, .segment-table td { padding: 10px 8px; }
+            .sim-params { padding: 10px 12px; }
+            .sim-params-title { font-size: 11px; }
+            .sim-param-item label { font-size: 11px; }
+            .sim-param-input-wrap input { width: 60px; font-size: 13px; padding: 4px 6px; }
+            .sim-param-input-wrap span { font-size: 11px; }
+            .recalc-btn { padding: 8px; font-size: 13px; }
+            .bottom-bar { height: 60px; padding: 0 24px; }
+            .my-location { padding: 8px 14px; }
+            .my-location .material-icons { font-size: 20px; }
+            .my-location-coords { font-size: 12px; }
+            .search-box { max-width: 300px; }
+            .search-input { padding: 10px 16px; font-size: 14px; }
+            .view-btn { padding: 10px 16px; font-size: 13px; }
+            .view-btn .material-icons { font-size: 18px; }
+            .map-info { bottom: 70px; right: 20px; }
+            .credit-bar { font-size: 11px; padding: 4px 10px; }
+            .scale-bar { padding: 4px 10px; }
+            .scale-text { font-size: 11px; }
+            .coord-display { bottom: 70px; left: 20px; font-size: 12px; padding: 6px 12px; }
+            .toast { font-size: 15px; padding: 14px 24px; }
+            .search-results { width: 350px; max-height: 250px; }
+            .search-result-item { padding: 12px 16px; }
+            .search-result-name { font-size: 14px; }
+            .search-result-address { font-size: 11px; }
+            .coord-popup { padding: 10px 14px; }
+            .coord-popup-title { font-size: 11px; }
+            .coord-popup-value { font-size: 14px; }
+            .coord-popup-btn { padding: 6px; font-size: 12px; }
+            .legend-item { font-size: 11px; }
+            .legend-dot { width: 10px; height: 10px; }
+        }
+        
+        /* 大画面デスクトップ */
+        @media (min-width: 1200px) {
+            .bottom-panel { width: 480px; }
+            .search-box { max-width: 400px; }
+            .side-panel { width: 420px; }
+        }
     </style>
 </head>
 <body>
